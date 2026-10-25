@@ -49,33 +49,30 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#090909] flex flex-col justify-center items-center px-4 relative overflow-hidden">
-      {/* Ambient background glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#D7FF3F]/5 rounded-full blur-3xl pointer-events-none" />
-
+    <div className="min-h-screen w-full bg-[#090909] flex flex-col justify-center items-center px-4 relative overflow-hidden select-none">
       <div className="w-full max-w-md z-10">
         {/* Brand Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D7FF3F] to-emerald-500 flex items-center justify-center text-black shadow-lg shadow-[#D7FF3F]/20">
+            <div className="w-9 h-9 bg-[#D7FF3F] border border-black flex items-center justify-center text-black shadow-[2px_2px_0px_#000]">
               <Music2 className="w-5 h-5 text-black" />
             </div>
-            <span className="text-2xl font-black tracking-wider text-white">
+            <span className="text-xl font-pixel tracking-wider text-white">
               AURALIS
             </span>
           </Link>
-          <h1 className="text-xl font-bold text-white tracking-tight">
-            Welcome back
+          <h1 className="text-base font-pixel text-white tracking-wide">
+            // ACCESS TERMINAL
           </h1>
-          <p className="text-xs text-[#A1A1AA] mt-1">
-            Access your high-fidelity music catalog & personalized stream
+          <p className="text-xs font-sans text-[#A1A1AA] mt-1">
+            Sign in to access your acoustic library & stream controls.
           </p>
         </div>
 
-        {/* Card Form */}
-        <div className="bg-[#121212] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+        {/* Retro Card Form */}
+        <div className="bg-[#111111] border-2 border-[#262626] p-6 sm:p-8 shadow-[5px_5px_0px_#000]">
           {error && (
-            <div className="mb-5 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
+            <div className="mb-5 p-3 bg-red-950/40 border-2 border-red-500/40 text-red-400 text-xs font-pixel flex items-center gap-2.5 shadow-[2px_2px_0px_#000]">
               <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
               <span>{error}</span>
             </div>
@@ -83,8 +80,8 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">
-                Email Address
+              <label className="block text-xs font-pixel text-[#A1A1AA] mb-1.5">
+                IDENTITY (EMAIL)
               </label>
               <input
                 type="email"
@@ -92,14 +89,14 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[#181818] border border-white/10 text-white placeholder-[#71717A] text-sm focus:outline-none focus:border-[#D7FF3F] transition-colors"
+                className="w-full px-3 py-2 bg-[#181818] border-2 border-[#2e2e2e] text-white text-xs font-sans focus:outline-none focus:border-[#D7FF3F]"
               />
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-medium text-[#A1A1AA]">
-                  Password
+                <label className="block text-xs font-pixel text-[#A1A1AA]">
+                  PASSPHRASE
                 </label>
               </div>
               <div className="relative">
@@ -109,7 +106,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#181818] border border-white/10 text-white placeholder-[#71717A] text-sm focus:outline-none focus:border-[#D7FF3F] transition-colors pr-10"
+                  className="w-full px-3 py-2 bg-[#181818] border-2 border-[#2e2e2e] text-white text-xs font-sans focus:outline-none focus:border-[#D7FF3F] pr-10"
                 />
                 <button
                   type="button"
@@ -128,38 +125,38 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full mt-2 py-3 px-4 rounded-xl bg-[#D7FF3F] hover:bg-[#cbf531] text-black font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-[#D7FF3F]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full mt-2 py-2.5 px-4 retro-btn-primary text-xs font-pixel flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin text-black" />
-                  <span>Authenticating...</span>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-black" />
+                  <span>[ AUTHENTICATING... ]</span>
                 </>
               ) : (
                 <>
-                  <span>Sign In</span>
-                  <ArrowRight className="w-4 h-4 text-black" />
+                  <span>[ ACCESS SYSTEM ]</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-black" />
                 </>
               )}
             </button>
           </form>
 
           {/* Quick Demo Credentials Tip */}
-          <div className="mt-6 pt-5 border-t border-white/5">
-            <p className="text-[11px] text-[#71717A] text-center mb-2">
-              Development Access Credentials
+          <div className="mt-6 pt-5 border-t-2 border-[#242424]">
+            <p className="text-[10px] font-pixel text-[#71717A] text-center mb-2">
+              // QUICK LOGIN PRESETS
             </p>
-            <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
+            <div className="grid grid-cols-2 gap-2 text-xs">
               <button
                 type="button"
                 onClick={() => {
                   setEmail("admin@auralis.app");
                   setPassword("admin123");
                 }}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-left text-[#D7FF3F] transition-colors"
+                className="p-2 bg-[#141414] hover:bg-[#181818] border border-[#2e2e2e] hover:border-[#D7FF3F] text-left transition-colors shadow-[1px_1px_0px_#000]"
               >
-                <div className="font-semibold text-white">Admin Demo</div>
-                <div className="truncate text-[#71717A]">admin@auralis.app</div>
+                <div className="font-pixel text-[10px] text-[#D7FF3F]">[ ADMIN ]</div>
+                <div className="truncate text-[10px] text-[#71717A]">admin@auralis.app</div>
               </button>
               <button
                 type="button"
@@ -167,23 +164,23 @@ export default function LoginPage() {
                   setEmail("thiganth@auralis.app");
                   setPassword("password123");
                 }}
-                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-left text-white transition-colors"
+                className="p-2 bg-[#141414] hover:bg-[#181818] border border-[#2e2e2e] hover:border-[#D7FF3F] text-left transition-colors shadow-[1px_1px_0px_#000]"
               >
-                <div className="font-semibold text-white">User Demo</div>
-                <div className="truncate text-[#71717A]">thiganth@auralis.app</div>
+                <div className="font-pixel text-[10px] text-white">[ LISTENER ]</div>
+                <div className="truncate text-[10px] text-[#71717A]">thiganth@auralis.app</div>
               </button>
             </div>
           </div>
         </div>
 
         {/* Footer Switch */}
-        <p className="text-center text-xs text-[#71717A] mt-6">
-          Don&apos;t have an account?{" "}
+        <p className="text-center text-xs font-pixel text-[#71717A] mt-6">
+          DON&apos;T HAVE AN ACCOUNT?{" "}
           <Link
             href="/register"
-            className="text-white hover:text-[#D7FF3F] underline underline-offset-4 transition-colors font-medium"
+            className="text-[#D7FF3F] hover:underline transition-colors ml-1"
           >
-            Create an account
+            [ REGISTER ]
           </Link>
         </p>
       </div>

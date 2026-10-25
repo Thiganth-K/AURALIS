@@ -56,30 +56,30 @@ export function AdminShell({ children }: AdminShellProps) {
   };
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-[#090909] text-white font-sans">
-      {/* Admin Sidebar - Desktop */}
-      <aside className="hidden lg:flex w-64 flex-col bg-[#0e0e0e] border-r border-white/5 select-none shrink-0">
+    <div className="flex h-screen w-screen overflow-hidden bg-[#090909] text-white select-none">
+      {/* Admin Sidebar - Desktop Retro Console */}
+      <aside className="hidden lg:flex w-64 flex-col bg-[#0e0e0e] border-r-2 border-[#242424] shadow-[4px_0px_0px_#000] select-none shrink-0 z-20">
         {/* Brand Header */}
-        <div className="h-16 flex items-center justify-between px-6 border-b border-white/5">
+        <div className="h-16 flex items-center justify-between px-5 border-b-2 border-[#242424] bg-[#121212]">
           <Link href="/admin" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#D7FF3F] flex items-center justify-center text-black font-black text-sm">
+            <div className="w-8 h-8 bg-[#D7FF3F] border border-black flex items-center justify-center text-black font-pixel text-xs shadow-[2px_2px_0px_#000]">
               <Shield className="w-4 h-4 text-black" />
             </div>
             <div>
-              <span className="font-black text-sm tracking-wider text-white">
+              <span className="font-pixel text-xs tracking-wider text-white">
                 AURALIS
               </span>
-              <span className="text-[10px] font-mono text-[#D7FF3F] ml-1.5 px-1.5 py-0.5 rounded bg-[#D7FF3F]/10 uppercase font-semibold">
-                CMS
+              <span className="text-[9px] font-pixel text-[#D7FF3F] ml-1.5 px-1 py-0.5 border border-[#2e2e2e] bg-[#181818] uppercase">
+                CONTROL
               </span>
             </div>
           </Link>
         </div>
 
         {/* Navigation Links */}
-        <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
-          <div className="px-3 pb-2 text-[10px] font-mono uppercase tracking-widest text-[#71717A]">
-            Catalog & System
+        <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
+          <div className="px-3 pb-2 text-[9px] font-pixel uppercase tracking-widest text-[#71717A]">
+            // CONTROL ROOM
           </div>
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -92,39 +92,42 @@ export function AdminShell({ children }: AdminShellProps) {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
+                className={`flex items-center justify-between px-3 py-2 text-xs font-pixel transition-all border-2 ${
                   isActive
-                    ? "bg-[#D7FF3F] text-black font-semibold shadow-md shadow-[#D7FF3F]/10"
-                    : "text-[#A1A1AA] hover:text-white hover:bg-white/5"
+                    ? "bg-[#D7FF3F] text-black border-black shadow-[2px_2px_0px_#000] font-bold"
+                    : "border-transparent text-[#A1A1AA] hover:text-white hover:bg-[#141414] hover:border-[#2a2a2a]"
                 }`}
               >
-                <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-black" : "text-[#71717A]"}`} />
-                <span>{item.name}</span>
+                <div className="flex items-center gap-2.5">
+                  <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? "text-black" : "text-[#71717A]"}`} />
+                  <span>{item.name.toUpperCase()}</span>
+                </div>
+                {isActive && <span className="text-[10px] text-black font-bold">▶</span>}
               </Link>
             );
           })}
         </nav>
 
         {/* Sidebar Footer */}
-        <div className="p-4 border-t border-white/5 space-y-2">
+        <div className="p-3 border-t-2 border-[#242424] space-y-2 bg-[#111111]">
           <Link
             href="/"
-            className="flex items-center justify-between px-3 py-2 rounded-xl text-xs text-[#A1A1AA] hover:text-white hover:bg-white/5 transition-colors border border-white/5"
+            className="flex items-center justify-between px-3 py-1.5 text-xs font-pixel text-[#A1A1AA] hover:text-white bg-[#141414] border border-[#2a2a2a] shadow-[1px_1px_0px_#000]"
           >
             <span className="flex items-center gap-2">
-              <ExternalLink className="w-3.5 h-3.5 text-[#71717A]" />
-              <span>Public Stream</span>
+              <ExternalLink className="w-3 h-3 text-[#D7FF3F]" />
+              <span>PUBLIC STREAM</span>
             </span>
-            <span className="text-[10px] text-[#71717A] font-mono">Live</span>
+            <span className="text-[9px] text-[#D7FF3F]">[ LIVE ]</span>
           </Link>
 
           <button
             type="button"
             onClick={handleLogout}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-red-400 hover:bg-red-500/10 transition-colors text-left"
+            className="w-full flex items-center gap-2 px-3 py-1.5 text-xs font-pixel text-red-400 hover:text-red-300 bg-[#141414] border border-[#2a2a2a] shadow-[1px_1px_0px_#000] active:translate-y-0.5 text-left"
           >
-            <LogOut className="w-3.5 h-3.5" />
-            <span>Sign out admin</span>
+            <LogOut className="w-3 h-3" />
+            <span>[ EJECT / LOGOUT ]</span>
           </button>
         </div>
       </aside>
@@ -132,41 +135,41 @@ export function AdminShell({ children }: AdminShellProps) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Admin Header */}
-        <header className="h-16 bg-[#0e0e0e]/80 backdrop-blur-md border-b border-white/5 px-6 flex items-center justify-between shrink-0">
+        <header className="h-16 bg-[#0e0e0e] border-b-2 border-[#242424] px-6 flex items-center justify-between shrink-0 shadow-[0_2px_0px_#000]">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-              className="lg:hidden p-2 rounded-lg bg-white/5 text-[#A1A1AA] hover:text-white"
+              className="lg:hidden p-1.5 border border-[#2e2e2e] bg-[#141414] text-[#A1A1AA] hover:text-white"
             >
-              {mobileSidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {mobileSidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
             </button>
-            <div className="flex items-center gap-2 text-xs">
-              <span className="text-[#71717A]">Control Center</span>
-              <span className="text-[#71717A]">/</span>
-              <span className="font-semibold text-white capitalize">
+            <div className="flex items-center gap-2 text-xs font-pixel">
+              <span className="text-[#71717A]">CONTROL ROOM</span>
+              <span className="text-[#D7FF3F]">/</span>
+              <span className="text-white uppercase">
                 {pathname.replace("/admin/", "").replace("/admin", "Overview") || "Overview"}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-[#141414] border border-white/5">
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs font-mono text-[#A1A1AA]">
-                Live Cluster
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-2.5 py-1 bg-[#141414] border border-[#242424] shadow-[1px_1px_0px_#000]">
+              <div className="w-2 h-2 bg-[#D7FF3F] animate-pulse" />
+              <span className="text-[10px] font-pixel text-[#A1A1AA]">
+                NODE // ONLINE
               </span>
             </div>
 
-            <div className="flex items-center gap-2 text-xs">
+            <div className="flex items-center gap-2 text-xs font-pixel bg-[#141414] border border-[#242424] px-2 py-1 shadow-[1px_1px_0px_#000]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={user?.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"}
                 alt={user?.name || "Admin"}
-                className="w-7 h-7 rounded-full object-cover border border-white/10"
+                className="w-5 h-5 border border-black object-cover"
               />
-              <span className="font-medium text-white hidden sm:inline">
-                {user?.name || "Admin"}
+              <span className="text-white hidden sm:inline text-[11px]">
+                {user?.name?.toUpperCase() || "ADMIN"}
               </span>
             </div>
           </div>
@@ -175,15 +178,15 @@ export function AdminShell({ children }: AdminShellProps) {
         {/* Mobile Sidebar Modal */}
         {mobileSidebarOpen && (
           <div className="lg:hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex">
-            <div className="w-64 bg-[#0e0e0e] h-full flex flex-col p-4 border-r border-white/10">
-              <div className="flex items-center justify-between pb-4 border-b border-white/5 mb-4">
-                <span className="font-bold text-sm text-white">AURALIS CMS</span>
+            <div className="w-64 bg-[#0e0e0e] h-full flex flex-col p-4 border-r-2 border-[#242424]">
+              <div className="flex items-center justify-between pb-3 border-b-2 border-[#242424] mb-3">
+                <span className="font-pixel text-xs text-white">AURALIS // CMS</span>
                 <button
                   type="button"
                   onClick={() => setMobileSidebarOpen(false)}
-                  className="p-1 rounded text-[#71717A] hover:text-white"
+                  className="p-1 border border-[#2e2e2e] bg-[#141414] text-[#71717A] hover:text-white"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
               <div className="space-y-1 flex-1">
@@ -192,10 +195,10 @@ export function AdminShell({ children }: AdminShellProps) {
                     key={item.name}
                     href={item.href}
                     onClick={() => setMobileSidebarOpen(false)}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs text-[#A1A1AA] hover:text-white hover:bg-white/5"
+                    className="flex items-center gap-2.5 px-3 py-2 text-xs font-pixel text-[#A1A1AA] hover:text-white hover:bg-[#141414]"
                   >
-                    <item.icon className="w-4 h-4" />
-                    <span>{item.name}</span>
+                    <item.icon className="w-3.5 h-3.5" />
+                    <span>{item.name.toUpperCase()}</span>
                   </Link>
                 ))}
               </div>

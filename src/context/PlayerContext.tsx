@@ -60,6 +60,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [likedSongIds, setLikedSongIds] = useState<Set<string>>(new Set());
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const handleNextTrackRef = useRef<() => void>(() => {});
 
   // Initialize audio element on mount
   useEffect(() => {
@@ -78,7 +79,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     };
 
     const handleEnded = () => {
-      handleNextTrack();
+      handleNextTrackRef.current();
     };
 
     const handlePlay = () => setIsPlaying(true);
@@ -218,6 +219,8 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       loadAndPlayTrack(nextSong, true);
     }
   }, [repeatMode, queue, isShuffle, queueIndex, currentSong, loadAndPlayTrack]);
+
+  handleNextTrackRef.current = handleNextTrack;
 
   const previous = useCallback(() => {
     if (!audioRef.current) return;

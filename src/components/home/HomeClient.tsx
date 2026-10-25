@@ -82,69 +82,79 @@ export function HomeClient({
   const isCatalogEmpty = trendingSongs.length === 0 && recentAlbums.length === 0;
 
   return (
-    <div className="px-6 md:px-10 py-8 space-y-12 max-w-7xl mx-auto">
-      {/* 1. EDITORIAL HERO & GREETING */}
-      <section className="relative rounded-2xl p-6 md:p-8 bg-gradient-to-r from-[#181818] via-[#121212] to-[#090909] border border-white/5 overflow-hidden shadow-2xl">
-        <div className="relative z-10 max-w-2xl space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-mono text-[#D7FF3F]">
-            <Radio className="w-3 h-3 text-[#D7FF3F] animate-pulse" />
-            <span>{featuredMeta?.headline || "AURALIS Live Platform • Studio Quality"}</span>
+    <div className="px-6 md:px-10 py-8 space-y-12 max-w-7xl mx-auto select-none">
+      {/* 1. RETRO CONSOLE HERO & GREETING */}
+      <section className="relative p-6 sm:p-8 bg-[#111111] border-2 border-[#262626] shadow-[4px_4px_0px_#000] overflow-hidden">
+        {/* Console status ticker bar */}
+        <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#222222] text-[10px] font-pixel text-[#71717A]">
+          <div className="flex items-center gap-2 text-[#D7FF3F]">
+            <Radio className="w-3.5 h-3.5 animate-pulse" />
+            <span>AURALIS DECK // SIGNAL ACTIVE</span>
           </div>
+          <span className="hidden sm:inline text-[#A1A1AA]">
+            STUDIO FLAC 24-BIT / 96kHz
+          </span>
+        </div>
 
-          <h1 className="text-2xl sm:text-4xl font-bold tracking-tight text-white">
-            {greeting}
-          </h1>
-
-          <p className="text-sm text-[#A1A1AA] leading-relaxed">
-            {featuredMeta?.subheadline ||
-              (isCatalogEmpty
-                ? "Your database and Cloudinary asset pipeline are connected. The catalog is ready for fresh music uploads."
-                : "Your personalized acoustic stream is tuned to high-fidelity audio. Discover fresh electronic landscapes and late-night neo-soul.")}
+        <div className="relative z-10 max-w-2xl space-y-3">
+          <p className="text-xs font-pixel text-[#D7FF3F] tracking-wider uppercase">
+            // {greeting}
           </p>
 
-          <div className="pt-2 flex flex-wrap items-center gap-3">
+          <h1 className="text-2xl sm:text-4xl font-pixel tracking-wide text-white">
+            YOUR MUSIC SYSTEM IS READY
+          </h1>
+
+          <p className="text-xs sm:text-sm font-sans text-[#A1A1AA] leading-relaxed max-w-xl">
+            {featuredMeta?.subheadline ||
+              (isCatalogEmpty
+                ? "The audio pipeline is synchronized and ready for new master signals."
+                : "Continuous high-fidelity playback engine active. Resume your acoustic sessions or explore newly indexed catalog signals.")}
+          </p>
+
+          <div className="pt-3 flex flex-wrap items-center gap-3">
             {heroTrack && (
               <button
                 onClick={() => playSong(heroTrack, trendingSongs)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#D7FF3F] text-black font-semibold text-xs hover:bg-[#c5ea33] transition-colors shadow-lg shadow-[#D7FF3F]/15"
+                className="retro-btn-primary flex items-center gap-2 px-5 py-2.5 text-xs font-pixel"
               >
                 <Play className="w-3.5 h-3.5 fill-black stroke-black" />
-                <span>Play Featured</span>
+                <span>[ ▶ RESUME ]</span>
               </button>
             )}
 
             {isAdmin && (
               <Link
                 href="/admin/songs/new"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#D7FF3F] text-black font-semibold text-xs hover:bg-[#c5ea33] transition-colors shadow-lg shadow-[#D7FF3F]/15"
+                className="retro-btn-primary flex items-center gap-2 px-4 py-2.5 text-xs font-pixel"
               >
                 <Upload className="w-3.5 h-3.5" />
-                <span>Upload Song</span>
+                <span>[ + UPLOAD SIGNAL ]</span>
               </Link>
             )}
 
             <Link
               href="/discover"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 text-white font-medium text-xs hover:bg-white/10 transition-colors border border-white/10"
+              className="retro-btn-secondary flex items-center gap-2 px-4 py-2.5 text-xs font-pixel"
             >
               <Sparkles className="w-3.5 h-3.5 text-[#D7FF3F]" />
-              <span>Explore Catalog</span>
+              <span>[ DISCOVER ]</span>
             </Link>
           </div>
         </div>
 
         {/* Ambient background decoration */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-25 pointer-events-none hidden md:block">
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 opacity-20 pointer-events-none hidden md:block border-l-2 border-[#222]">
           {heroTrack ? (
             /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={heroTrack.artworkUrl}
               alt="Hero abstract"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover filter grayscale contrast-125"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Music2 className="w-48 h-48 text-white/5" />
+              <Music2 className="w-36 h-36 text-white/5" />
             </div>
           )}
         </div>
@@ -152,14 +162,14 @@ export function HomeClient({
 
       {/* EMPTY CATALOG ONBOARDING PANEL */}
       {isCatalogEmpty && (
-        <section className="rounded-2xl p-8 border border-white/10 bg-[#121212]/80 backdrop-blur-xl text-center max-w-xl mx-auto space-y-4">
-          <div className="w-14 h-14 rounded-2xl bg-[#D7FF3F]/10 border border-[#D7FF3F]/20 flex items-center justify-center mx-auto text-[#D7FF3F]">
-            <Music2 className="w-7 h-7" />
+        <section className="p-8 border-2 border-[#262626] bg-[#111111] shadow-[4px_4px_0px_#000] text-center max-w-xl mx-auto space-y-4">
+          <div className="w-12 h-12 bg-[#181818] border-2 border-[#2e2e2e] flex items-center justify-center mx-auto text-[#D7FF3F] shadow-[2px_2px_0px_#000]">
+            <Music2 className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">Music Catalog is Clean</h3>
-            <p className="text-xs text-[#A1A1AA] mt-1 max-w-md mx-auto leading-relaxed">
-              All previous mock and test audio tracks have been completely cleared. You can now use the Admin Portal to upload real audio files to Cloudinary and populate MongoDB.
+            <h3 className="text-base font-pixel text-white">// NO SIGNAL FOUND</h3>
+            <p className="text-xs font-sans text-[#A1A1AA] mt-2 max-w-md mx-auto leading-relaxed">
+              Your audio archive is waiting for live tracks. Use the Control Room to stream master recordings to Cloudinary and populate MongoDB.
             </p>
           </div>
 
@@ -168,26 +178,26 @@ export function HomeClient({
               <>
                 <Link
                   href="/admin/songs/new"
-                  className="px-4 py-2 rounded-xl bg-[#D7FF3F] text-black text-xs font-semibold hover:bg-[#c5ea33] transition-colors"
+                  className="retro-btn-primary px-4 py-2 text-xs font-pixel"
                 >
-                  Upload First Track
+                  [ UPLOAD MASTER ]
                 </Link>
                 <Link
                   href="/admin/artists/new"
-                  className="px-4 py-2 rounded-xl bg-white/10 text-white text-xs font-medium hover:bg-white/15 transition-colors"
+                  className="retro-btn-secondary px-4 py-2 text-xs font-pixel"
                 >
-                  Create Artist
+                  [ CREATE ARTIST ]
                 </Link>
                 <Link
                   href="/admin"
-                  className="px-4 py-2 rounded-xl bg-white/5 text-[#A1A1AA] hover:text-white text-xs font-medium transition-colors"
+                  className="retro-btn-ghost px-4 py-2 text-xs font-pixel"
                 >
-                  Admin Dashboard
+                  [ CONTROL ROOM ]
                 </Link>
               </>
             ) : (
-              <p className="text-xs text-[#71717A]">
-                Check back soon as tracks and albums are published.
+              <p className="text-xs font-pixel text-[#71717A]">
+                WAITING FOR TRANSMISSION BROADCASTS...
               </p>
             )}
           </div>
@@ -197,44 +207,44 @@ export function HomeClient({
       {/* 2. QUICK ACCESS CARDS */}
       {quickAccessItems.length > 0 && (
         <section className="space-y-4">
-          <h2 className="text-xs font-mono uppercase tracking-wider text-[#71717A]">
-            Quick Access
+          <h2 className="text-xs font-pixel text-[#71717A] tracking-wider">
+            // QUICK ACCESS SIGNALS
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {quickAccessItems.map((item, i) => (
               <div
                 key={i}
                 onClick={item.action}
-                className="group relative flex items-center justify-between p-2 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] border border-white/5 hover:border-white/10 transition-all cursor-pointer select-none"
+                className="group relative flex items-center justify-between p-2.5 bg-[#111111] hover:bg-[#181818] border-2 border-[#262626] hover:border-[#D7FF3F] shadow-[2px_2px_0px_#000] hover:shadow-[3px_3px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all duration-150 cursor-pointer"
               >
                 <div className="flex items-center gap-3 min-w-0 pr-2">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={item.artwork}
                     alt={item.title}
-                    className="w-12 h-12 rounded-lg object-cover shadow-sm shrink-0"
+                    className="w-11 h-11 border border-black object-cover shrink-0"
                   />
                   <div className="min-w-0">
-                    <h4 className="text-sm font-semibold text-white group-hover:text-[#D7FF3F] transition-colors truncate">
+                    <h4 className="text-xs font-pixel text-white group-hover:text-[#D7FF3F] transition-colors truncate">
                       {item.title}
                     </h4>
-                    <p className="text-xs text-[#71717A] truncate">
+                    <p className="text-[11px] font-sans text-[#71717A] truncate">
                       {item.subtitle}
                     </p>
                   </div>
                 </div>
 
-                {/* Play Button on hover */}
+                {/* Tactile Play Button on hover */}
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     item.action();
                   }}
-                  className="w-9 h-9 rounded-full bg-[#D7FF3F] text-black opacity-0 group-hover:opacity-100 flex items-center justify-center shadow-lg shadow-black/50 transition-all transform translate-x-1 group-hover:translate-x-0 shrink-0 mr-1"
+                  className="w-8 h-8 bg-[#D7FF3F] text-black border border-black opacity-0 group-hover:opacity-100 flex items-center justify-center shadow-[1px_1px_0px_#000] active:translate-y-0.5 transition-opacity shrink-0 mr-1"
                   aria-label={`Play ${item.title}`}
                 >
-                  <Play className="w-4 h-4 fill-black stroke-black ml-0.5" />
+                  <Play className="w-3.5 h-3.5 fill-black stroke-black ml-0.5" />
                 </button>
               </div>
             ))}
@@ -245,23 +255,23 @@ export function HomeClient({
       {/* 3. TRENDING NOW (SONG ROWS) */}
       {trendingSongs.length > 0 && (
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between pb-2 border-b border-[#222]">
             <div className="flex items-center gap-2">
               <Flame className="w-4 h-4 text-[#D7FF3F]" />
-              <h2 className="text-lg font-bold text-white tracking-tight">
-                Trending on Auralis
+              <h2 className="text-sm font-pixel text-white tracking-wide">
+                // TRENDING ON AURALIS
               </h2>
             </div>
             <Link
               href="/discover"
-              className="text-xs text-[#A1A1AA] hover:text-[#D7FF3F] transition-colors flex items-center gap-1 font-medium"
+              className="text-xs font-pixel text-[#A1A1AA] hover:text-[#D7FF3F] transition-colors flex items-center gap-1"
             >
-              <span>See all</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>[ VIEW ALL ]</span>
+              <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
-          <div className="bg-[#111111] rounded-2xl p-2 sm:p-3 border border-white/5 space-y-1">
+          <div className="bg-[#0e0e0e] border-2 border-[#242424] p-2 space-y-1 shadow-[3px_3px_0px_#000]">
             {trendingSongs.slice(0, 5).map((song, idx) => (
               <SongRow
                 key={song.id}
@@ -275,19 +285,19 @@ export function HomeClient({
         </section>
       )}
 
-      {/* 4. RECENTLY PLAYED */}
+      {/* 4. RECENTLY PLAYED / POPULAR TRACKS */}
       {trendingSongs.length > 0 && (
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white tracking-tight">
-              Popular Tracks
+          <div className="flex items-center justify-between pb-2 border-b border-[#222]">
+            <h2 className="text-sm font-pixel text-white tracking-wide">
+              // RECENT SIGNALS
             </h2>
             <Link
               href="/discover"
-              className="text-xs text-[#A1A1AA] hover:text-[#D7FF3F] transition-colors flex items-center gap-1 font-medium"
+              className="text-xs font-pixel text-[#A1A1AA] hover:text-[#D7FF3F] transition-colors flex items-center gap-1"
             >
-              <span>Explore</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>[ EXPLORE ]</span>
+              <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
@@ -302,21 +312,18 @@ export function HomeClient({
       {/* 5. MADE FOR YOU / CURATED PLAYLISTS */}
       {curatedPlaylists.length > 0 && (
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between pb-2 border-b border-[#222]">
             <div>
-              <h2 className="text-lg font-bold text-white tracking-tight">
-                Playlists
+              <h2 className="text-sm font-pixel text-white tracking-wide">
+                // CASSETTES & PLAYLISTS
               </h2>
-              <p className="text-xs text-[#71717A] mt-0.5">
-                Curated acoustic frequency mixes based on your listening habits
-              </p>
             </div>
             <Link
               href="/discover"
-              className="text-xs text-[#A1A1AA] hover:text-[#D7FF3F] transition-colors flex items-center gap-1 font-medium"
+              className="text-xs font-pixel text-[#A1A1AA] hover:text-[#D7FF3F] transition-colors flex items-center gap-1"
             >
-              <span>View all</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>[ ALL TAPES ]</span>
+              <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
@@ -331,16 +338,16 @@ export function HomeClient({
       {/* 6. NEW RELEASES */}
       {recentAlbums.length > 0 && (
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white tracking-tight">
-              New Releases
+          <div className="flex items-center justify-between pb-2 border-b border-[#222]">
+            <h2 className="text-sm font-pixel text-white tracking-wide">
+              // NEW RELEASES & SLEEVES
             </h2>
             <Link
               href="/discover"
-              className="text-xs text-[#A1A1AA] hover:text-[#D7FF3F] transition-colors flex items-center gap-1 font-medium"
+              className="text-xs font-pixel text-[#A1A1AA] hover:text-[#D7FF3F] transition-colors flex items-center gap-1"
             >
-              <span>Browse releases</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>[ BROWSE ]</span>
+              <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 
@@ -355,16 +362,16 @@ export function HomeClient({
       {/* 7. FEATURED ARTISTS */}
       {featuredArtists.length > 0 && (
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-white tracking-tight">
-              Featured Artists
+          <div className="flex items-center justify-between pb-2 border-b border-[#222]">
+            <h2 className="text-sm font-pixel text-white tracking-wide">
+              // FEATURED ARTISTS
             </h2>
             <Link
               href="/discover"
-              className="text-xs text-[#A1A1AA] hover:text-[#D7FF3F] transition-colors flex items-center gap-1 font-medium"
+              className="text-xs font-pixel text-[#A1A1AA] hover:text-[#D7FF3F] transition-colors flex items-center gap-1"
             >
-              <span>Discover more</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>[ DISCOVER ]</span>
+              <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
 

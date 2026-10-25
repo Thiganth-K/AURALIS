@@ -11,26 +11,26 @@ interface LogoProps {
 
 export function Logo({ collapsed = false, className = "", size = "md" }: LogoProps) {
   const iconSizes = {
-    sm: "w-6 h-6",
-    md: "w-7 h-7",
-    lg: "w-9 h-9",
+    sm: "w-7 h-7",
+    md: "w-8 h-8",
+    lg: "w-10 h-10",
   };
 
   const textSizes = {
-    sm: "text-base tracking-widest",
-    md: "text-lg tracking-wider",
-    lg: "text-xl tracking-wider",
+    sm: "text-xs tracking-wider",
+    md: "text-sm tracking-wider",
+    lg: "text-base tracking-wider",
   };
 
   return (
     <Link
       href="/"
-      className={`group flex items-center gap-3 transition-opacity hover:opacity-90 ${className}`}
+      className={`group flex items-center gap-2.5 transition-all select-none ${className}`}
       aria-label="AURALIS Home"
     >
-      {/* Brand Icon: Dynamic geometric acoustic wave with neon chartreuse accent */}
+      {/* Brand Icon: Retro Pixel Cartridge / Audio Wave */}
       <div
-        className={`${iconSizes[size]} relative flex items-center justify-center rounded-lg bg-[#181818] border border-white/10 p-1 shadow-md shadow-black/50 group-hover:border-[#D7FF3F]/30 transition-colors`}
+        className={`${iconSizes[size]} relative flex items-center justify-center bg-[#121212] border border-white/20 p-1.5 shadow-[2px_2px_0px_#000000] group-hover:border-[#D7FF3F] group-hover:shadow-[2px_2px_0px_#D7FF3F] transition-all`}
       >
         <svg
           viewBox="0 0 24 24"
@@ -38,22 +38,24 @@ export function Logo({ collapsed = false, className = "", size = "md" }: LogoPro
           xmlns="http://www.w3.org/2000/svg"
           className="w-full h-full"
         >
-          {/* Subtle audio bars / pulse */}
-          <rect x="3" y="10" width="2" height="4" rx="1" fill="#71717A" />
-          <rect x="7" y="6" width="2.2" height="12" rx="1.1" fill="#FFFFFF" />
-          <rect x="11.2" y="3.5" width="2.4" height="17" rx="1.2" fill="#D7FF3F" />
-          <rect x="15.8" y="7" width="2.2" height="10" rx="1.1" fill="#FFFFFF" />
-          <rect x="20" y="10.5" width="2" height="3" rx="1" fill="#71717A" />
+          {/* Stepped pixel equalizer frequency bars */}
+          <rect x="2" y="12" width="3" height="6" fill="#71717A" />
+          <rect x="7" y="7" width="3" height="11" fill="#FFFFFF" />
+          <rect x="12" y="4" width="3" height="14" fill="#D7FF3F" />
+          <rect x="17" y="9" width="3" height="9" fill="#FFFFFF" />
         </svg>
       </div>
 
       {!collapsed && (
         <div className="flex flex-col">
-          <span className={`font-semibold font-sans uppercase text-white ${textSizes[size]}`}>
-            AURALIS
-          </span>
-          <span className="text-[9px] tracking-widest text-[#71717A] uppercase -mt-1 font-mono">
-            Hi-Fi Audio
+          <div className="flex items-center gap-1.5">
+            <span className={`font-pixel font-bold uppercase text-white tracking-widest group-hover:text-[#D7FF3F] transition-colors ${textSizes[size]}`}>
+              AURALIS
+            </span>
+            <span className="inline-block w-1.5 h-1.5 bg-[#D7FF3F] animate-pulse" />
+          </div>
+          <span className="text-[8.5px] font-pixel tracking-wider text-[#A1A1AA] uppercase flex items-center gap-1">
+            <span className="text-[#D7FF3F]">♪</span> RETRO MUSIC SYSTEM
           </span>
         </div>
       )}

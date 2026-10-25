@@ -42,30 +42,28 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#090909] flex flex-col justify-center items-center px-4 relative overflow-hidden py-12">
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#D7FF3F]/5 rounded-full blur-3xl pointer-events-none" />
-
+    <div className="min-h-screen w-full bg-[#090909] flex flex-col justify-center items-center px-4 relative overflow-hidden py-12 select-none">
       <div className="w-full max-w-md z-10">
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D7FF3F] to-emerald-500 flex items-center justify-center text-black shadow-lg shadow-[#D7FF3F]/20">
+            <div className="w-9 h-9 bg-[#D7FF3F] border border-black flex items-center justify-center text-black shadow-[2px_2px_0px_#000]">
               <Music2 className="w-5 h-5 text-black" />
             </div>
-            <span className="text-2xl font-black tracking-wider text-white">
+            <span className="text-xl font-pixel tracking-wider text-white">
               AURALIS
             </span>
           </Link>
-          <h1 className="text-xl font-bold text-white tracking-tight">
-            Create your account
+          <h1 className="text-base font-pixel text-white tracking-wide">
+            // INITIALIZE ACCOUNT
           </h1>
-          <p className="text-xs text-[#A1A1AA] mt-1">
-            Join the next-generation high-fidelity music network
+          <p className="text-xs font-sans text-[#A1A1AA] mt-1">
+            Join the high-fidelity acoustic streaming network
           </p>
         </div>
 
-        <div className="bg-[#121212] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
+        <div className="bg-[#111111] border-2 border-[#262626] p-6 sm:p-8 shadow-[5px_5px_0px_#000]">
           {error && (
-            <div className="mb-5 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
+            <div className="mb-5 p-3 bg-red-950/40 border-2 border-red-500/40 text-red-400 text-xs font-pixel flex items-center gap-2 shadow-[2px_2px_0px_#000]">
               <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
               <span>{error}</span>
             </div>
@@ -73,8 +71,8 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">
-                Full Name
+              <label className="block text-xs font-pixel text-[#A1A1AA] mb-1.5">
+                FULL NAME
               </label>
               <input
                 type="text"
@@ -82,13 +80,13 @@ export default function RegisterPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Jane Doe"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[#181818] border border-white/10 text-white placeholder-[#71717A] text-sm focus:outline-none focus:border-[#D7FF3F] transition-colors"
+                className="w-full px-3 py-2 bg-[#181818] border-2 border-[#2e2e2e] text-white text-xs font-sans focus:outline-none focus:border-[#D7FF3F]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">
-                Email Address
+              <label className="block text-xs font-pixel text-[#A1A1AA] mb-1.5">
+                IDENTITY (EMAIL)
               </label>
               <input
                 type="email"
@@ -96,13 +94,13 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[#181818] border border-white/10 text-white placeholder-[#71717A] text-sm focus:outline-none focus:border-[#D7FF3F] transition-colors"
+                className="w-full px-3 py-2 bg-[#181818] border-2 border-[#2e2e2e] text-white text-xs font-sans focus:outline-none focus:border-[#D7FF3F]"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">
-                Password
+              <label className="block text-xs font-pixel text-[#A1A1AA] mb-1.5">
+                PASSPHRASE
               </label>
               <div className="relative">
                 <input
@@ -111,7 +109,7 @@ export default function RegisterPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="At least 6 characters"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#181818] border border-white/10 text-white placeholder-[#71717A] text-sm focus:outline-none focus:border-[#D7FF3F] transition-colors pr-10"
+                  className="w-full px-3 py-2 bg-[#181818] border-2 border-[#2e2e2e] text-white text-xs font-sans focus:outline-none focus:border-[#D7FF3F] pr-10"
                 />
                 <button
                   type="button"
@@ -128,55 +126,55 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">
-                Confirm Password
+              <label className="block text-xs font-pixel text-[#A1A1AA] mb-1.5">
+                CONFIRM PASSPHRASE
               </label>
               <input
                 type={showPassword ? "text" : "password"}
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Repeat password"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[#181818] border border-white/10 text-white placeholder-[#71717A] text-sm focus:outline-none focus:border-[#D7FF3F] transition-colors"
+                placeholder="Repeat passphrase"
+                className="w-full px-3 py-2 bg-[#181818] border-2 border-[#2e2e2e] text-white text-xs font-sans focus:outline-none focus:border-[#D7FF3F]"
               />
             </div>
 
             <div className="pt-1">
-              <div className="flex items-center gap-2 text-[11px] text-[#71717A]">
-                <div className="w-3.5 h-3.5 rounded-full bg-[#D7FF3F]/20 flex items-center justify-center">
+              <div className="flex items-center gap-2 text-[10px] font-pixel text-[#71717A]">
+                <div className="w-3.5 h-3.5 bg-[#D7FF3F]/20 border border-[#D7FF3F]/50 flex items-center justify-center">
                   <Check className="w-2.5 h-2.5 text-[#D7FF3F]" />
                 </div>
-                <span>Standard Listener Tier (FLAC playback & catalog access)</span>
+                <span>[ TIER: STANDARD LISTENER • FLAC 24-BIT ]</span>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full mt-2 py-3 px-4 rounded-xl bg-[#D7FF3F] hover:bg-[#cbf531] text-black font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-[#D7FF3F]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full mt-2 py-2.5 px-4 retro-btn-primary text-xs font-pixel flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin text-black" />
-                  <span>Creating Account...</span>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-black" />
+                  <span>[ INITIALIZING... ]</span>
                 </>
               ) : (
                 <>
-                  <span>Create Account</span>
-                  <ArrowRight className="w-4 h-4 text-black" />
+                  <span>[ CREATE ACCOUNT ]</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-black" />
                 </>
               )}
             </button>
           </form>
         </div>
 
-        <p className="text-center text-xs text-[#71717A] mt-6">
-          Already registered?{" "}
+        <p className="text-center text-xs font-pixel text-[#71717A] mt-6">
+          ALREADY REGISTERED?{" "}
           <Link
             href="/login"
-            className="text-white hover:text-[#D7FF3F] underline underline-offset-4 transition-colors font-medium"
+            className="text-[#D7FF3F] hover:underline transition-colors ml-1"
           >
-            Sign in here
+            [ SIGN IN ]
           </Link>
         </p>
       </div>

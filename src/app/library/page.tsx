@@ -124,12 +124,14 @@ function LibraryContent() {
   }
 
   return (
-    <div className="px-6 md:px-10 py-8 space-y-8 max-w-7xl mx-auto">
+    <div className="px-6 md:px-10 py-8 space-y-8 max-w-7xl mx-auto select-none">
       {/* Header and Tab Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b-2 border-[#242424]">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Your Library</h1>
-          <p className="text-xs text-[#A1A1AA] mt-1">
+          <h1 className="text-xl sm:text-2xl font-pixel tracking-wide text-white">
+            {user.name.toUpperCase()} // MUSIC ARCHIVE
+          </h1>
+          <p className="text-xs font-sans text-[#A1A1AA] mt-1">
             Access your liked tracks, personal playlist collections, and playback timeline.
           </p>
         </div>
@@ -139,51 +141,51 @@ function LibraryContent() {
             <button
               type="button"
               onClick={() => setCreateModalOpen(true)}
-              className="px-3.5 py-1.5 rounded-full bg-[#D7FF3F] hover:bg-[#cbf531] text-black font-semibold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-[#D7FF3F]/10"
+              className="retro-btn-primary px-3.5 py-1.5 text-xs font-pixel flex items-center gap-1.5"
             >
-              <Plus className="w-3.5 h-3.5 text-black" />
-              <span>New Playlist</span>
+              <Plus className="w-3.5 h-3.5" />
+              <span>[ + NEW TAPE ]</span>
             </button>
           )}
 
-          <div className="flex items-center gap-1.5 bg-[#141414] p-1 rounded-full border border-white/10">
+          <div className="flex items-center gap-1 bg-[#111111] p-1 border-2 border-[#262626] shadow-[2px_2px_0px_#000]">
             <button
               type="button"
               onClick={() => setActiveTab("liked")}
-              className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1 text-xs font-pixel transition-all flex items-center gap-1.5 ${
                 activeTab === "liked"
-                  ? "bg-white text-black font-semibold shadow"
+                  ? "bg-[#D7FF3F] text-black font-bold shadow-[1px_1px_0px_#000]"
                   : "text-[#A1A1AA] hover:text-white"
               }`}
             >
-              <Heart className={`w-3.5 h-3.5 ${activeTab === "liked" ? "fill-black" : ""}`} />
-              <span>Liked ({likedSongs.length})</span>
+              <Heart className={`w-3 h-3 ${activeTab === "liked" ? "fill-black" : ""}`} />
+              <span>LIKED ({likedSongs.length})</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab("playlists")}
-              className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1 text-xs font-pixel transition-all flex items-center gap-1.5 ${
                 activeTab === "playlists"
-                  ? "bg-white text-black font-semibold shadow"
+                  ? "bg-[#D7FF3F] text-black font-bold shadow-[1px_1px_0px_#000]"
                   : "text-[#A1A1AA] hover:text-white"
               }`}
             >
-              <ListMusic className="w-3.5 h-3.5" />
-              <span>Playlists ({userPlaylists.length})</span>
+              <ListMusic className="w-3 h-3" />
+              <span>TAPES ({userPlaylists.length})</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab("history")}
-              className={`px-3 py-1.5 rounded-full text-xs font-mono transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1 text-xs font-pixel transition-all flex items-center gap-1.5 ${
                 activeTab === "history"
-                  ? "bg-white text-black font-semibold shadow"
+                  ? "bg-[#D7FF3F] text-black font-bold shadow-[1px_1px_0px_#000]"
                   : "text-[#A1A1AA] hover:text-white"
               }`}
             >
-              <History className="w-3.5 h-3.5" />
-              <span>History</span>
+              <History className="w-3 h-3" />
+              <span>HISTORY</span>
             </button>
           </div>
         </div>
@@ -191,34 +193,35 @@ function LibraryContent() {
 
       {/* Tab Contents */}
       {loading ? (
-        <div className="py-20 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 text-[#D7FF3F] animate-spin" />
+        <div className="py-20 flex flex-col items-center justify-center gap-3">
+          <Loader2 className="w-6 h-6 text-[#D7FF3F] animate-spin" />
+          <span className="text-xs font-pixel text-[#71717A]">LOADING ARCHIVE...</span>
         </div>
       ) : activeTab === "liked" ? (
         likedSongs.length === 0 ? (
-          <div className="py-20 text-center space-y-2">
+          <div className="py-16 text-center space-y-3 border-2 border-[#262626] bg-[#111111] p-8 shadow-[3px_3px_0px_#000] max-w-md mx-auto">
             <Heart className="w-8 h-8 text-[#71717A] mx-auto" />
-            <p className="text-sm font-semibold text-white">No liked songs yet</p>
-            <p className="text-xs text-[#71717A]">
-              Click the heart icon on any song row or in the player to save songs here.
+            <p className="text-sm font-pixel text-white">// NO LIKED TRACKS</p>
+            <p className="text-xs font-sans text-[#71717A]">
+              Click the heart icon on any song row or in the player to save songs to your personal archive.
             </p>
           </div>
         ) : (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-mono text-[#71717A] uppercase">
-                {likedSongs.length} acoustic favorites
+              <span className="text-xs font-pixel text-[#71717A] uppercase">
+                // {likedSongs.length} LIKED SIGNALS
               </span>
               <button
                 type="button"
                 onClick={() => likedSongs[0] && playSong(likedSongs[0], likedSongs)}
-                className="px-4 py-2 rounded-full bg-[#D7FF3F] text-black font-semibold text-xs flex items-center gap-2 hover:bg-[#cbf531] transition-all"
+                className="retro-btn-primary px-3.5 py-1.5 text-xs font-pixel flex items-center gap-2"
               >
-                <Play className="w-3.5 h-3.5 fill-black" />
-                <span>Play All</span>
+                <Play className="w-3.5 h-3.5 fill-black stroke-black" />
+                <span>[ ▶ PLAY ALL ]</span>
               </button>
             </div>
-            <div className="rounded-xl border border-white/5 bg-[#121212] overflow-hidden divide-y divide-white/5">
+            <div className="border-2 border-[#242424] bg-[#0e0e0e] shadow-[3px_3px_0px_#000] p-2 space-y-1">
               {likedSongs.map((song, index) => (
                 <SongRow
                   key={song.id}
@@ -232,20 +235,22 @@ function LibraryContent() {
         )
       ) : activeTab === "playlists" ? (
         userPlaylists.length === 0 ? (
-          <div className="py-20 text-center space-y-3">
+          <div className="py-16 text-center space-y-3 border-2 border-[#262626] bg-[#111111] p-8 shadow-[3px_3px_0px_#000] max-w-md mx-auto">
             <ListMusic className="w-8 h-8 text-[#71717A] mx-auto" />
-            <p className="text-sm font-semibold text-white">No playlists created yet</p>
-            <p className="text-xs text-[#71717A]">
-              Organize your music into custom listening selections.
+            <p className="text-sm font-pixel text-white">// NO CASSETTE TAPES CREATED</p>
+            <p className="text-xs font-sans text-[#71717A]">
+              Organize your music archive into custom cassette selections.
             </p>
-            <button
-              type="button"
-              onClick={() => setCreateModalOpen(true)}
-              className="px-4 py-2 rounded-full bg-[#D7FF3F] text-black font-semibold text-xs inline-flex items-center gap-1.5"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Create First Playlist</span>
-            </button>
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => setCreateModalOpen(true)}
+                className="retro-btn-primary px-4 py-2 text-xs font-pixel inline-flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>[ CREATE FIRST TAPE ]</span>
+              </button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -256,19 +261,19 @@ function LibraryContent() {
         )
       ) : (
         historyItems.length === 0 ? (
-          <div className="py-20 text-center space-y-2">
+          <div className="py-16 text-center space-y-3 border-2 border-[#262626] bg-[#111111] p-8 shadow-[3px_3px_0px_#000] max-w-md mx-auto">
             <History className="w-8 h-8 text-[#71717A] mx-auto" />
-            <p className="text-sm font-semibold text-white">No listening history recorded yet</p>
-            <p className="text-xs text-[#71717A]">
-              Play any published song to start logging your playback history.
+            <p className="text-sm font-pixel text-white">// NO PLAYBACK HISTORY RECORDED</p>
+            <p className="text-xs font-sans text-[#71717A]">
+              Play any published song to start logging your playback frequency history.
             </p>
           </div>
         ) : (
           <div className="space-y-4">
-            <span className="text-xs font-mono text-[#71717A] uppercase">
-              Recent playback timeline
+            <span className="text-xs font-pixel text-[#71717A] uppercase">
+              // RECENT PLAYBACK TIMELINE
             </span>
-            <div className="rounded-xl border border-white/5 bg-[#121212] overflow-hidden divide-y divide-white/5">
+            <div className="border-2 border-[#242424] bg-[#0e0e0e] shadow-[3px_3px_0px_#000] p-2 space-y-1">
               {historyItems.map((item, index) => (
                 <SongRow
                   key={item.id}
@@ -282,15 +287,15 @@ function LibraryContent() {
         )
       )}
 
-      {/* Create Playlist Modal */}
+      {/* Create Playlist Modal with Retro Framing */}
       {createModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-[#141414] border border-white/10 rounded-2xl p-6 shadow-2xl">
-            <h2 className="text-base font-bold text-white mb-4">Create Playlist</h2>
+          <div className="w-full max-w-sm bg-[#111111] border-2 border-[#2e2e2e] p-6 shadow-[5px_5px_0px_#000]">
+            <h2 className="text-sm font-pixel text-white mb-4">// CREATE CASSETTE TAPE</h2>
             <form onSubmit={handleCreatePlaylist} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">
-                  Playlist Name
+                <label className="block text-xs font-pixel text-[#A1A1AA] mb-1.5">
+                  TAPE TITLE
                 </label>
                 <input
                   type="text"
@@ -298,8 +303,8 @@ function LibraryContent() {
                   required
                   value={newPlaylistName}
                   onChange={(e) => setNewPlaylistName(e.target.value)}
-                  placeholder="My Playlist #1"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#181818] border border-white/10 text-white text-xs focus:outline-none focus:border-[#D7FF3F]"
+                  placeholder="Tape #01 - Late Night"
+                  className="w-full px-3 py-2 bg-[#181818] border-2 border-[#2e2e2e] text-white text-xs font-sans focus:outline-none focus:border-[#D7FF3F]"
                 />
               </div>
 
@@ -307,16 +312,16 @@ function LibraryContent() {
                 <button
                   type="button"
                   onClick={() => setCreateModalOpen(false)}
-                  className="px-3.5 py-2 rounded-xl bg-white/5 text-xs text-[#A1A1AA] hover:text-white"
+                  className="retro-btn-ghost px-3 py-1.5 text-xs font-pixel"
                 >
-                  Cancel
+                  [ CANCEL ]
                 </button>
                 <button
                   type="submit"
                   disabled={creatingPlaylist}
-                  className="px-4 py-2 rounded-xl bg-[#D7FF3F] text-black font-semibold text-xs disabled:opacity-50"
+                  className="retro-btn-primary px-4 py-1.5 text-xs font-pixel disabled:opacity-50"
                 >
-                  {creatingPlaylist ? "Creating..." : "Create"}
+                  {creatingPlaylist ? "[ RECORDING... ]" : "[ CREATE TAPE ]"}
                 </button>
               </div>
             </form>

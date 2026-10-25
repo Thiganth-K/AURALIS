@@ -8,11 +8,10 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
-  Sparkles,
-  User as UserIcon,
   Shield,
   LogOut,
   LogIn,
+  Sliders,
 } from "lucide-react";
 
 export function TopBar() {
@@ -35,48 +34,53 @@ export function TopBar() {
   };
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-[#090909]/80 backdrop-blur-md border-b border-white/5 px-6 flex items-center justify-between">
-      {/* Left: Navigation History */}
+    <header className="sticky top-0 z-30 h-16 bg-[#090909]/95 backdrop-blur-md border-b-2 border-black shadow-[0_2px_0_rgba(255,255,255,0.05)] px-4 sm:px-6 flex items-center justify-between">
+      {/* Left: Navigation History & Console Search */}
       <div className="flex items-center gap-2">
         <button
           type="button"
           onClick={() => router.back()}
-          className="w-8 h-8 rounded-full bg-[#181818] border border-white/5 flex items-center justify-center text-[#A1A1AA] hover:text-white hover:border-white/10 transition-colors"
+          className="w-8 h-8 rounded-none bg-[#141414] border border-white/15 flex items-center justify-center text-[#A1A1AA] hover:text-white hover:border-[#D7FF3F] shadow-[2px_2px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
           aria-label="Back"
+          title="Back"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
         <button
           type="button"
           onClick={() => router.forward()}
-          className="w-8 h-8 rounded-full bg-[#181818] border border-white/5 flex items-center justify-center text-[#A1A1AA] hover:text-white hover:border-white/10 transition-colors"
+          className="w-8 h-8 rounded-none bg-[#141414] border border-white/15 flex items-center justify-center text-[#A1A1AA] hover:text-white hover:border-[#D7FF3F] shadow-[2px_2px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
           aria-label="Forward"
+          title="Forward"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
 
-        {/* Search bar inside top bar */}
+        {/* Retro Terminal Search Panel */}
         <form
           onSubmit={handleSearchSubmit}
-          className="ml-3 hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#141414] border border-white/5 focus-within:border-white/20 transition-all w-64 md:w-80"
+          className="ml-2 hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[#121212] border border-white/15 focus-within:border-[#D7FF3F] shadow-[2px_2px_0px_#000] transition-all w-64 md:w-80 group"
         >
-          <Search className="w-3.5 h-3.5 text-[#71717A] shrink-0" />
+          <span className="text-[#D7FF3F] font-pixel text-xs font-bold select-none">&gt;</span>
           <input
             type="text"
-            placeholder="Search songs, artists, albums..."
+            placeholder="Search AURALIS..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-transparent text-xs text-white placeholder-[#71717A] focus:outline-none"
+            className="w-full bg-transparent font-pixel text-xs text-white placeholder-[#71717A] focus:outline-none"
           />
+          <button type="submit" aria-label="Submit search">
+            <Search className="w-3.5 h-3.5 text-[#71717A] group-focus-within:text-[#D7FF3F] shrink-0 transition-colors" />
+          </button>
         </form>
       </div>
 
-      {/* Right: Membership Tier & Profile Menu */}
+      {/* Right: Audio Frequency Spec & Profile Terminal */}
       <div className="flex items-center gap-3">
-        {/* Hi-Fi Tier Badge */}
-        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#181818] border border-[#D7FF3F]/20 text-[11px] font-mono text-[#D7FF3F]">
-          <Sparkles className="w-3 h-3 text-[#D7FF3F]" />
-          <span>FLAC 24-bit • Hi-Fi</span>
+        {/* Hi-Fi Audio Spec Badge */}
+        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 bg-[#121212] border border-[#D7FF3F]/30 text-[10px] font-pixel text-[#D7FF3F] shadow-[1px_1px_0px_#000]">
+          <span className="w-1.5 h-1.5 bg-[#D7FF3F] animate-pulse inline-block" />
+          <span>FLAC // 24-BIT 96kHz</span>
         </div>
 
         {user ? (
@@ -84,7 +88,7 @@ export function TopBar() {
             <button
               type="button"
               onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-              className="flex items-center gap-2.5 p-1 pr-3 rounded-full bg-[#141414] hover:bg-[#181818] border border-white/5 hover:border-white/10 transition-colors"
+              className="flex items-center gap-2.5 p-1.5 pr-3 bg-[#141414] hover:bg-[#1a1a1a] border border-white/15 hover:border-[#D7FF3F] shadow-[2px_2px_0px_#000] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -93,84 +97,68 @@ export function TopBar() {
                   "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
                 }
                 alt={user.name}
-                className="w-7 h-7 rounded-full object-cover border border-white/10"
+                className="w-6 h-6 object-cover border border-white/10"
               />
-              <span className="text-xs font-medium text-white hidden sm:inline max-w-[120px] truncate">
+              <span className="text-xs font-pixel text-white hidden sm:inline max-w-[120px] truncate">
                 {user.name}
               </span>
-              {isAdmin && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#D7FF3F]/10 text-[#D7FF3F] font-mono uppercase">
-                  Admin
-                </span>
-              )}
+              <span className="text-[10px] font-pixel text-[#D7FF3F]">▼</span>
             </button>
 
-            {/* Profile Dropdown */}
+            {/* Profile Retro Inset Dropdown Menu */}
             {isProfileMenuOpen && (
-              <div className="absolute right-0 mt-2 w-52 rounded-xl bg-[#181818] border border-white/10 shadow-2xl py-1 z-50 animate-in fade-in zoom-in-95 duration-150">
-                <div className="px-3 py-2 border-b border-white/5">
-                  <p className="text-xs font-semibold text-white truncate">
+              <div className="absolute right-0 mt-2 w-56 bg-[#121212] border-2 border-black shadow-[4px_4px_0px_#000] z-50 p-2 space-y-1">
+                <div className="px-3 py-2 border-b border-white/10 mb-1 bg-[#090909]">
+                  <p className="text-[11px] font-pixel text-white truncate font-bold">
                     {user.name}
                   </p>
-                  <p className="text-[11px] text-[#71717A] truncate">
+                  <p className="text-[9px] font-mono text-[#71717A] truncate">
                     {user.email}
                   </p>
-                  <div className="mt-1">
-                    <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-white/5 text-[#A1A1AA]">
-                      Role: {user.role}
-                    </span>
-                  </div>
+                  <span className="inline-block mt-1 text-[8.5px] font-pixel px-1.5 py-0.2 bg-[#D7FF3F]/10 text-[#D7FF3F] border border-[#D7FF3F]/20 uppercase">
+                    {user.role} tier
+                  </span>
                 </div>
 
                 {isAdmin && (
                   <Link
                     href="/admin"
                     onClick={() => setIsProfileMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 text-xs text-[#D7FF3F] hover:bg-[#D7FF3F]/10 transition-colors font-medium"
+                    className="flex items-center gap-2.5 px-3 py-2 text-xs font-pixel text-[#D7FF3F] hover:bg-[#1c1c1c] border border-transparent hover:border-[#D7FF3F]/40 transition-colors"
                   >
-                    <Shield className="w-3.5 h-3.5 text-[#D7FF3F]" />
-                    <span>Admin Dashboard</span>
+                    <Shield className="w-3.5 h-3.5" />
+                    <span>[ CMS CONTROL ]</span>
                   </Link>
                 )}
 
                 <Link
                   href="/library"
                   onClick={() => setIsProfileMenuOpen(false)}
-                  className="flex items-center gap-2.5 px-3 py-2 text-xs text-[#A1A1AA] hover:text-white hover:bg-white/5 transition-colors"
+                  className="flex items-center gap-2.5 px-3 py-2 text-xs font-pixel text-[#A1A1AA] hover:text-white hover:bg-[#1c1c1c] border border-transparent hover:border-white/10 transition-colors"
                 >
-                  <UserIcon className="w-3.5 h-3.5" />
-                  <span>Your Library</span>
+                  <Sliders className="w-3.5 h-3.5" />
+                  <span>[ AUDIO ARCHIVE ]</span>
                 </Link>
 
-                <div className="border-t border-white/5 mt-1 pt-1">
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-red-400 hover:bg-white/5 transition-colors text-left"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>Log out</span>
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-pixel text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/30 transition-colors text-left"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>[ EJECT / SIGN OUT ]</span>
+                </button>
               </div>
             )}
           </div>
         ) : (
-          <div className="flex items-center gap-2">
-            <Link
-              href="/login"
-              className="px-3 py-1.5 rounded-full text-xs font-medium text-[#A1A1AA] hover:text-white transition-colors flex items-center gap-1.5"
-            >
-              <LogIn className="w-3.5 h-3.5" />
-              <span>Log in</span>
-            </Link>
-            <Link
-              href="/register"
-              className="px-3.5 py-1.5 rounded-full bg-white text-black hover:bg-[#D7FF3F] transition-colors text-xs font-medium"
-            >
-              Sign up
-            </Link>
-          </div>
+          <Link
+            href="/login"
+            className="retro-btn retro-btn-primary"
+          >
+            <LogIn className="w-3 h-3" />
+            <span>LOGIN</span>
+          </Link>
         )}
       </div>
     </header>

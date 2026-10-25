@@ -151,29 +151,29 @@ export default function AdminSongsPage() {
   });
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto select-none">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b-2 border-[#242424]">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <Music className="w-6 h-6 text-[#D7FF3F]" />
-            <span>Song Catalog & Publishing</span>
+          <h1 className="text-xl sm:text-2xl font-pixel tracking-wide text-white flex items-center gap-2.5">
+            <Music className="w-5 h-5 text-[#D7FF3F]" />
+            <span>SONG CATALOG // INGESTION</span>
           </h1>
-          <p className="text-xs text-[#A1A1AA] mt-1">
+          <p className="text-xs font-sans text-[#A1A1AA] mt-1">
             Authoritative track catalog. Draft uploads are hidden from public stream until published.
           </p>
         </div>
         <Link
           href="/admin/songs/new"
-          className="px-4 py-2 rounded-xl bg-[#D7FF3F] hover:bg-[#cbf531] text-black font-semibold text-xs flex items-center gap-2 transition-all shadow-md shadow-[#D7FF3F]/10 self-start sm:self-auto"
+          className="retro-btn-primary px-4 py-2 text-xs font-pixel flex items-center gap-2 self-start sm:self-auto"
         >
-          <Plus className="w-4 h-4 text-black" />
-          <span>Upload New Track</span>
+          <Plus className="w-3.5 h-3.5" />
+          <span>[ + UPLOAD SIGNAL ]</span>
         </Link>
       </div>
 
       {actionError && (
-        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
+        <div className="p-3 bg-red-950/40 border-2 border-red-500/40 text-red-400 text-xs font-pixel flex items-center gap-2 shadow-[2px_2px_0px_#000]">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{actionError}</span>
         </div>
@@ -181,155 +181,156 @@ export default function AdminSongsPage() {
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row items-center gap-3 justify-between">
-        <div className="w-full sm:w-80 flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#141414] border border-white/10 text-xs">
-          <Search className="w-4 h-4 text-[#71717A] shrink-0" />
+        <div className="w-full sm:w-80 flex items-center gap-2 px-3 py-1.5 bg-[#111111] border-2 border-[#262626] shadow-[2px_2px_0px_#000] focus-within:border-[#D7FF3F] text-xs">
+          <Search className="w-3.5 h-3.5 text-[#D7FF3F] shrink-0" />
           <input
             type="text"
             placeholder="Search tracks, artists, genres..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-transparent text-white placeholder-[#71717A] focus:outline-none"
+            className="w-full bg-transparent font-pixel text-xs text-white placeholder-[#555] focus:outline-none"
           />
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <span className="text-xs text-[#71717A]">Filter:</span>
+          <span className="text-xs font-pixel text-[#71717A]">FILTER:</span>
           {(["all", "published", "draft", "archived"] as const).map((st) => (
             <button
               key={st}
               type="button"
               onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono capitalize transition-all ${
+              className={`px-2.5 py-1 text-xs font-pixel uppercase transition-all border-2 shadow-[2px_2px_0px_#000] active:translate-y-0.5 ${
                 statusFilter === st
-                  ? "bg-white text-black font-semibold"
-                  : "bg-white/5 text-[#A1A1AA] hover:text-white"
+                  ? "bg-[#D7FF3F] text-black border-black font-bold"
+                  : "bg-[#141414] text-[#A1A1AA] border-[#262626] hover:text-white"
               }`}
             >
-              {st}
+              [ {st} ]
             </button>
           ))}
         </div>
       </div>
 
-      {/* Songs Table */}
-      <div className="rounded-2xl border border-white/5 bg-[#121212] overflow-hidden">
+      {/* Songs Table with Hard Retro Borders */}
+      <div className="border-2 border-[#262626] bg-[#111111] shadow-[4px_4px_0px_#000] overflow-hidden">
         {loading ? (
-          <div className="py-16 flex items-center justify-center">
+          <div className="py-16 flex flex-col items-center justify-center gap-3">
             <Loader2 className="w-6 h-6 text-[#D7FF3F] animate-spin" />
+            <span className="text-xs font-pixel text-[#71717A]">FETCHING CATALOG...</span>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="py-16 text-center text-[#71717A] text-xs">
-            No songs match the filter criteria.
+          <div className="py-16 text-center text-[#71717A] text-xs font-pixel">
+            NO SONGS MATCH THE ACTIVE FILTERS.
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-white/[0.02] border-b border-white/5 text-[#71717A] uppercase font-mono text-[10px]">
+              <thead className="bg-[#161616] border-b-2 border-[#262626] text-[#71717A] uppercase font-pixel text-[10px]">
                 <tr>
-                  <th className="py-3.5 px-4 font-semibold w-10">Preview</th>
-                  <th className="py-3.5 px-4 font-semibold">Track</th>
-                  <th className="py-3.5 px-4 font-semibold">Artist</th>
-                  <th className="py-3.5 px-4 font-semibold">Album</th>
-                  <th className="py-3.5 px-4 font-semibold">Status</th>
-                  <th className="py-3.5 px-4 font-semibold">Plays</th>
-                  <th className="py-3.5 px-4 font-semibold">Duration</th>
-                  <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
+                  <th className="py-3 px-3 w-10">CUE</th>
+                  <th className="py-3 px-4">TRACK</th>
+                  <th className="py-3 px-4">ARTIST</th>
+                  <th className="py-3 px-4">ALBUM</th>
+                  <th className="py-3 px-4">STATUS</th>
+                  <th className="py-3 px-4">PLAYS</th>
+                  <th className="py-3 px-4">TIME</th>
+                  <th className="py-3 px-4 text-right">COMMANDS</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y border-b border-[#222]">
                 {filtered.map((song) => {
                   const isPlaying = previewSongId === song.id;
                   return (
-                    <tr key={song.id} className="hover:bg-white/[0.02] transition-colors">
-                      <td className="py-3.5 px-4">
+                    <tr key={song.id} className="hover:bg-[#161616] transition-colors">
+                      <td className="py-3 px-3">
                         <button
                           type="button"
                           onClick={() => handleTogglePreview(song)}
-                          className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
+                          className={`w-7 h-7 border border-black flex items-center justify-center transition-colors shadow-[1px_1px_0px_#000] active:translate-y-0.5 ${
                             isPlaying
                               ? "bg-[#D7FF3F] text-black"
-                              : "bg-white/5 text-white hover:bg-white/10"
+                              : "bg-[#181818] border-[#333] text-white hover:border-[#D7FF3F]"
                           }`}
                         >
                           {isPlaying ? (
-                            <Pause className="w-3.5 h-3.5" />
+                            <Pause className="w-3 h-3 fill-current" />
                           ) : (
-                            <Play className="w-3.5 h-3.5 ml-0.5" />
+                            <Play className="w-3 h-3 fill-current ml-0.5" />
                           )}
                         </button>
                       </td>
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-3">
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2.5">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={song.artworkUrl}
                             alt={song.title}
-                            className="w-10 h-10 rounded-lg object-cover shrink-0 border border-white/10"
+                            className="w-9 h-9 border border-black object-cover shrink-0"
                           />
                           <div>
-                            <div className="font-semibold text-white flex items-center gap-1.5">
+                            <div className="font-pixel text-xs text-white flex items-center gap-1.5">
                               <span>{song.title}</span>
                               {song.explicit && (
-                                <span className="text-[9px] font-mono px-1 rounded bg-white/10 text-[#A1A1AA]">
+                                <span className="text-[9px] font-pixel px-1 bg-[#1c1c1c] border border-[#333] text-[#A1A1AA]">
                                   E
                                 </span>
                               )}
                             </div>
-                            <div className="text-[11px] text-[#71717A] font-mono">
+                            <div className="text-[10px] text-[#71717A] font-pixel">
                               {song.genre}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 font-medium text-[#A1A1AA]">
+                      <td className="py-3 px-4 font-sans text-[#A1A1AA]">
                         {song.artist?.name || "Independent"}
                       </td>
-                      <td className="py-3.5 px-4 text-[#71717A]">
+                      <td className="py-3 px-4 font-sans text-[#71717A]">
                         {song.album?.title || "Single"}
                       </td>
-                      <td className="py-3.5 px-4">
+                      <td className="py-3 px-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase font-bold tracking-wider ${
+                          className={`inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-pixel uppercase font-bold border ${
                             song.status === "published"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              ? "bg-emerald-950/40 text-emerald-400 border-emerald-500/30"
                               : song.status === "draft"
-                              ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                              : "bg-neutral-800 text-neutral-400 border border-neutral-700"
+                              ? "bg-amber-950/40 text-amber-400 border-amber-500/30"
+                              : "bg-neutral-900 text-neutral-400 border-neutral-700"
                           }`}
                         >
-                          {song.status === "published" && <CheckCircle className="w-3 h-3" />}
-                          {song.status === "draft" && <Clock className="w-3 h-3" />}
-                          {song.status === "archived" && <Archive className="w-3 h-3" />}
-                          {song.status === "published" ? "LIVE" : song.status}
+                          {song.status === "published" && <CheckCircle className="w-2.5 h-2.5" />}
+                          {song.status === "draft" && <Clock className="w-2.5 h-2.5" />}
+                          {song.status === "archived" && <Archive className="w-2.5 h-2.5" />}
+                          {song.status === "published" ? "[ LIVE ]" : song.status === "draft" ? "[ DRAFT ]" : "[ ARCHIVED ]"}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-[#A1A1AA]">
+                      <td className="py-3 px-4 font-pixel text-[#A1A1AA]">
                         {song.playCount.toLocaleString()}
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-[#71717A]">
+                      <td className="py-3 px-4 font-pixel text-[#71717A]">
                         {formatTime(song.duration)}
                       </td>
-                      <td className="py-3.5 px-4 text-right">
+                      <td className="py-3 px-4 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             type="button"
                             disabled={isPending}
                             onClick={() => handleTogglePublish(song)}
                             title={song.status === "published" ? "Unpublish to draft" : "Publish to live stream"}
-                            className={`px-2.5 py-1 rounded-lg text-[10px] font-mono uppercase font-bold transition-all border ${
+                            className={`px-2 py-0.5 text-[10px] font-pixel uppercase font-bold transition-all border shadow-[1px_1px_0px_#000] active:translate-y-0.5 ${
                               song.status === "published"
-                                ? "bg-white/5 border-white/10 text-[#A1A1AA] hover:text-white"
-                                : "bg-[#D7FF3F] border-[#D7FF3F] text-black hover:bg-[#cbf531]"
+                                ? "bg-[#161616] border-[#333] text-[#A1A1AA] hover:text-white"
+                                : "bg-[#D7FF3F] border-black text-black"
                             }`}
                           >
-                            {song.status === "published" ? "Unpublish" : "Publish"}
+                            {song.status === "published" ? "[ UNPUBLISH ]" : "[ PUBLISH ]"}
                           </button>
                           <button
                             type="button"
                             disabled={isPending}
                             onClick={() => handleDelete(song.id, song.title)}
                             title="Delete song"
-                            className="p-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors"
+                            className="p-1 border border-[#333] bg-[#161616] text-red-400 hover:border-red-500 hover:text-red-300 shadow-[1px_1px_0px_#000] active:translate-y-0.5"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>

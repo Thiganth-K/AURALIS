@@ -76,38 +76,40 @@ function SearchContent() {
     songs.length > 0 || artists.length > 0 || albums.length > 0 || playlists.length > 0;
 
   return (
-    <div className="px-6 md:px-10 py-8 space-y-8 max-w-7xl mx-auto">
-      {/* Search Input Bar */}
+    <div className="px-6 md:px-10 py-8 space-y-8 max-w-7xl mx-auto select-none">
+      {/* Retro Search Command Console */}
       <div className="space-y-4">
-        <div className="relative max-w-2xl">
-          <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#71717A]" />
+        <div className="relative max-w-2xl bg-[#111111] border-2 border-[#2e2e2e] shadow-[3px_3px_0px_#000] focus-within:border-[#D7FF3F] transition-colors">
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[#D7FF3F] font-pixel text-xs">
+            <span>&gt;</span>
+          </div>
           <input
             type="text"
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search published songs, artists, albums, or playlists..."
-            className="w-full pl-12 pr-4 py-3.5 rounded-2xl bg-[#141414] border border-white/10 text-white placeholder-[#71717A] text-sm focus:outline-none focus:border-[#D7FF3F] transition-all shadow-xl"
+            placeholder="SEARCH AURALIS_ (title, artist, album, genre)"
+            className="w-full pl-8 pr-10 py-3.5 bg-transparent font-pixel text-xs text-white placeholder-[#555] focus:outline-none"
           />
           {loading && (
-            <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#D7FF3F] animate-spin" />
+            <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#D7FF3F] animate-spin" />
           )}
         </div>
 
-        {/* Category Pills */}
+        {/* Category Tactical Pills */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
           {(["all", "songs", "artists", "albums", "playlists"] as const).map((cat) => (
             <button
               key={cat}
               type="button"
               onClick={() => setCategory(cat)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-mono capitalize transition-all shrink-0 ${
+              className={`px-3 py-1 text-xs font-pixel uppercase transition-all shrink-0 border-2 shadow-[2px_2px_0px_#000] active:translate-y-0.5 ${
                 category === cat
-                  ? "bg-[#D7FF3F] text-black font-semibold"
-                  : "bg-white/5 text-[#A1A1AA] hover:text-white hover:bg-white/10"
+                  ? "bg-[#D7FF3F] text-black border-black font-bold"
+                  : "bg-[#141414] text-[#A1A1AA] border-[#262626] hover:text-white hover:border-[#444]"
               }`}
             >
-              {cat}
+              [ {cat} ]
             </button>
           ))}
         </div>
@@ -115,21 +117,22 @@ function SearchContent() {
 
       {/* Results Content */}
       {!debouncedQuery ? (
-        <div className="py-20 text-center space-y-2">
-          <p className="text-sm font-semibold text-white">Explore the AURALIS catalog</p>
-          <p className="text-xs text-[#71717A]">
+        <div className="py-20 text-center space-y-2 border-2 border-[#222] bg-[#111111] p-8 shadow-[3px_3px_0px_#000] max-w-md mx-auto">
+          <p className="text-sm font-pixel text-white">// AURALIS CATALOG SEARCH</p>
+          <p className="text-xs font-sans text-[#71717A]">
             Type a track title, genre, artist, or album name above to discover verified music.
           </p>
         </div>
       ) : loading ? (
-        <div className="py-20 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 text-[#D7FF3F] animate-spin" />
+        <div className="py-20 flex flex-col items-center justify-center gap-3">
+          <Loader2 className="w-6 h-6 text-[#D7FF3F] animate-spin" />
+          <span className="text-xs font-pixel text-[#71717A]">SCANNING FREQUENCIES...</span>
         </div>
       ) : !hasResults ? (
-        <div className="py-20 text-center space-y-2">
-          <p className="text-sm font-semibold text-white">No matches found for &quot;{debouncedQuery}&quot;</p>
-          <p className="text-xs text-[#71717A]">
-            Only published songs and verified releases appear in the public catalog.
+        <div className="py-16 text-center space-y-3 border-2 border-[#262626] bg-[#111111] p-8 shadow-[3px_3px_0px_#000] max-w-md mx-auto">
+          <p className="text-sm font-pixel text-[#D7FF3F]">// NO SIGNAL MATCHES</p>
+          <p className="text-xs font-sans text-[#71717A]">
+            No verified releases found matching &quot;{debouncedQuery}&quot;. Check spelling or explore trending signals.
           </p>
         </div>
       ) : (
@@ -137,11 +140,11 @@ function SearchContent() {
           {/* Songs Section */}
           {(category === "all" || category === "songs") && songs.length > 0 && (
             <section className="space-y-4">
-              <h2 className="text-xs font-mono uppercase tracking-wider text-[#71717A] flex items-center gap-2">
-                <Music className="w-3.5 h-3.5 text-[#D7FF3F]" />
-                <span>Songs</span>
+              <h2 className="text-xs font-pixel uppercase tracking-wider text-[#D7FF3F] flex items-center gap-2">
+                <Music className="w-3.5 h-3.5" />
+                <span>// SONGS ({songs.length})</span>
               </h2>
-              <div className="rounded-xl border border-white/5 bg-[#121212] overflow-hidden divide-y divide-white/5">
+              <div className="border-2 border-[#242424] bg-[#0e0e0e] shadow-[3px_3px_0px_#000] p-2 space-y-1">
                 {songs.map((song, index) => (
                   <SongRow
                     key={song.id}
@@ -157,9 +160,9 @@ function SearchContent() {
           {/* Artists Section */}
           {(category === "all" || category === "artists") && artists.length > 0 && (
             <section className="space-y-4">
-              <h2 className="text-xs font-mono uppercase tracking-wider text-[#71717A] flex items-center gap-2">
-                <Mic2 className="w-3.5 h-3.5 text-[#D7FF3F]" />
-                <span>Artists</span>
+              <h2 className="text-xs font-pixel uppercase tracking-wider text-[#D7FF3F] flex items-center gap-2">
+                <Mic2 className="w-3.5 h-3.5" />
+                <span>// ARTISTS ({artists.length})</span>
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {artists.map((artist) => (
@@ -172,9 +175,9 @@ function SearchContent() {
           {/* Albums Section */}
           {(category === "all" || category === "albums") && albums.length > 0 && (
             <section className="space-y-4">
-              <h2 className="text-xs font-mono uppercase tracking-wider text-[#71717A] flex items-center gap-2">
-                <Disc3 className="w-3.5 h-3.5 text-[#D7FF3F]" />
-                <span>Albums</span>
+              <h2 className="text-xs font-pixel uppercase tracking-wider text-[#D7FF3F] flex items-center gap-2">
+                <Disc3 className="w-3.5 h-3.5" />
+                <span>// ALBUMS ({albums.length})</span>
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {albums.map((album) => (
@@ -187,9 +190,9 @@ function SearchContent() {
           {/* Playlists Section */}
           {(category === "all" || category === "playlists") && playlists.length > 0 && (
             <section className="space-y-4">
-              <h2 className="text-xs font-mono uppercase tracking-wider text-[#71717A] flex items-center gap-2">
-                <ListMusic className="w-3.5 h-3.5 text-[#D7FF3F]" />
-                <span>Playlists</span>
+              <h2 className="text-xs font-pixel uppercase tracking-wider text-[#D7FF3F] flex items-center gap-2">
+                <ListMusic className="w-3.5 h-3.5" />
+                <span>// PLAYLISTS ({playlists.length})</span>
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {playlists.map((playlist) => (

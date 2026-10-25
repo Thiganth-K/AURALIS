@@ -25,6 +25,57 @@ graph TD
 
 ---
 
+## 1.1 Presentation Layer Architecture
+
+```mermaid
+graph TD
+    subgraph AURALIS Platform
+        subgraph Presentation Layer
+            RetroUI[pixel-retroui Library]
+            Tailwind[Tailwind CSS v4 Engine]
+            FramerMotion[Framer Motion Animations]
+            DesignTokens[AURALIS Retro Design Tokens]
+        end
+
+        subgraph Application Layer
+            PlayerContext[PlayerContext Audio Provider]
+            Auth[Authentication & JWT Session]
+            AdminCMS[Admin CMS Control Room]
+            MusicServices[Music Services Layer]
+        end
+
+        subgraph API Layer
+            ApiRoutes[Next.js App Router API Routes]
+            UploadRoute[Upload Handlers Cloudinary / R2]
+        end
+
+        subgraph Storage & Persistence
+            MongoDB[(MongoDB Atlas)]
+            MediaStorage[(Cloud Storage Cloudinary / R2)]
+        end
+    end
+
+    RetroUI --> PlayerContext
+    Tailwind --> RetroUI
+    DesignTokens --> RetroUI
+    FramerMotion --> RetroUI
+
+    PlayerContext --> ApiRoutes
+    AdminCMS --> ApiRoutes
+    AdminCMS --> UploadRoute
+
+    ApiRoutes --> MusicServices
+    MusicServices --> MongoDB
+    UploadRoute --> MediaStorage
+
+    classDef accent fill:#D7FF3F,stroke:#090909,stroke-width:2px,color:#000000;
+    classDef dark fill:#181818,stroke:#FFFFFF22,stroke-width:1px,color:#FFFFFF;
+    class RetroUI,PlayerContext,AdminCMS accent;
+    class Tailwind,FramerMotion,DesignTokens,Auth,MusicServices,ApiRoutes,UploadRoute,MongoDB,MediaStorage dark;
+```
+
+---
+
 ## 2. Phase 2 Layered Data Architecture
 
 ```mermaid

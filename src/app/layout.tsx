@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "@/lib/pixel-retroui-setup.js";
 import { AppShell } from "@/components/layout/AppShell";
 
 const geistSans = Geist({
@@ -14,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AURALIS — Music that moves with you",
+  title: "AURALIS — Retro Music Operating System",
   description:
-    "A modern music discovery and streaming platform engineered for pristine high-fidelity audio, curated discovery, and immersive playback.",
+    "A modern retro music discovery and streaming platform engineered for pristine high-fidelity audio, tactile retro UI, and immersive playback.",
 };
 
 export default function RootLayout({
@@ -29,7 +30,8 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full dark`}
     >
-      <body className="h-full bg-[#090909] text-white antialiased overflow-hidden">
+      <body className="h-full bg-[#090909] text-white antialiased overflow-hidden font-sans">
+        <div className="crt-overlay" aria-hidden="true" />
         <AppShell>{children}</AppShell>
       </body>
     </html>

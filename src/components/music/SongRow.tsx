@@ -3,7 +3,7 @@
 import React from "react";
 import { Song } from "@/types";
 import { usePlayer } from "@/context/PlayerContext";
-import { Play, Pause, Heart, MoreHorizontal } from "lucide-react";
+import { Play, Heart } from "lucide-react";
 
 interface SongRowProps {
   song: Song;
@@ -42,26 +42,26 @@ export function SongRow({
   return (
     <div
       onClick={handlePlayClick}
-      className={`group flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors cursor-pointer select-none ${
+      className={`group flex items-center justify-between px-3 py-2 rounded-none transition-all cursor-pointer select-none border ${
         isCurrent
-          ? "bg-[#181818] text-white"
-          : "hover:bg-[#151515] text-[#A1A1AA] hover:text-white"
+          ? "bg-[#181818] border-[#D7FF3F] text-white shadow-[2px_2px_0px_#000000]"
+          : "bg-transparent border-transparent hover:bg-[#141414] hover:border-white/10 hover:shadow-[2px_2px_0px_#000000] text-[#A1A1AA] hover:text-white"
       }`}
     >
       {/* Left: Index / Play Button + Artwork + Title & Artist */}
       <div className="flex items-center gap-3.5 min-w-0 flex-1">
-        {/* Track Number / Equalizer / Play indicator */}
-        <div className="w-6 flex items-center justify-center shrink-0">
+        {/* Track Number / Pixel Equalizer / Play indicator */}
+        <div className="w-7 flex items-center justify-center shrink-0">
           {isCurrentlyPlaying ? (
-            /* Mini animated equalizer bars */
-            <div className="flex items-end gap-0.5 h-3.5">
-              <span className="w-0.5 bg-[#D7FF3F] animate-pulse h-3" />
-              <span className="w-0.5 bg-[#D7FF3F] animate-pulse h-4" />
-              <span className="w-0.5 bg-[#D7FF3F] animate-pulse h-2" />
+            /* Pixel animated equalizer blocks */
+            <div className="flex items-end gap-1 h-3.5" title="Playing">
+              <span className="w-1 bg-[#D7FF3F] h-3 animate-pulse" />
+              <span className="w-1 bg-[#D7FF3F] h-4 animate-bounce" />
+              <span className="w-1 bg-[#D7FF3F] h-2 animate-pulse" />
             </div>
           ) : (
             <>
-              <span className="text-xs font-mono text-[#71717A] group-hover:hidden">
+              <span className="text-[11px] font-pixel text-[#71717A] group-hover:hidden">
                 {String(index + 1).padStart(2, "0")}
               </span>
               <button
@@ -76,8 +76,8 @@ export function SongRow({
           )}
         </div>
 
-        {/* Thumbnail artwork */}
-        <div className="relative w-10 h-10 rounded-md overflow-hidden shrink-0 bg-[#222222]">
+        {/* Thumbnail artwork with pixel border */}
+        <div className="relative w-9 h-9 rounded-none overflow-hidden shrink-0 bg-[#222222] border border-black shadow-[1px_1px_0px_rgba(255,255,255,0.15)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={song.artworkUrl}
@@ -90,56 +90,49 @@ export function SongRow({
         {/* Song & Artist details */}
         <div className="flex flex-col min-w-0 pr-2">
           <span
-            className={`text-sm font-medium truncate ${
-              isCurrent ? "text-[#D7FF3F]" : "text-white"
+            className={`text-xs font-pixel tracking-wide truncate ${
+              isCurrent ? "text-[#D7FF3F] font-bold" : "text-white"
             }`}
           >
             {song.title}
           </span>
-          <span className="text-xs text-[#71717A] truncate group-hover:text-[#A1A1AA] transition-colors">
+          <span className="text-[11px] text-[#71717A] truncate group-hover:text-[#A1A1AA] transition-colors">
             {song.artistName}
           </span>
         </div>
       </div>
 
-      {/* Middle: Album Name (Desktop) */}
-      {showAlbum && (
-        <div className="hidden md:block flex-1 max-w-xs text-xs text-[#71717A] truncate group-hover:text-[#A1A1AA] transition-colors px-4">
-          {song.albumTitle || "—"}
+      {/* Center: Optional Album Title */}
+      {showAlbum && song.albumTitle && (
+        <div className="hidden md:block flex-1 min-w-0 px-4 text-left">
+          <span className="text-xs text-[#71717A] truncate hover:text-white transition-colors block">
+            {song.albumTitle}
+          </span>
         </div>
       )}
 
-      {/* Right: Like Button + Duration + Context Menu */}
+      {/* Right: Heart + Duration */}
       <div className="flex items-center gap-3 shrink-0">
         <button
           type="button"
           onClick={handleLikeClick}
-          className={`p-1.5 rounded-full transition-colors ${
+          className={`p-1 transition-colors ${
             isLiked
-              ? "text-[#D7FF3F]"
-              : "text-[#71717A] opacity-0 group-hover:opacity-100 hover:text-white"
+              ? "text-rose-400"
+              : "text-[#52525B] hover:text-white opacity-0 group-hover:opacity-100"
           }`}
-          aria-label={isLiked ? "Unlike" : "Like"}
+          aria-label={isLiked ? "Unlike song" : "Like song"}
         >
           <Heart
-            className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`}
+            className={`w-3.5 h-3.5 ${
+              isLiked ? "fill-current" : ""
+            }`}
           />
         </button>
 
-        <span className="text-xs font-mono text-[#71717A] w-10 text-right">
+        <span className="text-[11px] font-pixel text-[#71717A] w-12 text-right">
           {song.durationFormatted}
         </span>
-
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-          className="p-1 rounded text-[#71717A] opacity-0 group-hover:opacity-100 hover:text-white transition-opacity"
-          aria-label="More options"
-        >
-          <MoreHorizontal className="w-4 h-4" />
-        </button>
       </div>
     </div>
   );
