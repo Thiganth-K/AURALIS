@@ -25,11 +25,11 @@ export function AppShell({ children }: AppShellProps) {
     <AuthProvider>
       <PlayerProvider>
         {isAdminOrAuthRoute ? (
-          <div className="h-screen w-screen overflow-hidden bg-[#04020c] text-white">
+          <div className="h-screen w-screen overflow-hidden bg-[#F6EEDE] text-[#111111]">
             {children}
           </div>
         ) : (
-          <div className="flex h-screen w-screen overflow-hidden bg-[#04020c] text-white">
+          <div className="flex h-screen w-screen overflow-hidden bg-[#F5F1E8] text-[#111111]">
             {/* Desktop Sidebar */}
             <Sidebar />
 

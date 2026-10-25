@@ -117,7 +117,7 @@ export function ExpandedPlayer() {
         {/* Center: // NOW PLAYING + AURALIS HI-FI */}
         <div className="text-center hidden sm:block">
           <p className="text-[10px] sm:text-xs font-pixel text-[#d7ff3f] tracking-widest uppercase">
-            // NOW PLAYING
+            {"// NOW PLAYING"}
           </p>
           <p className="text-xs sm:text-sm font-pixel text-white tracking-wide uppercase font-bold">
             {currentSong.albumTitle || "AURALIS HI-FI"}

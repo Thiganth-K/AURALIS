@@ -148,7 +148,7 @@ export function HomeClient({
         {/* Hero Content Left */}
         <div className="relative z-10 max-w-xl space-y-4">
           <p className="text-xs sm:text-sm font-pixel text-[#ff2a85] tracking-widest uppercase">
-            // {greeting.toUpperCase()}
+            {"//"} {greeting.toUpperCase()}
           </p>
 
           <h1 className="text-2xl sm:text-4xl md:text-5xl font-pixel tracking-wide text-white uppercase leading-tight">
@@ -280,7 +280,7 @@ export function HomeClient({
           </div>
         ) : (
           <div className="p-8 rounded-lg bg-[#0c0628] border border-[#4d2db7] text-center space-y-3">
-            <p className="text-xs font-pixel text-white">// NO BROADCAST SIGNALS YET</p>
+            <p className="text-xs font-pixel text-white">{"// NO BROADCAST SIGNALS YET"}</p>
             <p className="text-xs font-sans text-[#a79cd0] max-w-md mx-auto">
               Your audio catalog is waiting. Upload your first FLAC or MP3 studio master from the control room.
             </p>

@@ -3,268 +3,288 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #04020c;
-  --color-surface: #0a061a;
-  --color-surface-elevated: #110b2a;
-  --color-surface-hover: #180f38;
-  --color-border-subtle: #3a2373;
-  --color-border-hover: #5d38b5;
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #a79cd0;
-  --color-text-muted: #6f6299;
-  --color-accent: #d7ff3f;
-  --color-accent-hover: #c5ea33;
-  --color-neon-purple: #5c32c4;
-  --color-neon-cyan: #00f0ff;
-  --color-neon-pink: #ff2a85;
-  --color-neon-gold: #ffbe0b;
-  --color-neon-green: #06d6a0;
-  --font-pixel: Minecraft, monospace, sans-serif;
-  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --color-background: #F5F1E8;
+  --color-surface: #FFFDF7;
+  --color-surface-pure: #FFFDF7;
+  --color-surface-elevated: #FFFDF7;
+  --color-surface-hover: #F0EAE1;
+  --color-border-subtle: #DED5C5;
+  --color-border-hover: #111111;
+  --color-ink: #111111;
+  --color-ink-primary: #111111;
+  --color-ink-secondary: #292621;
+  --color-text-primary: #111111;
+  --color-text-secondary: #292621;
+  --color-text-muted: #756F65;
+  --color-orange-primary: #F05A28;
+  --color-orange-deep: #C83E1D;
+  --color-signal-red: #D62828;
+  --color-paper-gray: #DED5C5;
+  --color-muted-text: #756F65;
+  --color-accent: #F05A28;
+  --color-accent-hover: #C83E1D;
+
+  --font-display: var(--font-space-mono), monospace;
+  --font-mono: var(--font-ibm-plex-mono), monospace;
+  --font-sans: var(--font-inter), sans-serif;
+  --font-pixel: var(--font-ibm-plex-mono), monospace;
 }
 
 :root {
-  /* AURALIS Synthwave Retro Palette */
-  --bg-base: #04020c;
-  --surface-base: #0a061a;
-  --surface-elevated: #110b2a;
-  --accent-base: #d7ff3f;
-  --neon-purple: #5c32c4;
-  --neon-cyan: #00f0ff;
-  --neon-pink: #ff2a85;
+  /* AURALIS Light Editorial Retro Palette */
+  --bg-paper: #F5F1E8;
+  --surface-pure: #FFFDF7;
+  --ink-primary: #111111;
+  --ink-secondary: #292621;
+  --orange-primary: #F05A28;
+  --orange-deep: #C83E1D;
+  --signal-red: #D62828;
+  --paper-gray: #DED5C5;
+  --muted-text: #756F65;
 
-  /* RetroUI Custom Variable Overrides */
-  --primary-bg: #d7ff3f;
-  --primary-text: #04020c;
-  --primary-shadow: #000000;
-  --secondary-bg: #0d0824;
-  --secondary-text: #ffffff;
-  --secondary-shadow: #000000;
-  --bg-button: #0d0824;
-  --text-button: #ffffff;
-  --border-button: #4b2a9e;
-  --shadow-button: #000000;
-  --bg-card: #0a061a;
-  --text-card: #ffffff;
-  --border-card: #3a2373;
-  --shadow-card: #000000;
-  --bg-input: #080517;
-  --text-input: #ffffff;
-  --border-input: #4b2a9e;
-  --color-progressbar: #d7ff3f;
-  --border-progressbar: #3a2373;
+  /* RetroUI Variable Overrides to Light Editorial */
+  --primary-bg: #F05A28;
+  --primary-text: #111111;
+  --primary-shadow: #111111;
+  --secondary-bg: #FFFDF7;
+  --secondary-text: #111111;
+  --secondary-shadow: #111111;
+  --bg-button: #FFFDF7;
+  --text-button: #111111;
+  --border-button: #111111;
+  --shadow-button: #111111;
+  --bg-card: #FFFDF7;
+  --text-card: #111111;
+  --border-card: #111111;
+  --shadow-card: #111111;
+  --bg-input: #FFFDF7;
+  --text-input: #111111;
+  --border-input: #111111;
+  --color-progressbar: #F05A28;
+  --border-progressbar: #111111;
 }
 
 * {
   box-sizing: border-box;
 }
 
-/* Ensure body retains modern readable font by default */
+/* Base Body: Warm Paper, Sharp Black Ink */
 body {
-  background-color: #04020c;
-  color: #ffffff;
-  font-family: var(--font-sans);
+  background-color: #F5F1E8;
+  color: #111111;
+  font-family: var(--font-inter), sans-serif;
   overflow-x: hidden;
   user-select: none;
   -webkit-font-smoothing: antialiased;
 }
 
 /* Typography Utility Classes */
+.font-display {
+  font-family: var(--font-space-mono), monospace;
+  letter-spacing: -0.02em;
+}
+
+.font-mono,
 .font-pixel {
-  font-family: Minecraft, monospace, sans-serif;
-  letter-spacing: 0.04em;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  letter-spacing: 0.02em;
 }
 
 .font-sans {
-  font-family: var(--font-sans);
+  font-family: var(--font-inter), sans-serif;
 }
 
-/* Cyber Bracket Corner Panels (matching the reference UI) */
-.cyber-frame-purple {
+/* Editorial Hardware Surfaces & Frames */
+.editorial-card {
+  background-color: #FFFDF7;
+  border: 1px solid #111111;
+  box-shadow: 4px 4px 0px #111111;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.editorial-card-hero {
+  background-color: #FFFDF7;
+  border: 2px solid #111111;
+  box-shadow: 6px 6px 0px #111111;
+}
+
+.editorial-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0px #111111;
+}
+
+.editorial-card-orange {
+  background-color: #FFFDF7;
+  border: 2px solid #111111;
+  box-shadow: 4px 4px 0px #F05A28;
+}
+
+/* Editorial Stepped / Bracket Corners */
+.editorial-bracket-frame {
   position: relative;
-  background-color: #08051a;
-  border: 1.5px solid #4d2db7;
-  box-shadow: 0 0 10px rgba(77, 45, 183, 0.25), inset 0 0 15px rgba(77, 45, 183, 0.1);
+  background-color: #FFFDF7;
+  border: 1px solid #111111;
 }
 
-.cyber-frame-cyan {
-  position: relative;
-  background-color: #030a16;
-  border: 1.5px solid #00f0ff;
-  box-shadow: 0 0 12px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0, 240, 255, 0.08);
-}
-
-.cyber-frame-pink {
-  position: relative;
-  background-color: #12030f;
-  border: 1.5px solid #ff2a85;
-  box-shadow: 0 0 12px rgba(255, 42, 133, 0.3), inset 0 0 15px rgba(255, 42, 133, 0.08);
-}
-
-.cyber-frame-gold {
-  position: relative;
-  background-color: #140d02;
-  border: 1.5px solid #ffbe0b;
-  box-shadow: 0 0 12px rgba(255, 190, 11, 0.28), inset 0 0 15px rgba(255, 190, 11, 0.08);
-}
-
-.cyber-frame-green {
-  position: relative;
-  background-color: #02120b;
-  border: 1.5px solid #06d6a0;
-  box-shadow: 0 0 12px rgba(6, 214, 160, 0.28), inset 0 0 15px rgba(6, 214, 160, 0.08);
-}
-
-/* Corner bracket marks */
-.bracket-corners::before {
+.editorial-bracket-frame::before {
   content: "";
   position: absolute;
-  top: -3px;
-  left: -3px;
+  top: -2px;
+  left: -2px;
   width: 6px;
   height: 6px;
-  border-top: 2px solid currentColor;
-  border-left: 2px solid currentColor;
+  border-top: 2px solid #111111;
+  border-left: 2px solid #111111;
   pointer-events: none;
 }
 
-.bracket-corners::after {
+.editorial-bracket-frame::after {
   content: "";
   position: absolute;
-  bottom: -3px;
-  right: -3px;
+  bottom: -2px;
+  right: -2px;
   width: 6px;
   height: 6px;
-  border-bottom: 2px solid currentColor;
-  border-right: 2px solid currentColor;
+  border-bottom: 2px solid #111111;
+  border-right: 2px solid #111111;
   pointer-events: none;
 }
 
-/* Tactile Retro Buttons */
+/* Tactile Analog Buttons (Physical Switch Feel) */
+.editorial-btn-primary,
 .retro-btn-primary {
-  background-color: #d7ff3f;
-  color: #04020c;
-  border: 1.5px solid #000000;
-  box-shadow: 2px 2px 0px #000000;
+  background-color: #F05A28;
+  color: #111111;
+  border: 2px solid #111111;
+  box-shadow: 4px 4px 0px #111111;
+  font-family: var(--font-ibm-plex-mono), monospace;
   font-weight: 700;
-  transition: all 0.1s ease;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.1s ease;
   cursor: pointer;
   user-select: none;
 }
 
+.editorial-btn-primary:hover,
 .retro-btn-primary:hover {
-  background-color: #e4ff6b;
-  box-shadow: 3px 3px 0px #000000;
+  background-color: #f26f42;
+  transform: translateY(-2px);
+  box-shadow: 5px 5px 0px #111111;
 }
 
+.editorial-btn-primary:active,
 .retro-btn-primary:active {
-  transform: translate(1px, 1px);
-  box-shadow: none;
+  transform: translateY(2px);
+  box-shadow: 1px 1px 0px #111111;
 }
 
+.editorial-btn-secondary,
 .retro-btn-secondary {
-  background-color: #0d0824;
-  color: #ffffff;
-  border: 1.5px solid #4d2db7;
-  box-shadow: 2px 2px 0px #000000;
-  transition: all 0.1s ease;
+  background-color: #FFFDF7;
+  color: #111111;
+  border: 2px solid #111111;
+  box-shadow: 3px 3px 0px #111111;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-weight: 600;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background-color 0.1s ease;
   cursor: pointer;
   user-select: none;
 }
 
+.editorial-btn-secondary:hover,
 .retro-btn-secondary:hover {
-  background-color: #170e3c;
-  border-color: #6a42ea;
-  box-shadow: 0 0 8px rgba(106, 66, 234, 0.4);
+  background-color: #F5F1E8;
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 0px #111111;
 }
 
+.editorial-btn-secondary:active,
 .retro-btn-secondary:active {
-  transform: translate(1px, 1px);
-  box-shadow: none;
+  transform: translateY(2px);
+  box-shadow: 1px 1px 0px #111111;
 }
 
+.editorial-btn-ghost,
 .retro-btn-ghost {
   background-color: transparent;
-  color: #a79cd0;
-  border: 1.5px dashed #4d2db7;
+  color: #756F65;
+  border: 1px dashed #111111;
+  font-family: var(--font-ibm-plex-mono), monospace;
   transition: all 0.1s ease;
   cursor: pointer;
 }
 
+.editorial-btn-ghost:hover,
 .retro-btn-ghost:hover {
-  color: #ffffff;
-  border-color: #d7ff3f;
+  color: #111111;
+  border-style: solid;
+  border-color: #F05A28;
+  background-color: #FFFDF7;
 }
 
+.editorial-btn-danger,
 .retro-btn-danger {
-  background-color: rgba(255, 42, 133, 0.15);
-  color: #ff2a85;
-  border: 1.5px solid #ff2a85;
-  box-shadow: 2px 2px 0px #000000;
+  background-color: #D62828;
+  color: #FFFDF7;
+  border: 2px solid #111111;
+  box-shadow: 3px 3px 0px #111111;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-weight: 600;
+  transition: all 0.1s ease;
 }
 
+.editorial-btn-danger:hover,
 .retro-btn-danger:hover {
-  background-color: rgba(239, 68, 68, 0.25);
-  color: #fca5a5;
+  background-color: #b51f1f;
+  transform: translateY(-2px);
+  box-shadow: 4px 4px 0px #111111;
 }
 
-/* Retro Badges & Indicators */
+/* Badges & Indicators */
+.editorial-badge,
 .retro-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
-  font-family: Minecraft, monospace, sans-serif;
-  font-size: 0.65rem;
-  text-transform: uppercase;
+  gap: 0.35rem;
+  font-family: var(--font-ibm-plex-mono), monospace;
+  font-size: 0.7rem;
   letter-spacing: 0.05em;
-  padding: 0.15rem 0.45rem;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background-color: #161616;
-  box-shadow: 1px 1px 0px #000000;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid #111111;
+  background-color: #FFFDF7;
+  color: #111111;
+  box-shadow: 2px 2px 0px #111111;
 }
 
+.editorial-badge-orange,
 .retro-badge-accent {
-  background-color: rgba(215, 255, 63, 0.1);
-  color: #d7ff3f;
-  border-color: rgba(215, 255, 63, 0.3);
+  background-color: #F05A28;
+  color: #111111;
+  border: 1px solid #111111;
+  box-shadow: 2px 2px 0px #111111;
 }
 
-.retro-badge-plum {
-  background-color: rgba(195, 129, 181, 0.1);
-  color: #c381b5;
-  border-color: rgba(195, 129, 181, 0.3);
+.editorial-badge-signal {
+  background-color: #FFFDF7;
+  color: #D62828;
+  border: 1px solid #D62828;
 }
 
-/* Subtle CRT scanline overlay: comfortable, not flickering */
-.crt-overlay {
-  pointer-events: none;
-  position: fixed;
-  inset: 0;
-  z-index: 99;
-  background: linear-gradient(
-    rgba(18, 16, 16, 0) 50%,
-    rgba(0, 0, 0, 0.25) 50%
-  );
-  background-size: 100% 4px;
-  opacity: 0.12;
-}
-
-/* Custom retro block scrollbars */
+/* Clean Analog Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0d0d0d;
-  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  background: #F5F1E8;
+  border-left: 1px solid #DED5C5;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #242424;
-  border: 1px solid #000000;
+  background: #DED5C5;
+  border: 1px solid #111111;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #d7ff3f;
+  background: #F05A28;
 }
