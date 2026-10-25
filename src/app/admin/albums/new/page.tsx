@@ -17,7 +17,13 @@ export default function AdminNewAlbumPage() {
 
   const [title, setTitle] = useState("");
   const [artistId, setArtistId] = useState("");
-  const [releaseDate, setReleaseDate] = useState(new Date().toISOString().split("T")[0]);
+  const [releaseDate, setReleaseDate] = useState("2026-01-01");
+
+  useEffect(() => {
+    try {
+      setReleaseDate(new Date().toISOString().split("T")[0]);
+    } catch {}
+  }, []);
   const [genres, setGenres] = useState("");
   const [description, setDescription] = useState("");
   const [artworkUrl, setArtworkUrl] = useState("");

@@ -39,7 +39,7 @@ export default function AdminNewSongPage() {
   const [artistId, setArtistId] = useState("");
   const [albumId, setAlbumId] = useState("");
   const [genre, setGenre] = useState("");
-  const [releaseDate, setReleaseDate] = useState(new Date().toISOString().split("T")[0]);
+  const [releaseDate, setReleaseDate] = useState("2026-01-01");
   const [duration, setDuration] = useState("180");
   const [explicit, setExplicit] = useState(false);
   const [status, setStatus] = useState<"draft" | "published">("published");

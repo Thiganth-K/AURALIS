@@ -72,12 +72,20 @@ export async function getSessionUser(req?: NextRequest): Promise<SessionUser | n
     if (!token) return null;
 
     const payload = await verifySessionToken(token);
-    if (!payload || !mongoose.Types.ObjectId.isValid(payload.userId)) {
+    if (!payload) {
       return null;
     }
 
     await connectToDatabase();
-    const userDoc = await User.findById(payload.userId).lean();
+    let userDoc = mongoose.Types.ObjectId.isValid(payload.userId)
+      ? await User.findById(payload.userId).lean()
+      : null;
+
+    // Fallback: If database was cleaned or reseeded, resolve by email
+    if (!userDoc && payload.email) {
+      userDoc = await User.findOne({ email: payload.email }).lean();
+    }
+
     if (!userDoc || userDoc.status === "suspended") {
       return null;
     }
