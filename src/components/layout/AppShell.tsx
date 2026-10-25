@@ -1,0 +1,63 @@
+"use client";
+
+import React, { ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { TopBar } from "@/components/layout/TopBar";
+import { MobileNav } from "@/components/layout/MobileNav";
+import { GlobalPlayer } from "@/components/player/GlobalPlayer";
+import { MobilePlayer } from "@/components/player/MobilePlayer";
+import { QueueDrawer } from "@/components/player/QueueDrawer";
+import { PlayerProvider } from "@/context/PlayerContext";
+import { AuthProvider } from "@/context/AuthContext";
+
+interface AppShellProps {
+  children: ReactNode;
+}
+
+export function AppShell({ children }: AppShellProps) {
+  const pathname = usePathname();
+  const isAdminOrAuthRoute =
+    pathname.startsWith("/admin") || pathname === "/login" || pathname === "/register";
+
+  return (
+    <AuthProvider>
+      <PlayerProvider>
+        {isAdminOrAuthRoute ? (
+          <div className="h-screen w-screen overflow-hidden bg-[#090909] text-white">
+            {children}
+          </div>
+        ) : (
+          <div className="flex h-screen w-screen overflow-hidden bg-[#090909] text-white">
+            {/* Desktop Sidebar */}
+            <Sidebar />
+
+            {/* Main Column */}
+            <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative">
+              <TopBar />
+
+              {/* Main Scrollable Content */}
+              <main className="flex-1 overflow-y-auto pb-32 md:pb-28">
+                {children}
+              </main>
+
+              {/* Playback Queue Drawer */}
+              <QueueDrawer />
+
+              {/* Desktop Persistent Player */}
+              <div className="hidden md:block">
+                <GlobalPlayer />
+              </div>
+
+              {/* Mobile Player (Mini docked + Fullscreen modal) */}
+              <MobilePlayer />
+
+              {/* Mobile Bottom Dock */}
+              <MobileNav />
+            </div>
+          </div>
+        )}
+      </PlayerProvider>
+    </AuthProvider>
+  );
+}
