@@ -12,11 +12,11 @@ export function ArtistCard({ artist }: ArtistCardProps) {
   return (
     <Link
       href={`/artist/${artist.id}`}
-      className="group flex flex-col items-center text-center p-3 bg-[#111111] hover:bg-[#181818] border-2 border-[#262626] hover:border-[#D7FF3F] shadow-[3px_3px_0px_#000] hover:shadow-[4px_4px_0px_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all duration-150 select-none"
+      className="group flex flex-col items-center text-center p-3 rounded-lg bg-[#0c0628] border border-[#ff9e00] shadow-[0_0_12px_rgba(255,158,0,0.2)] hover:border-[#00f0ff] hover:shadow-[0_0_15px_rgba(0,240,255,0.3)] hover:-translate-y-0.5 transition-all select-none"
     >
-      {/* Circular Artist Image with stepped pixel framing */}
-      <div className="relative w-28 h-28 p-1 mb-3 bg-[#181818] border-2 border-[#262626] group-hover:border-[#D7FF3F] shadow-[2px_2px_0px_#000] transition-colors duration-150">
-        <div className="w-full h-full rounded-full overflow-hidden border border-black">
+      {/* Circular Artist Image with cyber ring framing */}
+      <div className="relative w-28 h-28 p-1 mb-3 rounded-full bg-[#180e38] border-2 border-[#ff9e00] group-hover:border-[#00f0ff] shadow-[0_0_10px_rgba(255,158,0,0.3)] transition-colors duration-150">
+        <div className="w-full h-full rounded-full overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={artist.image}
@@ -27,14 +27,14 @@ export function ArtistCard({ artist }: ArtistCardProps) {
         </div>
       </div>
 
-      <h4 className="text-sm font-pixel text-white group-hover:text-[#D7FF3F] transition-colors truncate w-full px-1">
+      <h4 className="text-sm font-pixel text-white group-hover:text-[#00f0ff] transition-colors truncate w-full px-1">
         {artist.name}
       </h4>
       <div className="mt-1 flex items-center justify-center gap-1.5 w-full">
-        <span className="text-[10px] font-pixel text-[#D7FF3F] bg-[#181818] border border-[#2e2e2e] px-1 py-0.5 truncate max-w-[80px]">
+        <span className="text-[10px] font-pixel text-[#ffbe0b] bg-[#1a0e03] border border-[#ff9e00]/50 rounded px-1.5 py-0.5 truncate max-w-[80px]">
           {artist.genres[0] || "ARTIST"}
         </span>
-        <span className="text-[10px] font-pixel text-[#71717A]">
+        <span className="text-[10px] font-pixel text-[#a79cd0]">
           {artist.followersFormatted}
         </span>
       </div>

@@ -28,14 +28,14 @@ export function SongCard({ song, playlistContext }: SongCardProps) {
   return (
     <div
       onClick={handlePlayClick}
-      className={`group relative flex flex-col p-2.5 rounded-none bg-[#121212] border-2 transition-all cursor-pointer select-none ${
+      className={`group relative flex flex-col p-3 rounded-lg bg-[#0c0628] border transition-all cursor-pointer select-none ${
         isCurrent
-          ? "border-[#D7FF3F] shadow-[3px_3px_0px_#D7FF3F]"
-          : "border-black shadow-[3px_3px_0px_#000000] hover:shadow-[5px_5px_0px_#000000] hover:-translate-y-0.5 hover:border-white/20"
+          ? "border-[#00f0ff] shadow-[0_0_15px_rgba(0,240,255,0.35)]"
+          : "border-[#4d2db7] shadow-[0_0_10px_rgba(77,45,183,0.2)] hover:border-[#00f0ff] hover:shadow-[0_0_15px_rgba(0,240,255,0.3)] hover:-translate-y-0.5"
       }`}
     >
-      {/* Artwork Container with Pixel Border */}
-      <div className="relative aspect-square w-full rounded-none overflow-hidden bg-[#1c1c1c] border border-black mb-2.5">
+      {/* Artwork Container */}
+      <div className="relative aspect-square w-full rounded overflow-hidden bg-[#180e38] border border-[#ff2a85] mb-2.5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={song.artworkUrl}
@@ -46,7 +46,7 @@ export function SongCard({ song, playlistContext }: SongCardProps) {
 
         {/* Tactile Retro Square Play Button */}
         <div
-          className={`absolute bottom-2 right-2 flex items-center justify-center w-8 h-8 rounded-none bg-[#D7FF3F] text-black border border-black shadow-[2px_2px_0px_#000] transition-all ${
+          className={`absolute bottom-2 right-2 flex items-center justify-center w-8 h-8 rounded bg-[#d7ff3f] text-black border-2 border-black shadow-[0_0_10px_rgba(215,255,63,0.5)] transition-all ${
             isCurrentlyPlaying
               ? "opacity-100 scale-100"
               : "opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0"
@@ -60,20 +60,20 @@ export function SongCard({ song, playlistContext }: SongCardProps) {
         </div>
       </div>
 
-      {/* Cartridge Metadata */}
+      {/* Track Metadata */}
       <div className="flex flex-col min-w-0">
         <h4
           className={`text-xs font-pixel tracking-wide truncate transition-colors ${
-            isCurrent ? "text-[#D7FF3F] font-bold" : "text-white group-hover:text-[#D7FF3F]"
+            isCurrent ? "text-[#00f0ff] font-bold" : "text-white group-hover:text-[#00f0ff]"
           }`}
         >
           {song.title}
         </h4>
-        <div className="flex items-center justify-between text-[11px] text-[#71717A] mt-0.5">
-          <span className="truncate group-hover:text-[#A1A1AA] transition-colors">
+        <div className="flex items-center justify-between text-[11px] text-[#a79cd0] mt-0.5">
+          <span className="truncate group-hover:text-white transition-colors">
             {song.artistName}
           </span>
-          <span className="font-pixel text-[10px] shrink-0 ml-1 text-[#52525B]">
+          <span className="font-pixel text-[10px] shrink-0 ml-1 text-[#ff2a85]">
             {song.durationFormatted}
           </span>
         </div>

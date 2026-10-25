@@ -3,7 +3,7 @@
 import React from "react";
 import { Song } from "@/types";
 import { usePlayer } from "@/context/PlayerContext";
-import { Play, Heart } from "lucide-react";
+import { Play, Pause } from "lucide-react";
 
 interface SongRowProps {
   song: Song;
@@ -16,14 +16,11 @@ export function SongRow({
   song,
   index,
   playlistContext,
-  showAlbum = true,
 }: SongRowProps) {
-  const { currentSong, isPlaying, playSong, togglePlay, likedSongIds, toggleLike } =
-    usePlayer();
+  const { currentSong, isPlaying, playSong, togglePlay } = usePlayer();
 
   const isCurrent = currentSong?.id === song.id;
   const isCurrentlyPlaying = isCurrent && isPlaying;
-  const isLiked = likedSongIds.has(song.id);
 
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -34,50 +31,19 @@ export function SongRow({
     }
   };
 
-  const handleLikeClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    toggleLike(song.id);
-  };
-
   return (
     <div
       onClick={handlePlayClick}
-      className={`group flex items-center justify-between px-3 py-2 rounded-none transition-all cursor-pointer select-none border ${
+      className={`group flex items-center justify-between p-2.5 rounded-lg transition-all cursor-pointer select-none border ${
         isCurrent
-          ? "bg-[#181818] border-[#D7FF3F] text-white shadow-[2px_2px_0px_#000000]"
-          : "bg-transparent border-transparent hover:bg-[#141414] hover:border-white/10 hover:shadow-[2px_2px_0px_#000000] text-[#A1A1AA] hover:text-white"
+          ? "bg-[#140a3d] border-[#00f0ff] shadow-[0_0_15px_rgba(0,240,255,0.3)]"
+          : "bg-[#0c0628] border-[#4d2db7] hover:border-[#00f0ff] hover:bg-[#140a3d] shadow-[0_0_10px_rgba(77,45,183,0.15)]"
       }`}
     >
-      {/* Left: Index / Play Button + Artwork + Title & Artist */}
+      {/* Left: Artwork + Badge + Equalizer + Title & Artist */}
       <div className="flex items-center gap-3.5 min-w-0 flex-1">
-        {/* Track Number / Pixel Equalizer / Play indicator */}
-        <div className="w-7 flex items-center justify-center shrink-0">
-          {isCurrentlyPlaying ? (
-            /* Pixel animated equalizer blocks */
-            <div className="flex items-end gap-1 h-3.5" title="Playing">
-              <span className="w-1 bg-[#D7FF3F] h-3 animate-pulse" />
-              <span className="w-1 bg-[#D7FF3F] h-4 animate-bounce" />
-              <span className="w-1 bg-[#D7FF3F] h-2 animate-pulse" />
-            </div>
-          ) : (
-            <>
-              <span className="text-[11px] font-pixel text-[#71717A] group-hover:hidden">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <button
-                type="button"
-                onClick={handlePlayClick}
-                className="hidden group-hover:flex items-center justify-center text-white hover:text-[#D7FF3F] transition-colors"
-                aria-label={`Play ${song.title}`}
-              >
-                <Play className="w-3.5 h-3.5 fill-current" />
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* Thumbnail artwork with pixel border */}
-        <div className="relative w-9 h-9 rounded-none overflow-hidden shrink-0 bg-[#222222] border border-black shadow-[1px_1px_0px_rgba(255,255,255,0.15)]">
+        {/* Artwork with glowing pink border */}
+        <div className="relative w-10 h-10 rounded overflow-hidden shrink-0 border border-[#ff2a85] shadow-[0_0_8px_rgba(255,42,133,0.3)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={song.artworkUrl}
@@ -87,52 +53,63 @@ export function SongRow({
           />
         </div>
 
+        {/* Index Badge [ 01 ] */}
+        <div className="px-2 py-0.5 rounded bg-[#160c3c] border border-[#5c32c4] text-white text-xs font-pixel shrink-0">
+          {String(index + 1).padStart(2, "0")}
+        </div>
+
+        {/* Animated Neon Equalizer Bars */}
+        <div className="flex items-end gap-0.5 h-4 w-4 shrink-0" title="Audio Signal">
+          <span
+            className={`w-1 bg-[#00ff88] rounded-xs transition-all ${
+              isCurrentlyPlaying ? "h-3 animate-pulse" : "h-2 opacity-60"
+            }`}
+          />
+          <span
+            className={`w-1 bg-[#00f0ff] rounded-xs transition-all ${
+              isCurrentlyPlaying ? "h-4 animate-bounce" : "h-3.5 opacity-60"
+            }`}
+          />
+          <span
+            className={`w-1 bg-[#d7ff3f] rounded-xs transition-all ${
+              isCurrentlyPlaying ? "h-2.5 animate-pulse" : "h-1.5 opacity-60"
+            }`}
+          />
+        </div>
+
         {/* Song & Artist details */}
         <div className="flex flex-col min-w-0 pr-2">
-          <span
-            className={`text-xs font-pixel tracking-wide truncate ${
-              isCurrent ? "text-[#D7FF3F] font-bold" : "text-white"
-            }`}
-          >
+          <span className="text-xs sm:text-sm font-pixel text-white font-bold tracking-wide truncate group-hover:text-[#00f0ff] transition-colors">
             {song.title}
           </span>
-          <span className="text-[11px] text-[#71717A] truncate group-hover:text-[#A1A1AA] transition-colors">
+          <span className="text-[11px] font-pixel text-[#00f0ff] truncate mt-0.5">
             {song.artistName}
           </span>
         </div>
       </div>
 
-      {/* Center: Optional Album Title */}
-      {showAlbum && song.albumTitle && (
-        <div className="hidden md:block flex-1 min-w-0 px-4 text-left">
-          <span className="text-xs text-[#71717A] truncate hover:text-white transition-colors block">
-            {song.albumTitle}
-          </span>
-        </div>
-      )}
-
-      {/* Right: Heart + Duration */}
-      <div className="flex items-center gap-3 shrink-0">
-        <button
-          type="button"
-          onClick={handleLikeClick}
-          className={`p-1 transition-colors ${
-            isLiked
-              ? "text-rose-400"
-              : "text-[#52525B] hover:text-white opacity-0 group-hover:opacity-100"
-          }`}
-          aria-label={isLiked ? "Unlike song" : "Like song"}
-        >
-          <Heart
-            className={`w-3.5 h-3.5 ${
-              isLiked ? "fill-current" : ""
-            }`}
-          />
-        </button>
-
-        <span className="text-[11px] font-pixel text-[#71717A] w-12 text-right">
+      {/* Right: Duration + Tactile Square Play Button */}
+      <div className="flex items-center gap-4 shrink-0">
+        <span className="text-xs font-pixel text-white tracking-wider">
           {song.durationFormatted}
         </span>
+
+        <button
+          type="button"
+          onClick={handlePlayClick}
+          className={`w-8 h-8 rounded flex items-center justify-center border transition-all ${
+            isCurrentlyPlaying
+              ? "bg-[#d7ff3f] text-black border-[#d7ff3f] shadow-[0_0_10px_rgba(215,255,63,0.5)]"
+              : "bg-[#160c3c] border-[#5c32c4] text-white hover:bg-[#ff2a85] hover:border-[#ff2a85] hover:shadow-[0_0_10px_rgba(255,42,133,0.5)]"
+          }`}
+          aria-label={isCurrentlyPlaying ? "Pause track" : "Play track"}
+        >
+          {isCurrentlyPlaying ? (
+            <Pause className="w-3.5 h-3.5 fill-current" />
+          ) : (
+            <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
+          )}
+        </button>
       </div>
     </div>
   );

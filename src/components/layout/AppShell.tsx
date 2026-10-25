@@ -7,6 +7,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { GlobalPlayer } from "@/components/player/GlobalPlayer";
 import { MobilePlayer } from "@/components/player/MobilePlayer";
+import { ExpandedPlayer } from "@/components/player/ExpandedPlayer";
 import { QueueDrawer } from "@/components/player/QueueDrawer";
 import { PlayerProvider } from "@/context/PlayerContext";
 import { AuthProvider } from "@/context/AuthContext";
@@ -24,11 +25,11 @@ export function AppShell({ children }: AppShellProps) {
     <AuthProvider>
       <PlayerProvider>
         {isAdminOrAuthRoute ? (
-          <div className="h-screen w-screen overflow-hidden bg-[#090909] text-white">
+          <div className="h-screen w-screen overflow-hidden bg-[#04020c] text-white">
             {children}
           </div>
         ) : (
-          <div className="flex h-screen w-screen overflow-hidden bg-[#090909] text-white">
+          <div className="flex h-screen w-screen overflow-hidden bg-[#04020c] text-white">
             {/* Desktop Sidebar */}
             <Sidebar />
 
@@ -49,8 +50,11 @@ export function AppShell({ children }: AppShellProps) {
                 <GlobalPlayer />
               </div>
 
-              {/* Mobile Player (Mini docked + Fullscreen modal) */}
+              {/* Mobile Player (Mini docked bar) */}
               <MobilePlayer />
+
+              {/* Fullscreen Expanded Cyber Player */}
+              <ExpandedPlayer />
 
               {/* Mobile Bottom Dock */}
               <MobileNav />

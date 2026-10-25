@@ -10,52 +10,35 @@ interface LogoProps {
 }
 
 export function Logo({ collapsed = false, className = "", size = "md" }: LogoProps) {
-  const iconSizes = {
-    sm: "w-7 h-7",
-    md: "w-8 h-8",
-    lg: "w-10 h-10",
-  };
-
-  const textSizes = {
-    sm: "text-xs tracking-wider",
-    md: "text-sm tracking-wider",
-    lg: "text-base tracking-wider",
-  };
-
   return (
     <Link
       href="/"
-      className={`group flex items-center gap-2.5 transition-all select-none ${className}`}
+      className={`group flex items-center gap-3 select-none transition-all ${className}`}
       aria-label="AURALIS Home"
     >
-      {/* Brand Icon: Retro Pixel Cartridge / Audio Wave */}
-      <div
-        className={`${iconSizes[size]} relative flex items-center justify-center bg-[#121212] border border-white/20 p-1.5 shadow-[2px_2px_0px_#000000] group-hover:border-[#D7FF3F] group-hover:shadow-[2px_2px_0px_#D7FF3F] transition-all`}
-      >
+      {/* Brand Icon: Retro Pixel Equalizer */}
+      <div className="relative flex items-center justify-center p-2 rounded-md bg-[#0e072b] border border-[#5c32c4] shadow-[0_0_10px_rgba(92,50,196,0.35)] group-hover:border-[#00f0ff] group-hover:shadow-[0_0_12px_rgba(0,240,255,0.4)] transition-all">
         <svg
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-full"
+          className="w-5 h-5"
         >
-          {/* Stepped pixel equalizer frequency bars */}
-          <rect x="2" y="12" width="3" height="6" fill="#71717A" />
-          <rect x="7" y="7" width="3" height="11" fill="#FFFFFF" />
-          <rect x="12" y="4" width="3" height="14" fill="#D7FF3F" />
-          <rect x="17" y="9" width="3" height="9" fill="#FFFFFF" />
+          {/* Multi-colored pixel equalizer bars (pink, purple, cyan) */}
+          <rect x="2" y="10" width="3" height="10" fill="#ff2a85" />
+          <rect x="7" y="5" width="3" height="15" fill="#a855f7" />
+          <rect x="12" y="3" width="3" height="17" fill="#00f0ff" />
+          <rect x="17" y="8" width="3" height="12" fill="#d7ff3f" />
         </svg>
       </div>
 
       {!collapsed && (
         <div className="flex flex-col">
-          <div className="flex items-center gap-1.5">
-            <span className={`font-pixel font-bold uppercase text-white tracking-widest group-hover:text-[#D7FF3F] transition-colors ${textSizes[size]}`}>
-              AURALIS
-            </span>
-            <span className="inline-block w-1.5 h-1.5 bg-[#D7FF3F] animate-pulse" />
-          </div>
-          <span className="text-[8.5px] font-pixel tracking-wider text-[#A1A1AA] uppercase flex items-center gap-1">
-            <span className="text-[#D7FF3F]">♪</span> RETRO MUSIC SYSTEM
+          <span className="font-pixel font-bold uppercase text-white tracking-widest text-base group-hover:text-[#00f0ff] transition-colors leading-none">
+            AURALIS
+          </span>
+          <span className="text-[9px] font-pixel tracking-wider text-[#ff2a85] uppercase mt-1 leading-none">
+            RETRO MUSIC SYSTEM
           </span>
         </div>
       )}

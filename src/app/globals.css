@@ -3,53 +3,56 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #090909;
-  --color-surface: #111111;
-  --color-surface-elevated: #181818;
-  --color-surface-hover: #222222;
-  --color-border-subtle: rgba(255, 255, 255, 0.1);
-  --color-border-hover: rgba(255, 255, 255, 0.2);
+  --color-background: #04020c;
+  --color-surface: #0a061a;
+  --color-surface-elevated: #110b2a;
+  --color-surface-hover: #180f38;
+  --color-border-subtle: #3a2373;
+  --color-border-hover: #5d38b5;
   --color-text-primary: #ffffff;
-  --color-text-secondary: #a1a1aa;
-  --color-text-muted: #71717a;
+  --color-text-secondary: #a79cd0;
+  --color-text-muted: #6f6299;
   --color-accent: #d7ff3f;
   --color-accent-hover: #c5ea33;
-  --color-accent-muted: rgba(215, 255, 63, 0.12);
-  --color-retro-plum: #c381b5;
-  --color-retro-cream: #fefcd0;
+  --color-neon-purple: #5c32c4;
+  --color-neon-cyan: #00f0ff;
+  --color-neon-pink: #ff2a85;
+  --color-neon-gold: #ffbe0b;
+  --color-neon-green: #06d6a0;
   --font-pixel: Minecraft, monospace, sans-serif;
   --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 :root {
-  /* AURALIS Dark Retro Palette */
-  --bg-base: #090909;
-  --surface-base: #111111;
-  --surface-elevated: #181818;
+  /* AURALIS Synthwave Retro Palette */
+  --bg-base: #04020c;
+  --surface-base: #0a061a;
+  --surface-elevated: #110b2a;
   --accent-base: #d7ff3f;
-  --retro-plum: #c381b5;
-  --retro-cream: #fefcd0;
+  --neon-purple: #5c32c4;
+  --neon-cyan: #00f0ff;
+  --neon-pink: #ff2a85;
 
-  /* RetroUI Custom Variable Overrides to match AURALIS theme */
+  /* RetroUI Custom Variable Overrides */
   --primary-bg: #d7ff3f;
-  --primary-text: #090909;
+  --primary-text: #04020c;
   --primary-shadow: #000000;
-  --secondary-bg: #181818;
+  --secondary-bg: #0d0824;
   --secondary-text: #ffffff;
   --secondary-shadow: #000000;
-  --bg-button: #181818;
+  --bg-button: #0d0824;
   --text-button: #ffffff;
-  --border-button: #2a2a2a;
+  --border-button: #4b2a9e;
   --shadow-button: #000000;
-  --bg-card: #111111;
+  --bg-card: #0a061a;
   --text-card: #ffffff;
-  --border-card: #242424;
+  --border-card: #3a2373;
   --shadow-card: #000000;
-  --bg-input: #141414;
+  --bg-input: #080517;
   --text-input: #ffffff;
-  --border-input: #2a2a2a;
+  --border-input: #4b2a9e;
   --color-progressbar: #d7ff3f;
-  --border-progressbar: #242424;
+  --border-progressbar: #3a2373;
 }
 
 * {
@@ -58,7 +61,7 @@
 
 /* Ensure body retains modern readable font by default */
 body {
-  background-color: #090909;
+  background-color: #04020c;
   color: #ffffff;
   font-family: var(--font-sans);
   overflow-x: hidden;
@@ -76,73 +79,116 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Hard Pixel Borders & Inset/Elevated Panels */
-.retro-panel {
-  background-color: #111111;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 2px 2px 0px #000000;
+/* Cyber Bracket Corner Panels (matching the reference UI) */
+.cyber-frame-purple {
+  position: relative;
+  background-color: #08051a;
+  border: 1.5px solid #4d2db7;
+  box-shadow: 0 0 10px rgba(77, 45, 183, 0.25), inset 0 0 15px rgba(77, 45, 183, 0.1);
 }
 
-.retro-panel-elevated {
-  background-color: #161616;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 3px 3px 0px #000000;
+.cyber-frame-cyan {
+  position: relative;
+  background-color: #030a16;
+  border: 1.5px solid #00f0ff;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0, 240, 255, 0.08);
 }
 
-.retro-panel-accent {
-  background-color: #121212;
-  border: 1px solid #d7ff3f;
-  box-shadow: 3px 3px 0px rgba(215, 255, 63, 0.25);
+.cyber-frame-pink {
+  position: relative;
+  background-color: #12030f;
+  border: 1.5px solid #ff2a85;
+  box-shadow: 0 0 12px rgba(255, 42, 133, 0.3), inset 0 0 15px rgba(255, 42, 133, 0.08);
+}
+
+.cyber-frame-gold {
+  position: relative;
+  background-color: #140d02;
+  border: 1.5px solid #ffbe0b;
+  box-shadow: 0 0 12px rgba(255, 190, 11, 0.28), inset 0 0 15px rgba(255, 190, 11, 0.08);
+}
+
+.cyber-frame-green {
+  position: relative;
+  background-color: #02120b;
+  border: 1.5px solid #06d6a0;
+  box-shadow: 0 0 12px rgba(6, 214, 160, 0.28), inset 0 0 15px rgba(6, 214, 160, 0.08);
+}
+
+/* Corner bracket marks */
+.bracket-corners::before {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: 6px;
+  height: 6px;
+  border-top: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+  pointer-events: none;
+}
+
+.bracket-corners::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  width: 6px;
+  height: 6px;
+  border-bottom: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  pointer-events: none;
 }
 
 /* Tactile Retro Buttons */
-.retro-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-family: Minecraft, monospace, sans-serif;
-  font-size: 0.75rem;
-  line-height: 1rem;
-  padding: 0.5rem 0.875rem;
+.retro-btn-primary {
+  background-color: #d7ff3f;
+  color: #04020c;
+  border: 1.5px solid #000000;
+  box-shadow: 2px 2px 0px #000000;
+  font-weight: 700;
   transition: all 0.1s ease;
   cursor: pointer;
   user-select: none;
 }
 
-.retro-btn:active {
-  transform: translate(2px, 2px);
-  box-shadow: none !important;
-}
-
-.retro-btn-primary {
-  background-color: #d7ff3f;
-  color: #090909;
-  border: 1px solid #000000;
-  box-shadow: 3px 3px 0px #000000;
-  font-weight: 700;
-}
-
 .retro-btn-primary:hover {
-  background-color: #c5ea33;
+  background-color: #e4ff6b;
+  box-shadow: 3px 3px 0px #000000;
+}
+
+.retro-btn-primary:active {
+  transform: translate(1px, 1px);
+  box-shadow: none;
 }
 
 .retro-btn-secondary {
-  background-color: #181818;
+  background-color: #0d0824;
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 3px 3px 0px #000000;
+  border: 1.5px solid #4d2db7;
+  box-shadow: 2px 2px 0px #000000;
+  transition: all 0.1s ease;
+  cursor: pointer;
+  user-select: none;
 }
 
 .retro-btn-secondary:hover {
-  background-color: #222222;
-  border-color: rgba(255, 255, 255, 0.3);
+  background-color: #170e3c;
+  border-color: #6a42ea;
+  box-shadow: 0 0 8px rgba(106, 66, 234, 0.4);
+}
+
+.retro-btn-secondary:active {
+  transform: translate(1px, 1px);
+  box-shadow: none;
 }
 
 .retro-btn-ghost {
   background-color: transparent;
-  color: #a1a1aa;
-  border: 1px dashed rgba(255, 255, 255, 0.15);
+  color: #a79cd0;
+  border: 1.5px dashed #4d2db7;
+  transition: all 0.1s ease;
+  cursor: pointer;
 }
 
 .retro-btn-ghost:hover {
@@ -151,9 +197,9 @@ body {
 }
 
 .retro-btn-danger {
-  background-color: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background-color: rgba(255, 42, 133, 0.15);
+  color: #ff2a85;
+  border: 1.5px solid #ff2a85;
   box-shadow: 2px 2px 0px #000000;
 }
 
