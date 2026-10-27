@@ -6,7 +6,7 @@ const JWT_SECRET = new TextEncoder().encode(
   process.env.AUTH_SECRET || "auralis-super-secret-development-jwt-key-2026-min-32-chars"
 );
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 1. Static files, Next.js internals, and assets

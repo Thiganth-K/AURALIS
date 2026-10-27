@@ -103,7 +103,6 @@ export default function AdminNewAlbumPage() {
         genres: genres.split(",").map((g) => g.trim()).filter(Boolean),
         description: description.trim(),
         artworkUrl: artworkUrl || undefined,
-        status: "published",
       };
 
       const res = await fetch("/api/admin/albums", {
@@ -127,132 +126,246 @@ export default function AdminNewAlbumPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center gap-3 pb-4 border-b border-white/5">
+    <div className="max-w-2xl mx-auto space-y-6 select-none font-mono">
+      {/* Return to Discography Link */}
+      <div>
         <Link
           href="/admin/albums"
-          className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-[#A1A1AA] hover:text-white transition-colors"
+          className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all"
+          style={{
+            backgroundColor: "#FAF7EE",
+            color: "#111111",
+            border: "1.5px solid #111111",
+            boxShadow: "2px 2px 0px #111111",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#F6EEDE";
+            e.currentTarget.style.transform = "translate(-1px,-1px)";
+            e.currentTarget.style.boxShadow = "3px 3px 0px #111111";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "#FAF7EE";
+            e.currentTarget.style.transform = "translate(0,0)";
+            e.currentTarget.style.boxShadow = "2px 2px 0px #111111";
+          }}
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>[ RETURN TO DISCOGRAPHY ]</span>
         </Link>
-        <div>
-          <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-            <Disc3 className="w-5 h-5 text-[#D7FF3F]" />
-            <span>Create New Album Release</span>
-          </h1>
-          <p className="text-xs text-[#A1A1AA]">
-            Publish an album or EP linking directly to a registered artist in MongoDB.
-          </p>
-        </div>
       </div>
 
-      <div className="p-6 md:p-8 rounded-2xl bg-[#121212] border border-white/5 shadow-2xl">
+      {/* Form Container */}
+      <div
+        className="relative p-6 sm:p-7"
+        style={{
+          backgroundColor: "#FAF7EE",
+          border: "2px solid #111111",
+          boxShadow: "4px 4px 0px #111111",
+        }}
+      >
+        {/* Technical corner ticks */}
+        <span className="absolute top-1.5 left-2 text-xs font-mono text-[#7A7166]">┌</span>
+        <span className="absolute top-1.5 right-2 text-xs font-mono text-[#7A7166]">┐</span>
+        <span className="absolute bottom-1.5 left-2 text-xs font-mono text-[#7A7166]">└</span>
+        <span className="absolute bottom-1.5 right-2 text-xs font-mono text-[#7A7166]">┘</span>
+
+        {/* Header */}
+        <div className="pb-4 mb-5 border-b border-[#111111]/20">
+          <div className="flex items-center gap-2 mb-1">
+            <span
+              className="w-2 h-2 inline-block shrink-0"
+              style={{ backgroundColor: "#F05A28" }}
+            />
+            <span
+              className="text-[10px] font-bold tracking-[0.22em] uppercase"
+              style={{ color: "#F05A28" }}
+            >
+              AURALIS // DISCOGRAPHY RELEASE
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-wider text-[#111111] uppercase">
+            CREATE ALBUM RELEASE
+          </h1>
+          <p className="text-xs text-[#7A7166] mt-1 tracking-wide">
+            Provision a new long-play album or EP catalog record with sleeve artwork and liner notes.
+          </p>
+        </div>
+
         {error && (
-          <div className="mb-5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
+          <div
+            className="mb-5 p-3 flex items-center gap-2 text-xs font-bold uppercase"
+            style={{
+              backgroundColor: "#FFF0ED",
+              border: "1.5px solid #D62828",
+              color: "#D62828",
+              boxShadow: "2px 2px 0px #111111",
+            }}
+          >
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">
-              Album Title *
+            <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1.5 text-[#111111]">
+              <span className="w-1.5 h-1.5 inline-block" style={{ backgroundColor: "#F05A28" }} />
+              <span>ALBUM TITLE *</span>
             </label>
             <input
               type="text"
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Neon Horizon"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[#181818] border border-white/10 text-white text-xs focus:outline-none focus:border-[#D7FF3F]"
+              placeholder="e.g. After Hours"
+              className="w-full px-3.5 py-2.5 text-xs font-mono bg-transparent focus:outline-none uppercase"
+              style={{
+                backgroundColor: "#FAF7EE",
+                border: "2px solid #111111",
+                color: "#111111",
+                caretColor: "#F05A28",
+              }}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">
-              Artist (Database Relationship) *
+            <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1.5 text-[#111111]">
+              <span className="w-1.5 h-1.5 inline-block" style={{ backgroundColor: "#F05A28" }} />
+              <span>PRIMARY ARTIST *</span>
             </label>
-            <select
-              required
-              value={artistId}
-              onChange={(e) => setArtistId(e.target.value)}
-              disabled={loadingArtists}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[#181818] border border-white/10 text-white text-xs focus:outline-none focus:border-[#D7FF3F]"
-            >
-              {loadingArtists ? (
-                <option>Loading artists...</option>
-              ) : (
-                artists.map((art) => (
+            {loadingArtists ? (
+              <div className="py-2 text-xs text-[#7A7166]">FETCHING ARTISTS...</div>
+            ) : (
+              <select
+                required
+                value={artistId}
+                onChange={(e) => setArtistId(e.target.value)}
+                className="w-full px-3.5 py-2.5 text-xs font-mono font-bold uppercase tracking-wider cursor-pointer"
+                style={{
+                  backgroundColor: "#FAF7EE",
+                  border: "2px solid #111111",
+                  color: "#111111",
+                }}
+              >
+                {artists.map((art) => (
                   <option key={art.id} value={art.id}>
                     {art.name}
                   </option>
-                ))
-              )}
-            </select>
+                ))}
+              </select>
+            )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">
-                Release Date
+              <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1.5 text-[#111111]">
+                <span className="w-1.5 h-1.5 inline-block" style={{ backgroundColor: "#F05A28" }} />
+                <span>RELEASE DATE</span>
               </label>
               <input
                 type="date"
-                required
                 value={releaseDate}
                 onChange={(e) => setReleaseDate(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[#181818] border border-white/10 text-white text-xs focus:outline-none focus:border-[#D7FF3F]"
+                className="w-full px-3.5 py-2.5 text-xs font-mono bg-transparent focus:outline-none uppercase"
+                style={{
+                  backgroundColor: "#FAF7EE",
+                  border: "2px solid #111111",
+                  color: "#111111",
+                }}
               />
             </div>
+
             <div>
-              <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">
-                Genres
+              <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1.5 text-[#111111]">
+                <span className="w-1.5 h-1.5 inline-block" style={{ backgroundColor: "#F05A28" }} />
+                <span>GENRES</span>
               </label>
               <input
                 type="text"
                 value={genres}
                 onChange={(e) => setGenres(e.target.value)}
-                placeholder="Synthwave, Electronic"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[#181818] border border-white/10 text-white text-xs focus:outline-none focus:border-[#D7FF3F]"
+                placeholder="Synthwave, Pop"
+                className="w-full px-3.5 py-2.5 text-xs font-mono bg-transparent focus:outline-none uppercase"
+                style={{
+                  backgroundColor: "#FAF7EE",
+                  border: "2px solid #111111",
+                  color: "#111111",
+                  caretColor: "#F05A28",
+                }}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">
-              Description / Concept Notes
+            <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1.5 text-[#111111]">
+              <span className="w-1.5 h-1.5 inline-block" style={{ backgroundColor: "#F05A28" }} />
+              <span>DESCRIPTION / LINER NOTES</span>
             </label>
             <textarea
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Album concept, themes, and liner notes..."
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[#181818] border border-white/10 text-white text-xs focus:outline-none focus:border-[#D7FF3F]"
+              placeholder="Record release notes, credits, and production context..."
+              className="w-full px-3.5 py-2.5 text-xs font-mono bg-transparent focus:outline-none resize-none"
+              style={{
+                backgroundColor: "#FAF7EE",
+                border: "2px solid #111111",
+                color: "#111111",
+                caretColor: "#F05A28",
+              }}
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">
-              Album Artwork
+          {/* Artwork Upload */}
+          <div
+            className="p-4 space-y-2.5"
+            style={{
+              backgroundColor: "#F6EEDE",
+              border: "2px dashed #111111",
+            }}
+          >
+            <label className="text-xs font-bold uppercase tracking-wider text-[#111111] flex items-center gap-2">
+              <Upload className="w-3.5 h-3.5" style={{ color: "#F05A28" }} />
+              <span>SLEEVE ARTWORK COVER</span>
             </label>
             <div className="flex items-center gap-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={artworkUrl || "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=200&auto=format&fit=crop&q=80"}
+                src={
+                  artworkUrl ||
+                  "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200&auto=format&fit=crop&q=80"
+                }
                 alt="Artwork Preview"
-                className="w-14 h-14 rounded-xl object-cover border border-white/10 shrink-0"
+                className="w-16 h-16 object-cover shrink-0"
+                style={{
+                  border: "2px solid #111111",
+                  boxShadow: "2px 2px 0px #111111",
+                }}
               />
-              <label className="cursor-pointer inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-white transition-colors">
+              <label
+                className="cursor-pointer inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold uppercase tracking-wider transition-all"
+                style={{
+                  backgroundColor: "#FAF7EE",
+                  border: "2px solid #111111",
+                  boxShadow: "2px 2px 0px #111111",
+                  color: "#111111",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#FFF0ED";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#FAF7EE";
+                }}
+              >
                 {uploadingArtwork ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    <span>Uploading...</span>
+                    <span>UPLOADING...</span>
                   </>
                 ) : (
                   <>
-                    <Upload className="w-3.5 h-3.5 text-[#D7FF3F]" />
-                    <span>Upload Artwork</span>
+                    <Upload className="w-3.5 h-3.5" style={{ color: "#F05A28" }} />
+                    <span>[ SELECT ARTWORK ]</span>
                   </>
                 )}
                 <input
@@ -266,25 +379,54 @@ export default function AdminNewAlbumPage() {
             </div>
           </div>
 
-          <div className="pt-3 flex justify-end gap-3 border-t border-white/5">
+          <div className="pt-3 flex justify-end gap-3 border-t border-[#111111]/15">
             <Link
               href="/admin/albums"
-              className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-[#A1A1AA] hover:text-white transition-colors"
+              className="px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all"
+              style={{
+                backgroundColor: "#FAF7EE",
+                border: "1.5px solid #111111",
+                color: "#7A7166",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#111111";
+                e.currentTarget.style.backgroundColor = "#F6EEDE";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "#7A7166";
+                e.currentTarget.style.backgroundColor = "#FAF7EE";
+              }}
             >
-              Cancel
+              [ CANCEL ]
             </Link>
             <button
               type="submit"
               disabled={submitting || uploadingArtwork}
-              className="px-5 py-2.5 rounded-xl bg-[#D7FF3F] hover:bg-[#cbf531] text-black font-semibold text-xs flex items-center gap-2 transition-all shadow-md shadow-[#D7FF3F]/10 disabled:opacity-50"
+              className="px-5 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              style={{
+                backgroundColor: "#F05A28",
+                color: "#111111",
+                border: "2px solid #111111",
+                boxShadow: "3px 3px 0px #111111",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#e84e1d";
+                e.currentTarget.style.transform = "translate(-1px,-1px)";
+                e.currentTarget.style.boxShadow = "4px 4px 0px #111111";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "#F05A28";
+                e.currentTarget.style.transform = "translate(0,0)";
+                e.currentTarget.style.boxShadow = "3px 3px 0px #111111";
+              }}
             >
               {submitting ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  <span>Creating Album...</span>
+                  <span>COMMITTING...</span>
                 </>
               ) : (
-                <span>Save Album</span>
+                <span>[ CREATE ALBUM ]</span>
               )}
             </button>
           </div>

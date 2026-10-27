@@ -13,6 +13,7 @@ import {
   X,
   Disc3,
   Music,
+  Filter,
 } from "lucide-react";
 
 interface AdminArtistItem {
@@ -33,6 +34,7 @@ export default function AdminArtistsPage() {
   const [artists, setArtists] = useState<AdminArtistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [genreFilter, setGenreFilter] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingArtist, setEditingArtist] = useState<AdminArtistItem | null>(null);
 
@@ -51,7 +53,7 @@ export default function AdminArtistsPage() {
       const res = await fetch("/api/admin/artists");
       if (res.ok) {
         const data = await res.json();
-        if (data.success) {
+        if (data.success && Array.isArray(data.artists)) {
           setArtists(data.artists);
         }
       }
@@ -103,13 +105,13 @@ export default function AdminArtistsPage() {
         body: formData,
       });
       const data = await res.json();
-      if (res.ok && data.success) {
-        setFormImage(data.url);
-      } else {
+      if (!res.ok) {
         setFormError(data.error || "Failed to upload image");
+      } else {
+        setFormImage(data.url);
       }
     } catch {
-      setFormError("Upload network error");
+      setFormError("Network error during image upload");
     } finally {
       setUploadingImage(false);
     }
@@ -117,14 +119,22 @@ export default function AdminArtistsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError(null);
+    if (!formName.trim()) {
+      setFormError("Artist name is required");
+      return;
+    }
+
     setSubmitting(true);
+    setFormError(null);
 
     try {
       const payload = {
-        name: formName,
+        name: formName.trim(),
         bio: formBio,
-        genres: formGenres.split(",").map((g) => g.trim()).filter(Boolean),
+        genres: formGenres
+          .split(",")
+          .map((g) => g.trim())
+          .filter(Boolean),
         image: formImage || undefined,
       };
 
@@ -170,129 +180,402 @@ export default function AdminArtistsPage() {
     }
   };
 
-  const filtered = artists.filter((a) =>
-    a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.genres.some((g) => g.toLowerCase().includes(searchQuery.toLowerCase()))
+  // Distinct genres across all artists
+  const allGenres = Array.from(
+    new Set(artists.flatMap((a) => a.genres || []).filter(Boolean))
   );
 
+  const filtered = artists.filter((a) => {
+    const matchesSearch =
+      a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.genres.some((g) => g.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesGenre =
+      genreFilter === "all" ||
+      a.genres.some((g) => g.toLowerCase() === genreFilter.toLowerCase());
+    return matchesSearch && matchesGenre;
+  });
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <Mic2 className="w-6 h-6 text-[#D7FF3F]" />
-            <span>Artist Catalog</span>
-          </h1>
-          <p className="text-xs text-[#A1A1AA] mt-1">
-            Maintain verified artist profiles, genre taxonomy, and bios across the network.
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={openCreateModal}
-          className="px-4 py-2 rounded-xl bg-[#D7FF3F] hover:bg-[#cbf531] text-black font-semibold text-xs flex items-center gap-2 transition-all shadow-md shadow-[#D7FF3F]/10 self-start sm:self-auto"
+    <div className="space-y-6 select-none font-mono">
+      {/* ── 1. HERO BANNER (MATCHES USER SPEC EXACTLY) ──────── */}
+      <div
+        className="relative p-6 sm:p-7 overflow-hidden"
+        style={{
+          backgroundColor: "#FAF7EE",
+          border: "2px solid #111111",
+          boxShadow: "3px 3px 0px #111111",
+        }}
+      >
+        {/* Technical Corner Crop Ticks (in Orange #F05A28) */}
+        <span
+          className="absolute top-1.5 left-2 text-sm font-bold font-mono select-none"
+          style={{ color: "#F05A28" }}
         >
-          <Plus className="w-4 h-4 text-black" />
-          <span>Add Artist</span>
-        </button>
+          ┌
+        </span>
+        <span
+          className="absolute top-1.5 right-2 text-sm font-bold font-mono select-none"
+          style={{ color: "#F05A28" }}
+        >
+          ┐
+        </span>
+        <span
+          className="absolute bottom-1.5 left-2 text-sm font-bold font-mono select-none"
+          style={{ color: "#F05A28" }}
+        >
+          └
+        </span>
+        <span
+          className="absolute bottom-1.5 right-2 text-sm font-bold font-mono select-none"
+          style={{ color: "#F05A28" }}
+        >
+          ┘
+        </span>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
+          {/* Left Text Column */}
+          <div className="max-w-xl">
+            {/* Tagline */}
+            <div className="flex items-center gap-2 mb-2">
+              <span
+                className="w-2 h-2 inline-block shrink-0"
+                style={{ backgroundColor: "#F05A28" }}
+              />
+              <span
+                className="text-[10px] font-bold tracking-[0.22em] uppercase"
+                style={{ color: "#F05A28" }}
+              >
+                AURALIS // ARTIST ROSTER
+              </span>
+            </div>
+
+            {/* Title */}
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#111111] uppercase leading-none">
+              ARTIST CATALOG // DIRECTORY
+            </h1>
+
+            {/* Sub-text (Two Lines) */}
+            <p className="text-xs sm:text-[13px] text-[#7A7166] mt-2 font-mono leading-relaxed">
+              Maintain verified artist profiles, genre taxonomy, and discography links
+              <br className="hidden sm:inline" />
+              {" "}across the authoritative audio stream.
+            </p>
+          </div>
+
+          {/* Right Side: Soundwave Bars & Editorial Slogan */}
+          <div className="hidden sm:flex items-center gap-5 shrink-0">
+            {/* Center Soundwave Graphic in Vivid Orange */}
+            <div className="flex items-center gap-[3px] h-12 px-2">
+              <span className="w-[3px] bg-[#F05A28] h-3 rounded-xs" />
+              <span className="w-[3px] bg-[#F05A28] h-5 rounded-xs" />
+              <span className="w-[3px] bg-[#F05A28] h-8 rounded-xs" />
+              <span className="w-[3px] bg-[#F05A28] h-11 rounded-xs" />
+              <span className="w-[3px] bg-[#F05A28] h-12 rounded-xs" />
+              <span className="w-[3px] bg-[#F05A28] h-9 rounded-xs" />
+              <span className="w-[3px] bg-[#F05A28] h-7 rounded-xs" />
+              <span className="w-[3px] bg-[#F05A28] h-4 rounded-xs" />
+              <span className="w-[3px] bg-[#F05A28] h-2 rounded-xs" />
+            </div>
+
+            {/* Tagline on the Right */}
+            <div
+              className="text-left text-[10px] font-bold tracking-widest text-[#111111] uppercase leading-tight font-mono pl-5"
+              style={{ borderLeft: "1px solid rgba(17, 17, 17, 0.15)" }}
+            >
+              <p>BETTER MUSIC</p>
+              <p className="my-0.5">BETTER PEOPLE</p>
+              <p style={{ color: "#F05A28" }}>AURALIS</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Search */}
-      <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#141414] border border-white/10 text-xs w-full sm:w-80">
-        <Search className="w-4 h-4 text-[#71717A] shrink-0" />
-        <input
-          type="text"
-          placeholder="Filter artists or genres..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-transparent text-white placeholder-[#71717A] focus:outline-none"
-        />
+      {/* ── 2. SEARCH & FILTERS BAR (EXACT SPEC) ─────────────── */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3.5 justify-between">
+        {/* Search Input with offset box */}
+        <div
+          className="flex-1 max-w-lg flex items-center gap-3 px-3.5 py-2.5 text-xs"
+          style={{
+            backgroundColor: "#FAF7EE",
+            border: "2px solid #111111",
+            boxShadow: "2.5px 2.5px 0px #111111",
+          }}
+        >
+          <Search className="w-4 h-4 shrink-0" style={{ color: "#F05A28" }} />
+          <input
+            type="text"
+            placeholder="SEARCH ARTISTS BY NAME OR GENRE..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-transparent text-[#111111] placeholder-[#7A7166] focus:outline-none font-mono text-xs uppercase tracking-wide"
+            style={{ caretColor: "#F05A28" }}
+          />
+        </div>
+
+        {/* Filter Section on Right */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#111111]">
+            <Filter className="w-4 h-4 shrink-0" style={{ color: "#F05A28" }} />
+            <span className="tracking-wider">FILTER:</span>
+          </div>
+
+          {/* Genre Dropdown */}
+          <select
+            value={genreFilter}
+            onChange={(e) => setGenreFilter(e.target.value)}
+            className="px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-[#111111] cursor-pointer"
+            style={{
+              backgroundColor: "#FAF7EE",
+              border: "2px solid #111111",
+              boxShadow: "2px 2px 0px #111111",
+            }}
+          >
+            <option value="all">ALL GENRES</option>
+            {allGenres.map((g) => (
+              <option key={g} value={g}>
+                {g.toUpperCase()}
+              </option>
+            ))}
+          </select>
+
+          {/* Action: Register Artist Modal Button */}
+          <button
+            type="button"
+            onClick={openCreateModal}
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+            style={{
+              backgroundColor: "#F05A28",
+              color: "#FFFFFF",
+              border: "2px solid #111111",
+              boxShadow: "2px 2px 0px #111111",
+            }}
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>[ + REGISTER ARTIST ]</span>
+          </button>
+        </div>
       </div>
 
-      {/* Artists Grid / Table */}
-      <div className="rounded-2xl border border-white/5 bg-[#121212] overflow-hidden">
+      {/* ── 3. VERIFIED ARTIST IDENTITIES TABLE CONTAINER ───── */}
+      <div
+        className="relative overflow-visible"
+        style={{
+          backgroundColor: "#FAF7EE",
+          border: "2px solid #111111",
+          boxShadow: "3px 3px 0px #111111",
+        }}
+      >
+        {/* Outer Corner Crop Ticks (in Orange #F05A28) */}
+        <span
+          className="absolute -top-1 -left-1 text-sm font-bold font-mono select-none"
+          style={{ color: "#F05A28" }}
+        >
+          ┌
+        </span>
+        <span
+          className="absolute -top-1 -right-1 text-sm font-bold font-mono select-none"
+          style={{ color: "#F05A28" }}
+        >
+          ┐
+        </span>
+        <span
+          className="absolute -bottom-1 -left-1 text-sm font-bold font-mono select-none"
+          style={{ color: "#F05A28" }}
+        >
+          └
+        </span>
+        <span
+          className="absolute -bottom-1 -right-1 text-sm font-bold font-mono select-none"
+          style={{ color: "#F05A28" }}
+        >
+          ┘
+        </span>
+
+        {/* Table Header Bar */}
+        <div
+          className="px-5 py-3.5 flex items-center justify-between"
+          style={{ borderBottom: "2px solid #111111" }}
+        >
+          <div className="flex items-center gap-2">
+            <span
+              className="w-2 h-2 inline-block shrink-0"
+              style={{ backgroundColor: "#F05A28" }}
+            />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#111111]">
+              VERIFIED ARTIST IDENTITIES
+            </h2>
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#7A7166]">
+            [ {filtered.length} RECORDS FOUND ]
+          </span>
+        </div>
+
         {loading ? (
-          <div className="py-16 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 text-[#D7FF3F] animate-spin" />
+          <div className="py-20 flex flex-col items-center justify-center gap-2">
+            <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#F05A28" }} />
+            <span className="text-xs font-bold uppercase tracking-widest text-[#7A7166]">
+              LOADING ARTIST ROSTER...
+            </span>
           </div>
         ) : filtered.length === 0 ? (
-          <div className="py-16 text-center text-[#71717A] text-xs">
-            No artists found. Click &quot;Add Artist&quot; to create the first record.
+          <div className="py-20 text-center text-[#7A7166] text-xs font-bold uppercase tracking-wider">
+            NO ARTISTS MATCH THE QUERY. CLICK &quot;[ + REGISTER ARTIST ]&quot; TO CREATE ONE.
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-white/[0.02] border-b border-white/5 text-[#71717A] uppercase font-mono text-[10px]">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead
+                className="text-[#7A7166] uppercase font-bold text-[10px] tracking-wider"
+                style={{
+                  backgroundColor: "#F6EEDE",
+                  borderBottom: "1.5px solid #111111",
+                }}
+              >
                 <tr>
-                  <th className="py-3.5 px-4 font-semibold">Artist</th>
-                  <th className="py-3.5 px-4 font-semibold">Genres</th>
-                  <th className="py-3.5 px-4 font-semibold">Discography</th>
-                  <th className="py-3.5 px-4 font-semibold">Status</th>
-                  <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
+                  <th className="py-3 px-5">ARTIST</th>
+                  <th className="py-3 px-4">GENRES</th>
+                  <th className="py-3 px-4">DISCOGRAPHY</th>
+                  <th className="py-3 px-4">FOLLOWERS</th>
+                  <th className="py-3 px-4">STATUS</th>
+                  <th className="py-3 px-5 text-right">COMMANDS</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-[#111111]/15">
                 {filtered.map((art) => (
-                  <tr key={art.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-3">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={art.image}
-                          alt={art.name}
-                          className="w-10 h-10 rounded-full object-cover shrink-0 border border-white/10"
-                        />
-                        <div>
-                          <div className="font-semibold text-white">{art.name}</div>
-                          <div className="text-[11px] text-[#71717A] font-mono">
+                  <tr key={art.id} className="hover:bg-[#F6EEDE] transition-colors">
+                    {/* Artist Column */}
+                    <td className="py-3.5 px-5">
+                      <div className="flex items-center gap-3.5">
+                        {art.image ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={art.image}
+                            alt={art.name}
+                            className="w-9 h-9 object-cover shrink-0"
+                            style={{
+                              border: "1.5px solid #111111",
+                              boxShadow: "0 4px 12px rgba(240, 90, 40, 0.4)",
+                            }}
+                          />
+                        ) : (
+                          <div
+                            className="w-9 h-9 flex items-center justify-center text-sm font-bold shrink-0 uppercase text-white"
+                            style={{
+                              backgroundColor: "#F05A28",
+                              boxShadow: "0 4px 12px rgba(240, 90, 40, 0.45)",
+                            }}
+                          >
+                            {art.name.slice(0, 1).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <div className="font-bold text-[#111111] uppercase tracking-wide truncate text-xs">
+                            {art.name}
+                          </div>
+                          <div className="text-[11px] text-[#7A7166] font-mono truncate mt-0.5">
                             /{art.slug}
                           </div>
                         </div>
                       </div>
                     </td>
+
+                    {/* Genres Column */}
                     <td className="py-3.5 px-4">
-                      <div className="flex flex-wrap gap-1">
-                        {art.genres?.slice(0, 3).map((g) => (
-                          <span
-                            key={g}
-                            className="px-2 py-0.5 rounded-full bg-white/5 text-[10px] text-[#A1A1AA]"
-                          >
-                            {g}
+                      <div className="flex flex-wrap gap-1.5">
+                        {art.genres && art.genres.length > 0 ? (
+                          art.genres.slice(0, 3).map((g) => (
+                            <span
+                              key={g}
+                              className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
+                              style={{
+                                backgroundColor: "#FAF7EE",
+                                border: "1px solid #111111",
+                                color: "#111111",
+                              }}
+                            >
+                              {g}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-[10px] text-[#7A7166] uppercase">
+                            UNASSIGNED
                           </span>
-                        ))}
+                        )}
                       </div>
                     </td>
+
+                    {/* Discography Column */}
                     <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-3 text-[#A1A1AA] font-mono text-[11px]">
+                      <div className="flex items-center gap-3 text-[10px] font-bold text-[#111111]">
                         <span className="flex items-center gap-1">
-                          <Disc3 className="w-3 h-3 text-[#71717A]" />
-                          {art.albumCount || 0}
+                          <Disc3 className="w-3.5 h-3.5" style={{ color: "#F05A28" }} />
+                          <span>{art.albumCount || 0} ALBUMS</span>
                         </span>
                         <span className="flex items-center gap-1">
-                          <Music className="w-3 h-3 text-[#71717A]" />
-                          {art.songCount || 0}
+                          <Music className="w-3.5 h-3.5" style={{ color: "#F05A28" }} />
+                          <span>{art.songCount || 0} TRACKS</span>
                         </span>
                       </div>
                     </td>
+
+                    {/* Followers Column */}
+                    <td className="py-3.5 px-4 font-bold text-[#111111]">
+                      {(art.followerCount || 0).toLocaleString()}
+                    </td>
+
+                    {/* Status Column */}
                     <td className="py-3.5 px-4">
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-mono text-[10px] uppercase font-semibold">
-                        {art.status}
+                      <span
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider"
+                        style={{
+                          backgroundColor:
+                            art.status === "active" ? "#ECFDF5" : "#FAF7EE",
+                          color:
+                            art.status === "active" ? "#15803D" : "#7A7166",
+                          border:
+                            art.status === "active"
+                              ? "1px solid #16A34A"
+                              : "1px solid #111111",
+                        }}
+                      >
+                        <span
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{
+                            backgroundColor:
+                              art.status === "active" ? "#16A34A" : "#7A7166",
+                          }}
+                        />
+                        <span>{art.status.toUpperCase()}</span>
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
+
+                    {/* Commands Column */}
+                    <td className="py-3.5 px-5 text-right">
+                      <div className="flex items-center justify-end gap-2">
                         <button
                           type="button"
                           onClick={() => openEditModal(art)}
-                          className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[#A1A1AA] hover:text-white transition-colors"
+                          className="px-2.5 py-1.5 text-[10px] font-bold uppercase transition-all cursor-pointer flex items-center gap-1"
+                          style={{
+                            backgroundColor: "#FAF7EE",
+                            border: "1.5px solid #111111",
+                            boxShadow: "1.5px 1.5px 0px #111111",
+                            color: "#111111",
+                          }}
                         >
-                          <Edit2 className="w-3.5 h-3.5" />
+                          <Edit2 className="w-3 h-3 text-[#F05A28]" />
+                          <span>EDIT</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDelete(art.id, art.name)}
-                          className="p-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors"
+                          className="p-1.5 transition-all cursor-pointer"
+                          style={{
+                            backgroundColor: "#FAF7EE",
+                            border: "1.5px solid #D62828",
+                            boxShadow: "1.5px 1.5px 0px #111111",
+                            color: "#D62828",
+                          }}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -306,129 +589,146 @@ export default function AdminArtistsPage() {
         )}
       </div>
 
-      {/* Create / Edit Artist Modal */}
+      {/* ── MODAL: CREATE / EDIT ARTIST ───────────────────────── */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-[#141414] border border-white/10 rounded-2xl p-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-4 border-b border-white/5 mb-5">
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <Mic2 className="w-4 h-4 text-[#D7FF3F]" />
-                <span>{editingArtist ? "Edit Artist Profile" : "Register New Artist"}</span>
-              </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-[2px]">
+          <div
+            className="w-full max-w-lg p-6 relative font-mono select-none"
+            style={{
+              backgroundColor: "#FAF7EE",
+              border: "2px solid #111111",
+              boxShadow: "4px 4px 0px #111111",
+            }}
+          >
+            <div className="flex items-center justify-between pb-3 mb-4 border-b-2 border-[#111111]">
+              <div className="flex items-center gap-2">
+                <Mic2 className="w-4 h-4 text-[#F05A28]" />
+                <h3 className="font-bold text-sm uppercase tracking-wider text-[#111111]">
+                  {editingArtist ? "EDIT ARTIST IDENTIFIER" : "REGISTER NEW ARTIST"}
+                </h3>
+              </div>
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="text-[#71717A] hover:text-white"
+                className="p-1 border border-[#111111] hover:bg-[#F6EEDE] cursor-pointer"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {formError && (
-              <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
+              <div
+                className="p-3 mb-4 flex items-center gap-2 text-xs font-bold uppercase text-[#D62828]"
+                style={{
+                  backgroundColor: "#FFF0ED",
+                  border: "1.5px solid #D62828",
+                }}
+              >
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{formError}</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 text-xs font-bold">
+              {/* Name */}
               <div>
-                <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">
-                  Artist Name *
+                <label className="block mb-1 text-[#7A7166] uppercase">
+                  ARTIST / BAND NAME *
                 </label>
                 <input
                   type="text"
                   required
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  placeholder="e.g. Noir Avenue"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#181818] border border-white/10 text-white text-xs focus:outline-none focus:border-[#D7FF3F]"
+                  placeholder="E.G. DAFT PUNK"
+                  className="w-full p-2.5 bg-transparent border-2 border-[#111111] focus:outline-none uppercase font-mono"
+                  style={{ boxShadow: "1.5px 1.5px 0px #111111" }}
                 />
               </div>
 
+              {/* Genres */}
               <div>
-                <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">
-                  Genres (comma separated)
+                <label className="block mb-1 text-[#7A7166] uppercase">
+                  GENRES (COMMA-SEPARATED)
                 </label>
                 <input
                   type="text"
                   value={formGenres}
                   onChange={(e) => setFormGenres(e.target.value)}
-                  placeholder="Electronic, Alternative, Ambient"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#181818] border border-white/10 text-white text-xs focus:outline-none focus:border-[#D7FF3F]"
+                  placeholder="E.G. ELECTRONIC, FRENCH HOUSE, SYNTHWAVE"
+                  className="w-full p-2.5 bg-transparent border-2 border-[#111111] focus:outline-none uppercase font-mono"
+                  style={{ boxShadow: "1.5px 1.5px 0px #111111" }}
                 />
               </div>
 
+              {/* Bio */}
               <div>
-                <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">
-                  Biography
+                <label className="block mb-1 text-[#7A7166] uppercase">
+                  EDITORIAL BIOGRAPHY
                 </label>
                 <textarea
                   rows={3}
                   value={formBio}
                   onChange={(e) => setFormBio(e.target.value)}
-                  placeholder="Artist description and background..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#181818] border border-white/10 text-white text-xs focus:outline-none focus:border-[#D7FF3F]"
+                  placeholder="SHORT EDITORIAL PROFILE..."
+                  className="w-full p-2.5 bg-transparent border-2 border-[#111111] focus:outline-none font-mono"
+                  style={{ boxShadow: "1.5px 1.5px 0px #111111" }}
                 />
               </div>
 
+              {/* Image Upload */}
               <div>
-                <label className="block text-xs font-medium text-[#A1A1AA] mb-1.5">
-                  Artist Avatar / Image
+                <label className="block mb-1 text-[#7A7166] uppercase">
+                  PORTRAIT ARTWORK (FILE OR URL)
                 </label>
-                <div className="flex items-center gap-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={formImage || "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200&auto=format&fit=crop&q=80"}
-                    alt="Preview"
-                    className="w-12 h-12 rounded-full object-cover border border-white/10 shrink-0"
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="text"
+                    value={formImage}
+                    onChange={(e) => setFormImage(e.target.value)}
+                    placeholder="HTTPS://..."
+                    className="flex-1 p-2 bg-transparent border-2 border-[#111111] focus:outline-none font-mono text-[11px]"
                   />
-                  <div className="flex-1">
-                    <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs text-white transition-colors">
-                      {uploadingImage ? (
-                        <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span>Uploading image...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="w-3.5 h-3.5" />
-                          <span>Upload Image</span>
-                        </>
-                      )}
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                        onChange={handleImageUpload}
-                        disabled={uploadingImage}
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
+                  <label
+                    className="px-3 py-2 text-xs font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+                    style={{
+                      backgroundColor: "#FAF7EE",
+                      border: "2px solid #111111",
+                      boxShadow: "2px 2px 0px #111111",
+                    }}
+                  >
+                    {uploadingImage ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Upload className="w-3.5 h-3.5 text-[#F05A28]" />
+                    )}
+                    <span>{uploadingImage ? "..." : "FILE"}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploadingImage}
+                      className="hidden"
+                    />
+                  </label>
                 </div>
               </div>
 
-              <div className="pt-3 flex justify-end gap-3 border-t border-white/5">
+              <div className="flex justify-end gap-2 pt-3 border-t-2 border-[#111111]">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-[#A1A1AA] hover:text-white transition-colors"
+                  className="px-4 py-2 border-2 border-[#111111] bg-[#FAF7EE] text-[#111111] uppercase font-bold hover:bg-[#F6EEDE] cursor-pointer"
                 >
-                  Cancel
+                  CANCEL
                 </button>
                 <button
                   type="submit"
-                  disabled={submitting || uploadingImage}
-                  className="px-5 py-2.5 rounded-xl bg-[#D7FF3F] hover:bg-[#cbf531] text-black font-semibold text-xs flex items-center gap-2 transition-all shadow-md shadow-[#D7FF3F]/10 disabled:opacity-50"
+                  disabled={submitting}
+                  className="px-5 py-2 border-2 border-[#111111] bg-[#F05A28] text-white uppercase font-bold shadow-[2px_2px_0px_#111111] flex items-center gap-2 cursor-pointer"
                 >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      <span>Saving...</span>
-                    </>
-                  ) : (
-                    <span>{editingArtist ? "Update Profile" : "Save Artist"}</span>
-                  )}
+                  {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>{editingArtist ? "UPDATE ARTIST" : "REGISTER"}</span>
                 </button>
               </div>
             </form>

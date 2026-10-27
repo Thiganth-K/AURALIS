@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { User } from "@/models/User";
-import { verifyPassword, createSessionToken, AUTH_COOKIE_NAME } from "@/lib/auth";
+import { verifyPassword, createSessionToken, AUTH_COOKIE_NAME, ensureAdminUser } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,6 +21,45 @@ export async function POST(request: NextRequest) {
     await connectToDatabase();
 
     const normalizedEmail = email.toLowerCase().trim();
+    const envAdminEmail = (process.env.ADMIN_EMAIL || "admin@auralis.app").toLowerCase().trim();
+    const envAdminPassword = process.env.ADMIN_PASSWORD || "admin123";
+
+    // 1. Direct env-based Admin authentication check
+    if (normalizedEmail === envAdminEmail && password === envAdminPassword) {
+      const adminUser = await ensureAdminUser();
+      if (adminUser) {
+        const token = await createSessionToken({
+          userId: adminUser._id.toString(),
+          role: "admin",
+          email: adminUser.email,
+          name: adminUser.name,
+        });
+
+        const response = NextResponse.json({
+          success: true,
+          data: {
+            id: adminUser._id.toString(),
+            name: adminUser.name,
+            email: adminUser.email,
+            role: "admin",
+            status: "active",
+            avatar: adminUser.avatar,
+          },
+        });
+
+        response.cookies.set(AUTH_COOKIE_NAME, token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 60 * 60 * 24 * 7, // 7 days
+        });
+
+        return response;
+      }
+    }
+
+    // 2. Database user lookup
     const user = await User.findOne({ email: normalizedEmail });
 
     if (!user) {
@@ -33,7 +72,33 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check user status (Section 10)
+    // 3. Status checks (pending, rejected, suspended)
+    if (user.status === "pending") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "ACCOUNT_PENDING",
+            message: "Your registration is awaiting admin approval. Please check back later.",
+          },
+        },
+        { status: 403 }
+      );
+    }
+
+    if (user.status === "rejected") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "ACCOUNT_REJECTED",
+            message: "Your registration request has been rejected by an administrator.",
+          },
+        },
+        { status: 403 }
+      );
+    }
+
     if (user.status === "suspended") {
       return NextResponse.json(
         {
@@ -41,6 +106,19 @@ export async function POST(request: NextRequest) {
           error: {
             code: "ACCOUNT_SUSPENDED",
             message: "Your account has been suspended. Please contact support.",
+          },
+        },
+        { status: 403 }
+      );
+    }
+
+    if (user.status !== "active") {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "ACCOUNT_INACTIVE",
+            message: "Your account is not active.",
           },
         },
         { status: 403 }

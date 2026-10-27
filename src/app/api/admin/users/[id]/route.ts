@@ -96,7 +96,7 @@ export async function PATCH(
 
     await connectToDatabase();
     const updateData: Record<string, unknown> = {};
-    if (status && (status === "active" || status === "suspended")) {
+    if (status && ["active", "suspended", "pending", "rejected"].includes(status)) {
       updateData.status = status;
     }
     if (role && (role === "user" || role === "admin")) {
@@ -114,9 +114,18 @@ export async function PATCH(
       );
     }
 
+    const auditAction =
+      status === "active"
+        ? "USER_APPROVED"
+        : status === "rejected"
+        ? "USER_REJECTED"
+        : status
+        ? `USER_${status.toUpperCase()}`
+        : "USER_UPDATED";
+
     await AdminAudit.create({
       adminId: adminUser._id,
-      action: status ? `USER_${status.toUpperCase()}` : "USER_UPDATED",
+      action: auditAction,
       resourceType: "user",
       resourceId: id,
       details: updateData,

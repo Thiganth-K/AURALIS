@@ -1,14 +1,19 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { SessionUser } from "@/lib/auth";
 
 interface AuthContextType {
   user: SessionUser | null;
   isAdmin: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-  register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; user?: SessionUser }>;
+  register: (
+    name: string,
+    email: string,
+    password: string
+  ) => Promise<{ success: boolean; pendingApproval?: boolean; message?: string; error?: string }>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -18,6 +23,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const pathname = usePathname();
+  const isAuthPage = pathname === "/login" || pathname === "/register";
 
   const refresh = useCallback(async () => {
     try {
@@ -38,8 +45,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (isAuthPage) {
+      setIsLoading(false);
+      return;
+    }
     refresh();
-  }, [refresh]);
+  }, [refresh, isAuthPage]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -51,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await res.json();
       if (res.ok && data.success) {
         setUser(data.data);
-        return { success: true };
+        return { success: true, user: data.data };
       }
       return { success: false, error: data.error?.message || "Invalid credentials" };
     } catch {
@@ -68,6 +79,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       const data = await res.json();
       if (res.ok && data.success) {
+        if (data.pendingApproval) {
+          return { success: true, pendingApproval: true, message: data.message };
+        }
         setUser(data.data);
         return { success: true };
       }

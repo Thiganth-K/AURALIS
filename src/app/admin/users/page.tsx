@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useEffect, useState, useTransition } from "react";
-import Link from "next/link";
+import React, { useEffect, useState, useTransition, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import {
-  Users,
-  Plus,
   Search,
+  Filter,
   Shield,
+  MoreVertical,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
   UserCheck,
   UserX,
   Trash2,
-  Loader2,
-  AlertCircle,
 } from "lucide-react";
 
 interface AdminUserItem {
@@ -20,7 +20,7 @@ interface AdminUserItem {
   name: string;
   email: string;
   role: "user" | "admin";
-  status: "active" | "suspended";
+  status: "active" | "suspended" | "pending" | "rejected";
   likedCount: number;
   createdAt: string;
 }
@@ -34,6 +34,9 @@ export default function AdminUsersPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [isPending, startTransition] = useTransition();
   const [actionError, setActionError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   const fetchUsers = async () => {
     try {
@@ -41,7 +44,7 @@ export default function AdminUsersPage() {
       const res = await fetch("/api/admin/users");
       if (res.ok) {
         const data = await res.json();
-        if (data.success) {
+        if (data.success && Array.isArray(data.users)) {
           setUsers(data.users);
         }
       }
@@ -56,13 +59,28 @@ export default function AdminUsersPage() {
     fetchUsers();
   }, []);
 
-  const handleToggleStatus = async (userItem: AdminUserItem) => {
+  // Close action menu on click outside
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setActiveMenuId(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleSetStatus = async (
+    userItem: AdminUserItem,
+    newStatus: "active" | "suspended" | "pending" | "rejected"
+  ) => {
     if (userItem.id === currentAdmin?.id) {
       setActionError("You cannot modify your own administrative account status.");
       return;
     }
     setActionError(null);
-    const newStatus = userItem.status === "active" ? "suspended" : "active";
+    setSuccessMessage(null);
+    setActiveMenuId(null);
 
     startTransition(async () => {
       try {
@@ -75,6 +93,13 @@ export default function AdminUsersPage() {
           setUsers((prev) =>
             prev.map((u) => (u.id === userItem.id ? { ...u, status: newStatus } : u))
           );
+          if (newStatus === "active") {
+            setSuccessMessage(`Account request for ${userItem.email} has been approved.`);
+          } else if (newStatus === "rejected") {
+            setSuccessMessage(`Registration request for ${userItem.email} has been rejected.`);
+          } else if (newStatus === "suspended") {
+            setSuccessMessage(`User ${userItem.email} has been suspended.`);
+          }
         } else {
           const err = await res.json();
           setActionError(err.error || "Failed to update status");
@@ -85,17 +110,58 @@ export default function AdminUsersPage() {
     });
   };
 
+  const handleToggleRole = async (userItem: AdminUserItem) => {
+    if (userItem.id === currentAdmin?.id) {
+      setActionError("You cannot modify your own administrative role.");
+      return;
+    }
+    const newRole = userItem.role === "admin" ? "user" : "admin";
+    setActionError(null);
+    setSuccessMessage(null);
+    setActiveMenuId(null);
+
+    startTransition(async () => {
+      try {
+        const res = await fetch(`/api/admin/users/${userItem.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ role: newRole }),
+        });
+        if (res.ok) {
+          setUsers((prev) =>
+            prev.map((u) => (u.id === userItem.id ? { ...u, role: newRole } : u))
+          );
+          setSuccessMessage(
+            `User ${userItem.email} role updated to ${newRole.toUpperCase()}.`
+          );
+        } else {
+          const err = await res.json();
+          setActionError(err.error || "Failed to update role");
+        }
+      } catch {
+        setActionError("Network error while updating role");
+      }
+    });
+  };
+
   const handleDeleteUser = async (userItem: AdminUserItem) => {
     if (userItem.id === currentAdmin?.id) {
       setActionError("You cannot delete your own administrative account.");
       return;
     }
 
-    if (!confirm(`Are you sure you want to delete user ${userItem.email}? This action cannot be undone.`)) {
+    if (
+      !confirm(
+        `Are you sure you want to delete user ${userItem.email}? This action cannot be undone.`
+      )
+    ) {
       return;
     }
 
     setActionError(null);
+    setSuccessMessage(null);
+    setActiveMenuId(null);
+
     startTransition(async () => {
       try {
         const res = await fetch(`/api/admin/users/${userItem.id}`, {
@@ -103,6 +169,7 @@ export default function AdminUsersPage() {
         });
         if (res.ok) {
           setUsers((prev) => prev.filter((u) => u.id !== userItem.id));
+          setSuccessMessage(`User ${userItem.email} has been permanently deleted.`);
         } else {
           const err = await res.json();
           setActionError(err.error || "Failed to delete user");
@@ -123,187 +190,486 @@ export default function AdminUsersPage() {
   });
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2.5">
-            <Users className="w-6 h-6 text-[#D7FF3F]" />
-            <span>User Management</span>
-          </h1>
-          <p className="text-xs text-[#A1A1AA] mt-1">
-            Audit identities, manage access roles, and control account suspension statuses.
-          </p>
-        </div>
-        <Link
-          href="/admin/users/new"
-          className="px-4 py-2 rounded-xl bg-[#D7FF3F] hover:bg-[#cbf531] text-black font-semibold text-xs flex items-center gap-2 transition-all shadow-md shadow-[#D7FF3F]/10 self-start sm:self-auto"
+    <div className="space-y-6 select-none font-mono">
+      {/* ── 1. PAGE HERO BANNER (MATCHES USER SPEC EXACTLY) ── */}
+      <div
+        className="relative p-6 sm:p-7 overflow-hidden"
+        style={{
+          backgroundColor: "#FAF7EE",
+          border: "2px solid #111111",
+          boxShadow: "3px 3px 0px #111111",
+        }}
+      >
+        {/* Technical Corner Crop Ticks (in Orange #F05A28) */}
+        <span
+          className="absolute top-1.5 left-2 text-sm font-bold font-mono select-none"
+          style={{ color: "#F05A28" }}
         >
-          <Plus className="w-4 h-4 text-black" />
-          <span>Create User</span>
-        </Link>
+          ┌
+        </span>
+        <span
+          className="absolute top-1.5 right-2 text-sm font-bold font-mono select-none"
+          style={{ color: "#F05A28" }}
+        >
+          ┐
+        </span>
+        <span
+          className="absolute bottom-1.5 left-2 text-sm font-bold font-mono select-none"
+          style={{ color: "#F05A28" }}
+        >
+          └
+        </span>
+        <span
+          className="absolute bottom-1.5 right-2 text-sm font-bold font-mono select-none"
+          style={{ color: "#F05A28" }}
+        >
+          ┘
+        </span>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
+          {/* Left Text Column */}
+          <div className="max-w-xl">
+            {/* Tagline */}
+            <div className="flex items-center gap-2 mb-2">
+              <span
+                className="w-2 h-2 inline-block shrink-0"
+                style={{ backgroundColor: "#F05A28" }}
+              />
+              <span
+                className="text-[10px] font-bold tracking-[0.22em] uppercase"
+                style={{ color: "#F05A28" }}
+              >
+                AURALIS // USER ADMINISTRATION
+              </span>
+            </div>
+
+            {/* Title */}
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#111111] uppercase leading-none">
+              USERS // DIRECTORY
+            </h1>
+
+            {/* Sub-text (Two Lines) */}
+            <p className="text-xs sm:text-[13px] text-[#7A7166] mt-2 font-mono leading-relaxed">
+              Manage user accounts, roles, and permissions across the platform.
+              <br className="hidden sm:inline" />
+              {" "}Keep your community safe and connected.
+            </p>
+          </div>
+
+          {/* Right Side: Soundwave Bars & Editorial Tagline */}
+          <div className="hidden sm:flex items-center gap-5 shrink-0">
+            {/* Center Soundwave Graphic in Vivid Orange */}
+            <div className="flex items-center gap-[3px] h-12 px-2">
+              <span className="w-[3px] bg-[#F05A28] h-3 rounded-xs" />
+              <span className="w-[3px] bg-[#F05A28] h-5 rounded-xs" />
+              <span className="w-[3px] bg-[#F05A28] h-8 rounded-xs" />
+              <span className="w-[3px] bg-[#F05A28] h-11 rounded-xs" />
+              <span className="w-[3px] bg-[#F05A28] h-12 rounded-xs" />
+              <span className="w-[3px] bg-[#F05A28] h-9 rounded-xs" />
+              <span className="w-[3px] bg-[#F05A28] h-7 rounded-xs" />
+              <span className="w-[3px] bg-[#F05A28] h-4 rounded-xs" />
+              <span className="w-[3px] bg-[#F05A28] h-2 rounded-xs" />
+            </div>
+
+            {/* Tagline on the Right */}
+            <div
+              className="text-left text-[10px] font-bold tracking-widest text-[#111111] uppercase leading-tight font-mono pl-5"
+              style={{ borderLeft: "1px solid rgba(17, 17, 17, 0.15)" }}
+            >
+              <p>REAL PEOPLE.</p>
+              <p className="my-0.5">REAL MUSIC.</p>
+              <p style={{ color: "#F05A28" }}>AURALIS.</p>
+            </div>
+          </div>
+        </div>
       </div>
 
+      {/* Notifications */}
       {actionError && (
-        <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs flex items-center gap-2">
+        <div
+          className="p-3.5 flex items-center gap-2.5 text-xs font-bold uppercase"
+          style={{
+            backgroundColor: "#FFF0ED",
+            border: "2px solid #D62828",
+            color: "#D62828",
+            boxShadow: "2px 2px 0px #111111",
+          }}
+        >
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{actionError}</span>
         </div>
       )}
 
-      {/* Filter and Search Bar */}
-      <div className="flex flex-col md:flex-row items-center gap-3 justify-between">
-        <div className="w-full md:w-80 flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#141414] border border-white/10 text-xs">
-          <Search className="w-4 h-4 text-[#71717A] shrink-0" />
+      {successMessage && (
+        <div
+          className="p-3.5 flex items-center gap-2.5 text-xs font-bold uppercase"
+          style={{
+            backgroundColor: "#ECFDF5",
+            border: "2px solid #15803D",
+            color: "#15803D",
+            boxShadow: "2px 2px 0px #111111",
+          }}
+        >
+          <CheckCircle2 className="w-4 h-4 shrink-0" />
+          <span>{successMessage}</span>
+        </div>
+      )}
+
+      {/* ── 2. SEARCH & FILTERS BAR (EXACT SPEC) ─────────────── */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3.5 justify-between">
+        {/* Search input with bold offset box */}
+        <div
+          className="flex-1 max-w-lg flex items-center gap-3 px-3.5 py-2.5 text-xs"
+          style={{
+            backgroundColor: "#FAF7EE",
+            border: "2px solid #111111",
+            boxShadow: "2.5px 2.5px 0px #111111",
+          }}
+        >
+          <Search className="w-4 h-4 shrink-0" style={{ color: "#F05A28" }} />
           <input
             type="text"
-            placeholder="Search by name or email..."
+            placeholder="SEARCH BY NAME OR EMAIL..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-transparent text-white placeholder-[#71717A] focus:outline-none"
+            className="w-full bg-transparent text-[#111111] placeholder-[#7A7166] focus:outline-none font-mono text-xs uppercase tracking-wide"
+            style={{ caretColor: "#F05A28" }}
           />
         </div>
 
-        <div className="flex items-center gap-2 self-start md:self-auto">
+        {/* Filter Section on Right */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#111111]">
+            <Filter className="w-4 h-4 shrink-0" style={{ color: "#F05A28" }} />
+            <span className="tracking-wider">FILTER:</span>
+          </div>
+
+          {/* Role Dropdown */}
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-xs text-[#A1A1AA] focus:outline-none focus:border-white/20"
+            className="px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-[#111111] cursor-pointer"
+            style={{
+              backgroundColor: "#FAF7EE",
+              border: "2px solid #111111",
+              boxShadow: "2px 2px 0px #111111",
+            }}
           >
-            <option value="all">All Roles</option>
-            <option value="user">Listeners (User)</option>
-            <option value="admin">Administrators</option>
+            <option value="all">ALL ROLES</option>
+            <option value="user">USER / LISTENER</option>
+            <option value="admin">ADMIN</option>
           </select>
 
+          {/* Status Dropdown */}
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-[#141414] border border-white/10 text-xs text-[#A1A1AA] focus:outline-none focus:border-white/20"
+            className="px-3.5 py-2 text-xs font-bold uppercase tracking-wider text-[#111111] cursor-pointer"
+            style={{
+              backgroundColor: "#FAF7EE",
+              border: "2px solid #111111",
+              boxShadow: "2px 2px 0px #111111",
+            }}
           >
-            <option value="all">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="suspended">Suspended</option>
+            <option value="all">ALL STATUSES</option>
+            <option value="active">ACTIVE</option>
+            <option value="pending">PENDING</option>
+            <option value="suspended">SUSPENDED</option>
+            <option value="rejected">REJECTED</option>
           </select>
         </div>
       </div>
 
-      {/* Users Table */}
-      <div className="rounded-2xl border border-white/5 bg-[#121212] overflow-hidden">
+      {/* ── 3. REGISTERED IDENTITIES TABLE CONTAINER ────────── */}
+      <div
+        className="overflow-visible"
+        style={{
+          backgroundColor: "#FAF7EE",
+          border: "2px solid #111111",
+          boxShadow: "3px 3px 0px #111111",
+        }}
+      >
+        {/* Table Header Bar */}
+        <div
+          className="px-5 py-3.5 flex items-center justify-between"
+          style={{ borderBottom: "2px solid #111111" }}
+        >
+          <div className="flex items-center gap-2">
+            <span
+              className="w-2 h-2 inline-block shrink-0"
+              style={{ backgroundColor: "#F05A28" }}
+            />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#111111]">
+              REGISTERED IDENTITIES
+            </h2>
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-wider text-[#7A7166]">
+            [ {filteredUsers.length} RECORDS FOUND ]
+          </span>
+        </div>
+
         {loading ? (
-          <div className="py-16 flex items-center justify-center">
-            <Loader2 className="w-6 h-6 text-[#D7FF3F] animate-spin" />
+          <div className="py-20 flex flex-col items-center justify-center gap-2">
+            <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#F05A28" }} />
+            <span className="text-xs font-bold uppercase tracking-widest text-[#7A7166]">
+              LOADING DIRECTORY...
+            </span>
           </div>
         ) : filteredUsers.length === 0 ? (
-          <div className="py-16 text-center text-[#71717A] text-xs">
-            No users match the criteria.
+          <div className="py-20 text-center text-[#7A7166] text-xs font-bold uppercase tracking-wider">
+            NO USERS MATCH THE CURRENT CRITERIA.
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-white/[0.02] border-b border-white/5 text-[#71717A] uppercase font-mono text-[10px]">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead
+                className="text-[#7A7166] uppercase font-bold text-[10px] tracking-wider"
+                style={{
+                  backgroundColor: "#F6EEDE",
+                  borderBottom: "1.5px solid #111111",
+                }}
+              >
                 <tr>
-                  <th className="py-3.5 px-4 font-semibold">User</th>
-                  <th className="py-3.5 px-4 font-semibold">Role</th>
-                  <th className="py-3.5 px-4 font-semibold">Status</th>
-                  <th className="py-3.5 px-4 font-semibold">Liked Songs</th>
-                  <th className="py-3.5 px-4 font-semibold">Created</th>
-                  <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
+                  <th className="py-3 px-5">USER</th>
+                  <th className="py-3 px-4">ROLE</th>
+                  <th className="py-3 px-4">STATUS</th>
+                  <th className="py-3 px-4">LIKED TRACKS</th>
+                  <th className="py-3 px-4">REGISTERED</th>
+                  <th className="py-3 px-5 text-right">ACTIONS</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-[#111111]/15">
                 {filteredUsers.map((u) => {
                   const isCurrent = u.id === currentAdmin?.id;
+                  const isMenuOpen = activeMenuId === u.id;
+
+                  // Format MM/DD/YYYY exactly as in image
+                  const dateObj = new Date(u.createdAt);
+                  const formattedDate = !isNaN(dateObj.getTime())
+                    ? `${String(dateObj.getMonth() + 1).padStart(2, "0")}/${String(
+                        dateObj.getDate()
+                      ).padStart(2, "0")}/${dateObj.getFullYear()}`
+                    : "10/25/2026";
+
                   return (
                     <tr
                       key={u.id}
-                      className="hover:bg-white/[0.02] transition-colors"
+                      className="hover:bg-[#F6EEDE] transition-colors"
                     >
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-[#181818] border border-white/10 flex items-center justify-center text-xs font-bold text-white shrink-0">
-                            {u.name.slice(0, 1).toUpperCase()}
+                      {/* USER Column: Orange Square Avatar with Soft Drop Shadow + Name + YOU Badge + Email */}
+                      <td className="py-3.5 px-5">
+                        <div className="flex items-center gap-3.5">
+                          {/* Glowing Orange Square Monospace Avatar */}
+                          <div
+                            className="w-9 h-9 flex items-center justify-center text-sm font-bold shrink-0 uppercase text-white"
+                            style={{
+                              backgroundColor: "#F05A28",
+                              boxShadow: "0 4px 12px rgba(240, 90, 40, 0.45)",
+                            }}
+                          >
+                            {u.name ? u.name.slice(0, 1).toUpperCase() : "U"}
                           </div>
-                          <div>
-                            <div className="font-semibold text-white flex items-center gap-1.5">
+
+                          <div className="min-w-0">
+                            <div className="font-bold text-[#111111] flex items-center gap-2 uppercase truncate text-xs tracking-wide">
                               <span>{u.name}</span>
                               {isCurrent && (
-                                <span className="text-[10px] font-mono text-[#D7FF3F] bg-[#D7FF3F]/10 px-1 rounded">
-                                  You
+                                <span
+                                  className="text-[9px] font-bold px-1.5 py-0.5 tracking-wider uppercase text-white"
+                                  style={{ backgroundColor: "#F05A28" }}
+                                >
+                                  YOU
                                 </span>
                               )}
                             </div>
-                            <div className="text-[11px] text-[#71717A] font-mono">
+                            <div className="text-[11px] text-[#7A7166] font-mono truncate mt-0.5">
                               {u.email}
                             </div>
                           </div>
                         </div>
                       </td>
+
+                      {/* ROLE Column: Retro Box with Shield Icon */}
                       <td className="py-3.5 px-4">
                         <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono uppercase font-semibold ${
-                            u.role === "admin"
-                              ? "bg-[#D7FF3F]/10 text-[#D7FF3F] border border-[#D7FF3F]/20"
-                              : "bg-white/5 text-[#A1A1AA] border border-white/10"
-                          }`}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider"
+                          style={{
+                            backgroundColor: u.role === "admin" ? "#FFF0ED" : "#FAF7EE",
+                            color: u.role === "admin" ? "#F05A28" : "#7A7166",
+                            border:
+                              u.role === "admin" ? "1px solid #F05A28" : "1px solid #111111",
+                          }}
                         >
-                          {u.role === "admin" && <Shield className="w-2.5 h-2.5" />}
-                          {u.role}
+                          <Shield className="w-3 h-3 text-[#F05A28]" />
+                          <span>{u.role.toUpperCase()}</span>
                         </span>
                       </td>
+
+                      {/* STATUS Column: Green Dot + ACTIVE Badge */}
                       <td className="py-3.5 px-4">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono uppercase font-semibold ${
-                            u.status === "active"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : "bg-red-500/10 text-red-400 border border-red-500/20"
-                          }`}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider"
+                          style={{
+                            backgroundColor:
+                              u.status === "active"
+                                ? "#ECFDF5"
+                                : u.status === "pending"
+                                ? "#FEF3C7"
+                                : "#FFF0ED",
+                            color:
+                              u.status === "active"
+                                ? "#15803D"
+                                : u.status === "pending"
+                                ? "#B45309"
+                                : "#DC2626",
+                            border:
+                              u.status === "active"
+                                ? "1px solid #16A34A"
+                                : u.status === "pending"
+                                ? "1px solid #B45309"
+                                : "1px solid #DC2626",
+                          }}
                         >
                           <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              u.status === "active" ? "bg-emerald-400" : "bg-red-400"
-                            }`}
+                            className="w-1.5 h-1.5 rounded-full"
+                            style={{
+                              backgroundColor:
+                                u.status === "active"
+                                  ? "#16A34A"
+                                  : u.status === "pending"
+                                  ? "#B45309"
+                                  : "#DC2626",
+                            }}
                           />
-                          {u.status}
+                          <span>{u.status.toUpperCase()}</span>
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-[#A1A1AA]">
+
+                      {/* LIKED TRACKS Column */}
+                      <td className="py-3.5 px-4 font-bold text-[#111111]">
                         {u.likedCount || 0}
                       </td>
-                      <td className="py-3.5 px-4 text-[#71717A] font-mono">
-                        {new Date(u.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          {!isCurrent && (
-                            <>
-                              <button
-                                type="button"
-                                disabled={isPending}
-                                onClick={() => handleToggleStatus(u)}
-                                title={u.status === "active" ? "Suspend user" : "Activate user"}
-                                className={`p-1.5 rounded-lg border transition-colors ${
-                                  u.status === "active"
-                                    ? "bg-amber-500/10 border-amber-500/20 text-amber-400 hover:bg-amber-500/20"
-                                    : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20"
-                                }`}
-                              >
-                                {u.status === "active" ? (
-                                  <UserX className="w-3.5 h-3.5" />
-                                ) : (
-                                  <UserCheck className="w-3.5 h-3.5" />
-                                )}
-                              </button>
 
-                              <button
-                                type="button"
-                                disabled={isPending}
-                                onClick={() => handleDeleteUser(u)}
-                                title="Delete user"
-                                className="p-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </>
+                      {/* REGISTERED Date Column */}
+                      <td className="py-3.5 px-4 text-[#111111] font-mono">
+                        {formattedDate}
+                      </td>
+
+                      {/* ACTIONS Column: Single Retro Boxed Button with 3 Vertical Dots */}
+                      <td className="py-3.5 px-5 text-right relative">
+                        <div className="relative inline-block text-left" ref={menuRef}>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setActiveMenuId(isMenuOpen ? null : u.id)
+                            }
+                            className="p-1.5 transition-all cursor-pointer flex items-center justify-center"
+                            style={{
+                              backgroundColor: "#FAF7EE",
+                              border: "1.5px solid #111111",
+                              boxShadow: "1.5px 1.5px 0px #111111",
+                            }}
+                            title="Actions"
+                          >
+                            <MoreVertical className="w-3.5 h-3.5 text-[#111111]" />
+                          </button>
+
+                          {/* Popover Action Menu */}
+                          {isMenuOpen && (
+                            <div
+                              className="absolute right-0 mt-1.5 w-44 z-50 p-1 flex flex-col gap-0.5 text-left font-mono text-[11px]"
+                              style={{
+                                backgroundColor: "#FAF7EE",
+                                border: "2px solid #111111",
+                                boxShadow: "3px 3px 0px #111111",
+                              }}
+                            >
+                              {/* Toggle Role */}
+                              {!isCurrent && (
+                                <button
+                                  type="button"
+                                  disabled={isPending}
+                                  onClick={() => handleToggleRole(u)}
+                                  className="w-full text-left px-2.5 py-1.5 font-bold uppercase transition-colors hover:bg-[#F6EEDE] flex items-center gap-2 cursor-pointer"
+                                >
+                                  <Shield className="w-3.5 h-3.5 text-[#F05A28]" />
+                                  <span>
+                                    {u.role === "admin"
+                                      ? "REVOKE ADMIN"
+                                      : "MAKE ADMIN"}
+                                  </span>
+                                </button>
+                              )}
+
+                              {/* Toggle Status */}
+                              {!isCurrent && u.status === "pending" && (
+                                <>
+                                  <button
+                                    type="button"
+                                    disabled={isPending}
+                                    onClick={() => handleSetStatus(u, "active")}
+                                    className="w-full text-left px-2.5 py-1.5 font-bold uppercase text-[#15803D] hover:bg-[#ECFDF5] flex items-center gap-2 cursor-pointer"
+                                  >
+                                    <UserCheck className="w-3.5 h-3.5" />
+                                    <span>APPROVE USER</span>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    disabled={isPending}
+                                    onClick={() => handleSetStatus(u, "rejected")}
+                                    className="w-full text-left px-2.5 py-1.5 font-bold uppercase text-[#D62828] hover:bg-[#FFF0ED] flex items-center gap-2 cursor-pointer"
+                                  >
+                                    <UserX className="w-3.5 h-3.5" />
+                                    <span>REJECT USER</span>
+                                  </button>
+                                </>
+                              )}
+
+                              {!isCurrent && u.status === "active" && (
+                                <button
+                                  type="button"
+                                  disabled={isPending}
+                                  onClick={() => handleSetStatus(u, "suspended")}
+                                  className="w-full text-left px-2.5 py-1.5 font-bold uppercase text-[#B45309] hover:bg-[#FEF3C7] flex items-center gap-2 cursor-pointer"
+                                >
+                                  <UserX className="w-3.5 h-3.5" />
+                                  <span>SUSPEND USER</span>
+                                </button>
+                              )}
+
+                              {!isCurrent && u.status === "suspended" && (
+                                <button
+                                  type="button"
+                                  disabled={isPending}
+                                  onClick={() => handleSetStatus(u, "active")}
+                                  className="w-full text-left px-2.5 py-1.5 font-bold uppercase text-[#15803D] hover:bg-[#ECFDF5] flex items-center gap-2 cursor-pointer"
+                                >
+                                  <UserCheck className="w-3.5 h-3.5" />
+                                  <span>UNSUSPEND USER</span>
+                                </button>
+                              )}
+
+                              {/* Delete */}
+                              {!isCurrent && (
+                                <div className="border-t border-[#111111]/15 pt-0.5 mt-0.5">
+                                  <button
+                                    type="button"
+                                    disabled={isPending}
+                                    onClick={() => handleDeleteUser(u)}
+                                    className="w-full text-left px-2.5 py-1.5 font-bold uppercase text-[#D62828] hover:bg-[#FFF0ED] flex items-center gap-2 cursor-pointer"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <span>DELETE USER</span>
+                                  </button>
+                                </div>
+                              )}
+
+                              {isCurrent && (
+                                <div className="px-2.5 py-1.5 text-[10px] text-[#7A7166] uppercase font-bold">
+                                  CURRENT USER (NO ACTIONS)
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
                       </td>

@@ -12,7 +12,7 @@ export interface IUser extends Document {
     playedAt: Date;
   }[];
   role: "user" | "admin";
-  status: "active" | "suspended";
+  status: "active" | "suspended" | "pending" | "rejected";
   createdAt: Date;
   updatedAt: Date;
 }
@@ -39,7 +39,12 @@ const UserSchema = new Schema<IUser>(
       },
     ],
     role: { type: String, enum: ["user", "admin"], default: "user", index: true },
-    status: { type: String, enum: ["active", "suspended"], default: "active", index: true },
+    status: {
+      type: String,
+      enum: ["active", "suspended", "pending", "rejected"],
+      default: "pending",
+      index: true,
+    },
   },
   { timestamps: true }
 );

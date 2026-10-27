@@ -30,14 +30,17 @@ export async function GET(request: NextRequest) {
     if (role && (role === "user" || role === "admin")) {
       filter.role = role;
     }
-    if (status && (status === "active" || status === "suspended")) {
+    if (status && ["active", "suspended", "pending", "rejected"].includes(status)) {
       filter.status = status;
     }
 
-    const users = await User.find(filter)
-      .sort({ createdAt: -1 })
-      .select("-passwordHash")
-      .lean();
+    const [users, pendingCount] = await Promise.all([
+      User.find(filter)
+        .sort({ createdAt: -1 })
+        .select("-passwordHash")
+        .lean(),
+      User.countDocuments({ status: "pending" }),
+    ]);
 
     const formattedUsers = users.map((u) => ({
       id: u._id.toString(),
@@ -54,6 +57,7 @@ export async function GET(request: NextRequest) {
       success: true,
       users: formattedUsers,
       data: formattedUsers,
+      pendingCount,
     });
   } catch (error) {
     if (error && typeof error === "object" && "digest" in error && (error as { digest: string }).digest === "NEXT_PRERENDER_INTERRUPTED") {

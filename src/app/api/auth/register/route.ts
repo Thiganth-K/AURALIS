@@ -35,6 +35,21 @@ export async function POST(request: NextRequest) {
     await connectToDatabase();
 
     const normalizedEmail = email.toLowerCase().trim();
+    const envAdminEmail = (process.env.ADMIN_EMAIL || "admin@auralis.app").toLowerCase().trim();
+
+    if (normalizedEmail === envAdminEmail) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "RESERVED_EMAIL",
+            message: "This is a reserved administrative email address. Please sign in.",
+          },
+        },
+        { status: 400 }
+      );
+    }
+
     const existing = await User.findOne({ email: normalizedEmail });
     if (existing) {
       return NextResponse.json(
@@ -48,25 +63,20 @@ export async function POST(request: NextRequest) {
 
     const passwordHash = await hashPassword(password);
 
-    // CRITICAL: Default registration must ALWAYS create role: "user"
+    // New registrations are created with status: "pending" awaiting admin approval
     const newUser = await User.create({
       name: name.trim(),
       email: normalizedEmail,
       passwordHash,
       role: "user",
-      status: "active",
+      status: "pending",
       avatar: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80`,
     });
 
-    const token = await createSessionToken({
-      userId: newUser._id.toString(),
-      role: newUser.role,
-      email: newUser.email,
-      name: newUser.name,
-    });
-
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: true,
+      pendingApproval: true,
+      message: "Registration request submitted. Awaiting administrator approval.",
       data: {
         id: newUser._id.toString(),
         name: newUser.name,
@@ -76,16 +86,6 @@ export async function POST(request: NextRequest) {
         avatar: newUser.avatar,
       },
     });
-
-    response.cookies.set(AUTH_COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 7, // 7 days
-    });
-
-    return response;
   } catch (error) {
     console.error("API /api/auth/register error:", error);
     return NextResponse.json(

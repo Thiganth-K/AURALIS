@@ -79,20 +79,13 @@ export default function LoginPage() {
         ? new URLSearchParams(window.location.search)
         : null;
     const redirectParam = searchParams?.get("redirect");
+    const isAdmin = res.user?.role === "admin";
 
-    try {
-      const meRes = await fetch("/api/auth/me");
-      const meData = await meRes.json();
-      const isAdmin = meData.success && meData.data?.role === "admin";
-
-      if (redirectParam && redirectParam.startsWith("/")) {
-        router.push(redirectParam);
-      } else if (isAdmin) {
-        router.push("/admin");
-      } else {
-        router.push("/");
-      }
-    } catch {
+    if (redirectParam && redirectParam.startsWith("/")) {
+      router.push(redirectParam);
+    } else if (isAdmin) {
+      router.push("/admin");
+    } else {
       router.push("/");
     }
   };
@@ -348,7 +341,7 @@ export default function LoginPage() {
                 style={{
                   clipPath: chamferInner,
                   backgroundColor: "#F5F0E8",
-                  padding: "44px 30px 38px",
+                  padding: "40px 32px 36px",
                 }}
               >
                 {/* Error message */}
@@ -366,10 +359,10 @@ export default function LoginPage() {
                   </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Email */}
                   <div>
-                    <label className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase mb-2" style={{ color: "#111111" }}>
+                    <label className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase mb-2.5" style={{ color: "#111111" }}>
                       <span className="w-2 h-2 shrink-0 inline-block" style={{ backgroundColor: "#F05A28" }} />
                       IDENTITY (EMAIL)
                     </label>
@@ -378,10 +371,11 @@ export default function LoginPage() {
                       style={{
                         backgroundColor: "#FAF7EE",
                         border: "1.5px solid #111111",
+                        minHeight: 80,
                       }}
                     >
-                      <span className="pl-4 pr-3 flex items-center" style={{ color: "#111111" }}>
-                        <Mail className="w-[18px] h-[18px]" />
+                      <span className="pl-5 pr-3.5 flex items-center shrink-0" style={{ color: "#111111" }}>
+                        <Mail className="w-5 h-5" />
                       </span>
                       <input
                         type="email"
@@ -389,7 +383,7 @@ export default function LoginPage() {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="name@example.com"
-                        className="w-full py-4 pr-4 text-[13px] font-mono bg-transparent focus:outline-none"
+                        className="w-full py-6 pr-5 text-sm font-mono bg-transparent focus:outline-none"
                         style={{ color: "#111111", caretColor: "#F05A28" }}
                       />
                     </div>
@@ -397,7 +391,7 @@ export default function LoginPage() {
 
                   {/* Password */}
                   <div>
-                    <label className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase mb-2" style={{ color: "#111111" }}>
+                    <label className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase mb-2.5" style={{ color: "#111111" }}>
                       <span className="w-2 h-2 shrink-0 inline-block" style={{ backgroundColor: "#F05A28" }} />
                       PASSPHRASE
                     </label>
@@ -406,10 +400,11 @@ export default function LoginPage() {
                       style={{
                         backgroundColor: "#FAF7EE",
                         border: "1.5px solid #111111",
+                        minHeight: 80,
                       }}
                     >
-                      <span className="pl-4 pr-3 flex items-center" style={{ color: "#111111" }}>
-                        <Lock className="w-[18px] h-[18px]" />
+                      <span className="pl-5 pr-3.5 flex items-center shrink-0" style={{ color: "#111111" }}>
+                        <Lock className="w-5 h-5" />
                       </span>
                       <input
                         type={showPassword ? "text" : "password"}
@@ -417,20 +412,20 @@ export default function LoginPage() {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="••••••••"
-                        className="w-full py-4 pr-11 text-[13px] font-mono bg-transparent focus:outline-none tracking-widest"
+                        className="w-full py-6 pr-12 text-sm font-mono bg-transparent focus:outline-none tracking-widest"
                         style={{ color: "#111111", caretColor: "#F05A28" }}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3.5 flex items-center justify-center transition-colors"
+                        className="absolute right-4 flex items-center justify-center transition-colors p-1"
                         style={{ color: "#7A7166" }}
                         aria-label="Toggle password visibility"
                       >
                         {showPassword ? (
-                          <EyeOff className="w-[18px] h-[18px]" />
+                          <EyeOff className="w-5 h-5" />
                         ) : (
-                          <Eye className="w-[18px] h-[18px]" />
+                          <Eye className="w-5 h-5" />
                         )}
                       </button>
                     </div>
@@ -446,8 +441,8 @@ export default function LoginPage() {
                       color: "#111111",
                       border: "2px solid #111111",
                       boxShadow: "5px 5px 0px #111111",
-                      padding: "16px 24px",
-                      marginTop: 14,
+                      padding: "18px 24px",
+                      marginTop: 22,
                     }}
                     onMouseEnter={(e) => {
                       if (!isSubmitting) {
@@ -483,63 +478,6 @@ export default function LoginPage() {
                     )}
                   </button>
                 </form>
-
-                {/* Quick presets */}
-                <div className="mt-8">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="flex-1 h-[1px]" style={{ backgroundColor: "#111111", opacity: 0.2 }} />
-                    <span className="text-[10px] tracking-[0.22em] font-bold uppercase" style={{ color: "#7A7166" }}>
-                      // QUICK LOGIN PRESETS
-                    </span>
-                    <div className="flex-1 h-[1px]" style={{ backgroundColor: "#111111", opacity: 0.2 }} />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3.5">
-                    {/* Admin */}
-                    <button
-                      type="button"
-                      onClick={() => { setEmail("admin@auralis.app"); setPassword("admin123"); }}
-                      className="py-4 px-3.5 text-left cursor-pointer transition-all group"
-                      style={{
-                        backgroundColor: "#FAF7EE",
-                        border: "1.5px solid #111111",
-                      }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#F05A28"; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#111111"; }}
-                    >
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="w-2 h-2 shrink-0 inline-block" style={{ backgroundColor: "#F05A28" }} />
-                        <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: "#111111" }}>[ ADMIN ]</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-3.5 h-3.5 shrink-0" style={{ color: "#7A7166" }} />
-                        <span className="text-[11px] font-mono truncate" style={{ color: "#7A7166" }}>admin@auralis.app</span>
-                      </div>
-                    </button>
-
-                    {/* Listener */}
-                    <button
-                      type="button"
-                      onClick={() => { setEmail("thiganth@auralis.app"); setPassword("password123"); }}
-                      className="py-4 px-3.5 text-left cursor-pointer transition-all group"
-                      style={{
-                        backgroundColor: "#FAF7EE",
-                        border: "1.5px solid #111111",
-                      }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#F05A28"; }}
-                      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#111111"; }}
-                    >
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="w-2 h-2 shrink-0 inline-block" style={{ backgroundColor: "#F05A28" }} />
-                        <span className="text-[11px] font-bold tracking-widest uppercase" style={{ color: "#111111" }}>[ LISTENER ]</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-3.5 h-3.5 shrink-0" style={{ color: "#7A7166" }} />
-                        <span className="text-[11px] font-mono truncate" style={{ color: "#7A7166" }}>thiganth@auralis.app</span>
-                      </div>
-                    </button>
-                  </div>
-                </div>
               </div>
             </div>
           </div>

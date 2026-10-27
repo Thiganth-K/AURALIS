@@ -10,6 +10,7 @@ import React, {
   ReactNode,
 } from "react";
 import { Song, RepeatMode } from "@/types";
+import { useAuth } from "@/context/AuthContext";
 
 interface PlayerContextType {
   currentSong: Song | null;
@@ -45,6 +46,7 @@ interface PlayerContextType {
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
   const [currentSong, setCurrentSong] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
@@ -109,13 +111,18 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
   }, [volume, isMuted]);
 
-  // Sync song source
-  // Sync liked songs from DB
+  // Sync liked songs from DB only when authenticated
   useEffect(() => {
+    if (!user) {
+      setLikedSongIds(new Set());
+      return;
+    }
+
+    let isMounted = true;
     async function syncLiked() {
       try {
         const res = await fetch("/api/library/liked");
-        if (res.ok) {
+        if (res.ok && isMounted) {
           const data = await res.json();
           if (data.ids && Array.isArray(data.ids)) {
             setLikedSongIds(new Set(data.ids));
@@ -126,7 +133,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       }
     }
     syncLiked();
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
 
   const loadAndPlayTrack = useCallback((song: Song, autoPlay = true) => {
     setCurrentSong(song);
@@ -296,6 +307,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggleLike = useCallback((songId: string) => {
+    if (!user) return;
     setLikedSongIds((prev) => {
       const next = new Set(prev);
       const isCurrentlyLiked = next.has(songId);
@@ -308,7 +320,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       }
       return next;
     });
-  }, []);
+  }, [user]);
 
   return (
     <PlayerContext.Provider

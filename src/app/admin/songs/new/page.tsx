@@ -9,9 +9,7 @@ import {
   Upload,
   AlertCircle,
   Loader2,
-  CheckCircle2,
   FileAudio,
-  Radio,
 } from "lucide-react";
 
 interface ArtistOption {
@@ -63,21 +61,11 @@ export default function AdminNewSongPage() {
         ]);
         if (artistsRes.ok) {
           const aData = await artistsRes.json();
-          if (aData.success) {
-            setArtists(aData.artists);
-            if (aData.artists.length > 0) {
-              setArtistId(aData.artists[0].id);
-              if (aData.artists[0].genres?.[0]) {
-                setGenre(aData.artists[0].genres[0]);
-              }
-            }
-          }
+          if (aData.success) setArtists(aData.artists);
         }
         if (albumsRes.ok) {
           const albData = await albumsRes.json();
-          if (albData.success) {
-            setAlbums(albData.albums);
-          }
+          if (albData.success) setAlbums(albData.albums);
         }
       } catch (err) {
         console.error("Failed to load options:", err);
@@ -88,39 +76,38 @@ export default function AdminNewSongPage() {
     loadFormRelations();
   }, []);
 
-  // Filter albums matching selected artist
-  const availableAlbums = albums.filter((alb) => !artistId || alb.artistId === artistId);
+  const availableAlbums = albumId
+    ? albums
+    : artistId
+    ? albums.filter((a) => a.artistId === artistId)
+    : albums;
 
   const handleAudioUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Optional audio duration probe
-    const audioObj = new Audio(URL.createObjectURL(file));
-    audioObj.onloadedmetadata = () => {
-      if (audioObj.duration && !isNaN(audioObj.duration)) {
-        setDuration(Math.round(audioObj.duration).toString());
-      }
-    };
-
-    setUploadingAudio(true);
     setError(null);
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("type", "audio");
+    setUploadingAudio(true);
+    setAudioFilename(file.name);
 
     try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("resourceType", "video");
+
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
       const data = await res.json();
-      if (res.ok && data.success) {
+
+      if (res.ok && data.url) {
         setAudioUrl(data.url);
-        setAudioFilename(data.filename || file.name);
+        if (data.duration && !duration) {
+          setDuration(Math.round(data.duration).toString());
+        }
       } else {
-        setError(data.error || "Failed to upload audio file");
+        setError(data.error || "Failed to upload audio signal");
       }
     } catch {
       setError("Network error while uploading audio file");
@@ -133,20 +120,21 @@ export default function AdminNewSongPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploadingArtwork(true);
     setError(null);
-
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("type", "artwork");
+    setUploadingArtwork(true);
 
     try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("resourceType", "image");
+
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
       const data = await res.json();
-      if (res.ok && data.success) {
+
+      if (res.ok && data.url) {
         setArtworkUrl(data.url);
       } else {
         setError(data.error || "Failed to upload artwork");
@@ -212,29 +200,81 @@ export default function AdminNewSongPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 select-none">
-      {/* Header */}
-      <div className="flex items-center gap-3 pb-4 border-b-2 border-[#242424]">
+    <div className="max-w-3xl mx-auto space-y-6 select-none font-mono">
+      {/* Return to Catalog Link */}
+      <div>
         <Link
           href="/admin/songs"
-          className="p-1.5 border border-[#2e2e2e] bg-[#141414] text-[#A1A1AA] hover:text-white shadow-[1px_1px_0px_#000] active:translate-y-0.5"
+          className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all"
+          style={{
+            backgroundColor: "#FAF7EE",
+            color: "#111111",
+            border: "1.5px solid #111111",
+            boxShadow: "2px 2px 0px #111111",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#F6EEDE";
+            e.currentTarget.style.transform = "translate(-1px,-1px)";
+            e.currentTarget.style.boxShadow = "3px 3px 0px #111111";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "#FAF7EE";
+            e.currentTarget.style.transform = "translate(0,0)";
+            e.currentTarget.style.boxShadow = "2px 2px 0px #111111";
+          }}
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>[ RETURN TO CATALOG ]</span>
         </Link>
-        <div>
-          <h1 className="text-xl font-pixel text-white tracking-wide flex items-center gap-2">
-            <Music className="w-4 h-4 text-[#D7FF3F]" />
-            <span>INGEST AUDIO MASTER SIGNAL</span>
+      </div>
+
+      {/* Main Ingestion Form Card */}
+      <div
+        className="relative p-6 sm:p-8"
+        style={{
+          backgroundColor: "#FAF7EE",
+          border: "2px solid #111111",
+          boxShadow: "4px 4px 0px #111111",
+        }}
+      >
+        {/* Technical corner ticks */}
+        <span className="absolute top-1.5 left-2 text-xs font-mono text-[#7A7166]">┌</span>
+        <span className="absolute top-1.5 right-2 text-xs font-mono text-[#7A7166]">┐</span>
+        <span className="absolute bottom-1.5 left-2 text-xs font-mono text-[#7A7166]">└</span>
+        <span className="absolute bottom-1.5 right-2 text-xs font-mono text-[#7A7166]">┘</span>
+
+        {/* Header */}
+        <div className="pb-4 mb-6 border-b border-[#111111]/20">
+          <div className="flex items-center gap-2 mb-1">
+            <span
+              className="w-2 h-2 inline-block shrink-0"
+              style={{ backgroundColor: "#F05A28" }}
+            />
+            <span
+              className="text-[10px] font-bold tracking-[0.22em] uppercase"
+              style={{ color: "#F05A28" }}
+            >
+              AURALIS // INGESTION PROTOCOL
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-wider text-[#111111] uppercase">
+            INGEST AUDIO MASTER SIGNAL
           </h1>
-          <p className="text-xs font-sans text-[#A1A1AA]">
+          <p className="text-xs text-[#7A7166] mt-1 tracking-wide">
             Upload master audio frequency file, sleeve artwork, and calibrate track metadata.
           </p>
         </div>
-      </div>
 
-      <div className="p-6 md:p-8 bg-[#111111] border-2 border-[#262626] shadow-[5px_5px_0px_#000]">
         {error && (
-          <div className="mb-6 p-3 bg-red-950/40 border-2 border-red-500/40 text-red-400 text-xs font-pixel flex items-center gap-2.5 shadow-[2px_2px_0px_#000]">
+          <div
+            className="mb-6 p-3.5 flex items-center gap-2.5 text-xs font-bold uppercase"
+            style={{
+              backgroundColor: "#FFF0ED",
+              border: "2px solid #D62828",
+              color: "#D62828",
+              boxShadow: "2px 2px 0px #111111",
+            }}
+          >
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -243,8 +283,9 @@ export default function AdminNewSongPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Track Title */}
           <div>
-            <label className="block text-xs font-pixel text-white mb-1.5">
-              TRACK TITLE *
+            <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1.5 text-[#111111]">
+              <span className="w-1.5 h-1.5 inline-block" style={{ backgroundColor: "#F05A28" }} />
+              <span>TRACK TITLE *</span>
             </label>
             <input
               type="text"
@@ -252,15 +293,22 @@ export default function AdminNewSongPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Night Drive"
-              className="w-full px-3 py-2 bg-[#181818] border-2 border-[#2e2e2e] text-white text-xs font-sans focus:outline-none focus:border-[#D7FF3F] shadow-[inset_1px_1px_0px_#000]"
+              className="w-full px-3.5 py-2.5 text-xs font-mono bg-transparent focus:outline-none uppercase"
+              style={{
+                backgroundColor: "#FAF7EE",
+                border: "2px solid #111111",
+                color: "#111111",
+                caretColor: "#F05A28",
+              }}
             />
           </div>
 
-          {/* Artist & Album Grid */}
+          {/* Artist & Album Selection */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-pixel text-white mb-1.5">
-                ARTIST (SOURCE OF TRUTH) *
+              <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1.5 text-[#111111]">
+                <span className="w-1.5 h-1.5 inline-block" style={{ backgroundColor: "#F05A28" }} />
+                <span>ARTIST *</span>
               </label>
               <select
                 required
@@ -272,9 +320,14 @@ export default function AdminNewSongPage() {
                     setGenre(selected.genres[0]);
                   }
                 }}
-                className="w-full px-3 py-2 bg-[#181818] border-2 border-[#2e2e2e] text-white text-xs font-sans focus:outline-none focus:border-[#D7FF3F] shadow-[inset_1px_1px_0px_#000]"
+                className="w-full px-3.5 py-2.5 text-xs font-mono font-bold uppercase tracking-wider cursor-pointer"
+                style={{
+                  backgroundColor: "#FAF7EE",
+                  border: "2px solid #111111",
+                  color: "#111111",
+                }}
               >
-                <option value="">Select Artist...</option>
+                <option value="">SELECT ARTIST...</option>
                 {artists.map((art) => (
                   <option key={art.id} value={art.id}>
                     {art.name}
@@ -284,8 +337,9 @@ export default function AdminNewSongPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-pixel text-white mb-1.5">
-                ALBUM SLEEVE (OPTIONAL SINGLE)
+              <label className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1.5 text-[#111111]">
+                <span className="w-1.5 h-1.5 inline-block" style={{ backgroundColor: "#F05A28" }} />
+                <span>ALBUM SLEEVE</span>
               </label>
               <select
                 value={albumId}
@@ -296,9 +350,14 @@ export default function AdminNewSongPage() {
                     setArtworkUrl(selAlb.artworkUrl);
                   }
                 }}
-                className="w-full px-3 py-2 bg-[#181818] border-2 border-[#2e2e2e] text-white text-xs font-sans focus:outline-none focus:border-[#D7FF3F] shadow-[inset_1px_1px_0px_#000]"
+                className="w-full px-3.5 py-2.5 text-xs font-mono font-bold uppercase tracking-wider cursor-pointer"
+                style={{
+                  backgroundColor: "#FAF7EE",
+                  border: "2px solid #111111",
+                  color: "#111111",
+                }}
               >
-                <option value="">Single (Standalone Signal)</option>
+                <option value="">SINGLE (STANDALONE SIGNAL)</option>
                 {availableAlbums.map((alb) => (
                   <option key={alb.id} value={alb.id}>
                     {alb.title}
@@ -311,72 +370,113 @@ export default function AdminNewSongPage() {
           {/* Genre, Duration, Release Date */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-pixel text-[#A1A1AA] mb-1.5">
-                GENRE
+              <label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider mb-1.5 text-[#111111]">
+                <span className="w-1.5 h-1.5 inline-block" style={{ backgroundColor: "#F05A28" }} />
+                <span>GENRE</span>
               </label>
               <input
                 type="text"
                 value={genre}
                 onChange={(e) => setGenre(e.target.value)}
                 placeholder="Electronic, Synthwave"
-                className="w-full px-3 py-2 bg-[#181818] border-2 border-[#2e2e2e] text-white text-xs font-sans focus:outline-none focus:border-[#D7FF3F]"
+                className="w-full px-3.5 py-2.5 text-xs font-mono bg-transparent focus:outline-none uppercase"
+                style={{
+                  backgroundColor: "#FAF7EE",
+                  border: "2px solid #111111",
+                  color: "#111111",
+                  caretColor: "#F05A28",
+                }}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-pixel text-[#A1A1AA] mb-1.5">
-                DURATION (SEC)
+              <label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider mb-1.5 text-[#111111]">
+                <span className="w-1.5 h-1.5 inline-block" style={{ backgroundColor: "#F05A28" }} />
+                <span>DURATION (SEC)</span>
               </label>
               <input
                 type="number"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
                 placeholder="180"
-                className="w-full px-3 py-2 bg-[#181818] border-2 border-[#2e2e2e] text-white text-xs font-sans focus:outline-none focus:border-[#D7FF3F]"
+                className="w-full px-3.5 py-2.5 text-xs font-mono bg-transparent focus:outline-none"
+                style={{
+                  backgroundColor: "#FAF7EE",
+                  border: "2px solid #111111",
+                  color: "#111111",
+                  caretColor: "#F05A28",
+                }}
               />
             </div>
 
             <div>
-              <label className="block text-xs font-pixel text-[#A1A1AA] mb-1.5">
-                RELEASE DATE
+              <label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider mb-1.5 text-[#111111]">
+                <span className="w-1.5 h-1.5 inline-block" style={{ backgroundColor: "#F05A28" }} />
+                <span>RELEASE DATE</span>
               </label>
               <input
                 type="date"
                 value={releaseDate}
                 onChange={(e) => setReleaseDate(e.target.value)}
-                className="w-full px-3 py-2 bg-[#181818] border-2 border-[#2e2e2e] text-white text-xs font-sans focus:outline-none focus:border-[#D7FF3F]"
+                className="w-full px-3.5 py-2.5 text-xs font-mono bg-transparent focus:outline-none uppercase"
+                style={{
+                  backgroundColor: "#FAF7EE",
+                  border: "2px solid #111111",
+                  color: "#111111",
+                }}
               />
             </div>
           </div>
 
-          {/* Retro Audio File Upload Panel */}
-          <div className="p-4 bg-[#141414] border-2 border-[#2a2a2a] shadow-[2px_2px_0px_#000] space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-[#222]">
-              <label className="text-xs font-pixel text-[#D7FF3F] flex items-center gap-2">
-                <FileAudio className="w-3.5 h-3.5" />
+          {/* Audio File Ingestion Box */}
+          <div
+            className="p-4 sm:p-5 space-y-3"
+            style={{
+              backgroundColor: "#F6EEDE",
+              border: "2px dashed #F05A28",
+              boxShadow: "2px 2px 0px #111111",
+            }}
+          >
+            <div className="flex items-center justify-between pb-2 border-b border-[#111111]/15">
+              <label className="text-xs font-bold uppercase tracking-wider flex items-center gap-2 text-[#111111]">
+                <FileAudio className="w-4 h-4" style={{ color: "#F05A28" }} />
                 <span>// AUDIO SIGNAL INPUT *</span>
               </label>
               {audioUrl && (
-                <span className="text-[10px] font-pixel text-emerald-400 flex items-center gap-1">
-                  ✓ AUDIO READY
+                <span className="text-[10px] font-bold text-[#15803D] uppercase flex items-center gap-1">
+                  ✓ AUDIO MOUNTED
                 </span>
               )}
             </div>
 
-            <p className="text-[11px] font-sans text-[#71717A]">
-              Drop master audio frequency (FLAC, WAV, MP3, M4A) to transcode and upload to Cloudinary.
+            <p className="text-[11px] text-[#7A7166] tracking-wide">
+              Ingest master audio frequency (FLAC, WAV, MP3, M4A). Cloudinary storage streaming encoded.
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-1">
-              <label className="cursor-pointer retro-btn-secondary inline-flex items-center gap-2 px-4 py-2 text-xs font-pixel">
+              <label
+                className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all"
+                style={{
+                  backgroundColor: "#F05A28",
+                  color: "#111111",
+                  border: "2px solid #111111",
+                  boxShadow: "2px 2px 0px #111111",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#e84e1d";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#F05A28";
+                }}
+              >
                 {uploadingAudio ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-[#D7FF3F]" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     <span>[ INGESTING SIGNAL... ]</span>
                   </>
                 ) : (
                   <>
-                    <Upload className="w-3.5 h-3.5 text-[#D7FF3F]" />
+                    <Upload className="w-3.5 h-3.5" />
                     <span>[ SELECT AUDIO FILE ]</span>
                   </>
                 )}
@@ -390,21 +490,35 @@ export default function AdminNewSongPage() {
               </label>
 
               {audioFilename && (
-                <span className="text-[10px] font-pixel text-[#A1A1AA] truncate max-w-xs bg-[#181818] border border-[#2e2e2e] px-2 py-1">
+                <span
+                  className="text-[11px] font-bold uppercase px-2.5 py-1 truncate max-w-xs"
+                  style={{
+                    backgroundColor: "#FAF7EE",
+                    border: "1.5px solid #111111",
+                    color: "#111111",
+                  }}
+                >
                   {audioFilename}
                 </span>
               )}
             </div>
           </div>
 
-          {/* Retro Artwork Upload Panel */}
-          <div className="p-4 bg-[#141414] border-2 border-[#2a2a2a] shadow-[2px_2px_0px_#000] space-y-3">
-            <div className="flex items-center justify-between pb-2 border-b border-[#222]">
-              <label className="text-xs font-pixel text-white">
+          {/* Sleeve Artwork Box */}
+          <div
+            className="p-4 sm:p-5 space-y-3"
+            style={{
+              backgroundColor: "#F6EEDE",
+              border: "2px solid #111111",
+              boxShadow: "2px 2px 0px #111111",
+            }}
+          >
+            <div className="flex items-center justify-between pb-2 border-b border-[#111111]/15">
+              <label className="text-xs font-bold uppercase tracking-wider text-[#111111]">
                 // SLEEVE ARTWORK (OPTIONAL)
               </label>
               {artworkUrl && (
-                <span className="text-[10px] font-pixel text-[#D7FF3F]">
+                <span className="text-[10px] font-bold text-[#15803D] uppercase">
                   ✓ SLEEVE MOUNTED
                 </span>
               )}
@@ -418,10 +532,28 @@ export default function AdminNewSongPage() {
                   "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200&auto=format&fit=crop&q=80"
                 }
                 alt="Artwork Preview"
-                className="w-14 h-14 border-2 border-black object-cover shrink-0 shadow-[2px_2px_0px_#000]"
+                className="w-16 h-16 object-cover shrink-0"
+                style={{
+                  border: "2px solid #111111",
+                  boxShadow: "2px 2px 0px #111111",
+                }}
               />
 
-              <label className="cursor-pointer retro-btn-secondary inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-pixel">
+              <label
+                className="cursor-pointer inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold uppercase tracking-wider transition-all"
+                style={{
+                  backgroundColor: "#FAF7EE",
+                  color: "#111111",
+                  border: "2px solid #111111",
+                  boxShadow: "2px 2px 0px #111111",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#FFF0ED";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#FAF7EE";
+                }}
+              >
                 {uploadingArtwork ? (
                   <>
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -445,31 +577,41 @@ export default function AdminNewSongPage() {
           </div>
 
           {/* Publishing Settings: Clean/Explicit & Draft/Published Toggle */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-[#141414] border-2 border-[#262626]">
+          <div
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4"
+            style={{
+              backgroundColor: "#F6EEDE",
+              border: "2px solid #111111",
+            }}
+          >
             <div>
-              <label className="block text-xs font-pixel text-[#A1A1AA] mb-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-2">
                 EXPLICIT ADVISORY
               </label>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setExplicit(false)}
-                  className={`px-3 py-1 text-xs font-pixel border-2 shadow-[2px_2px_0px_#000] active:translate-y-0.5 ${
-                    !explicit
-                      ? "bg-white text-black border-black font-bold"
-                      : "bg-[#181818] border-[#333] text-[#A1A1AA]"
-                  }`}
+                  className="px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+                  style={{
+                    backgroundColor: !explicit ? "#FAF7EE" : "#F6EEDE",
+                    color: !explicit ? "#111111" : "#7A7166",
+                    border: "2px solid #111111",
+                    boxShadow: !explicit ? "2px 2px 0px #111111" : "none",
+                  }}
                 >
                   [ CLEAN ]
                 </button>
                 <button
                   type="button"
                   onClick={() => setExplicit(true)}
-                  className={`px-3 py-1 text-xs font-pixel border-2 shadow-[2px_2px_0px_#000] active:translate-y-0.5 ${
-                    explicit
-                      ? "bg-red-500 text-white border-black font-bold"
-                      : "bg-[#181818] border-[#333] text-[#A1A1AA]"
-                  }`}
+                  className="px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+                  style={{
+                    backgroundColor: explicit ? "#FFF0ED" : "#F6EEDE",
+                    color: explicit ? "#D62828" : "#7A7166",
+                    border: "2px solid #111111",
+                    boxShadow: explicit ? "2px 2px 0px #111111" : "none",
+                  }}
                 >
                   [ EXPLICIT ]
                 </button>
@@ -477,29 +619,33 @@ export default function AdminNewSongPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-pixel text-[#A1A1AA] mb-2">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#111111] mb-2">
                 RELEASE STATE
               </label>
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setStatus("draft")}
-                  className={`px-3 py-1 text-xs font-pixel uppercase border-2 shadow-[2px_2px_0px_#000] active:translate-y-0.5 ${
-                    status === "draft"
-                      ? "bg-amber-400 text-black border-black font-bold"
-                      : "bg-[#181818] border-[#333] text-[#A1A1AA]"
-                  }`}
+                  className="px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+                  style={{
+                    backgroundColor: status === "draft" ? "#FEF3C7" : "#F6EEDE",
+                    color: status === "draft" ? "#B45309" : "#7A7166",
+                    border: "2px solid #111111",
+                    boxShadow: status === "draft" ? "2px 2px 0px #111111" : "none",
+                  }}
                 >
                   [ SAVE DRAFT ]
                 </button>
                 <button
                   type="button"
                   onClick={() => setStatus("published")}
-                  className={`px-3 py-1 text-xs font-pixel uppercase border-2 shadow-[2px_2px_0px_#000] active:translate-y-0.5 ${
-                    status === "published"
-                      ? "bg-[#D7FF3F] text-black border-black font-bold"
-                      : "bg-[#181818] border-[#333] text-[#A1A1AA]"
-                  }`}
+                  className="px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider transition-all cursor-pointer"
+                  style={{
+                    backgroundColor: status === "published" ? "#F05A28" : "#F6EEDE",
+                    color: status === "published" ? "#111111" : "#7A7166",
+                    border: "2px solid #111111",
+                    boxShadow: status === "published" ? "2px 2px 0px #111111" : "none",
+                  }}
                 >
                   [ PUBLISH ]
                 </button>
@@ -507,22 +653,52 @@ export default function AdminNewSongPage() {
             </div>
           </div>
 
-          {/* Command Actions */}
-          <div className="pt-2 flex justify-end gap-3">
+          {/* Form Actions */}
+          <div className="pt-2 flex justify-end gap-3 border-t border-[#111111]/15">
             <Link
               href="/admin/songs"
-              className="retro-btn-ghost px-4 py-2 text-xs font-pixel"
+              className="px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all"
+              style={{
+                backgroundColor: "#FAF7EE",
+                border: "1.5px solid #111111",
+                color: "#7A7166",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.color = "#111111";
+                e.currentTarget.style.backgroundColor = "#F6EEDE";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = "#7A7166";
+                e.currentTarget.style.backgroundColor = "#FAF7EE";
+              }}
             >
               [ CANCEL ]
             </Link>
+
             <button
               type="submit"
               disabled={submitting || uploadingAudio || uploadingArtwork}
-              className="retro-btn-primary px-6 py-2 text-xs font-pixel flex items-center gap-2 disabled:opacity-50"
+              className="px-6 py-2 text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              style={{
+                backgroundColor: "#F05A28",
+                color: "#111111",
+                border: "2px solid #111111",
+                boxShadow: "3px 3px 0px #111111",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#e84e1d";
+                e.currentTarget.style.transform = "translate(-1px,-1px)";
+                e.currentTarget.style.boxShadow = "4px 4px 0px #111111";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "#F05A28";
+                e.currentTarget.style.transform = "translate(0,0)";
+                e.currentTarget.style.boxShadow = "3px 3px 0px #111111";
+              }}
             >
               {submitting ? (
                 <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-black" />
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   <span>[ COMMITTING TRANSMISSION... ]</span>
                 </>
               ) : (

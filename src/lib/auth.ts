@@ -24,7 +24,7 @@ export interface SessionUser {
   name: string;
   email: string;
   role: "user" | "admin";
-  status: "active" | "suspended";
+  status: "active" | "suspended" | "pending" | "rejected";
   avatar?: string;
 }
 
@@ -59,6 +59,47 @@ export async function verifySessionToken(token: string): Promise<SessionPayload 
   }
 }
 
+export async function ensureAdminUser(): Promise<any> {
+  const adminEmail = (process.env.ADMIN_EMAIL || "admin@auralis.app").toLowerCase().trim();
+  const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
+  const adminName = process.env.ADMIN_NAME || "Auralis Admin";
+
+  await connectToDatabase();
+  let admin = await User.findOne({ email: adminEmail });
+  const passwordHash = await hashPassword(adminPassword);
+
+  if (!admin) {
+    admin = await User.create({
+      name: adminName,
+      email: adminEmail,
+      passwordHash,
+      role: "admin",
+      status: "active",
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80",
+    });
+  } else {
+    let needsSave = false;
+    if (admin.role !== "admin") {
+      admin.role = "admin";
+      needsSave = true;
+    }
+    if (admin.status !== "active") {
+      admin.status = "active";
+      needsSave = true;
+    }
+    const isPwValid = await verifyPassword(adminPassword, admin.passwordHash);
+    if (!isPwValid) {
+      admin.passwordHash = passwordHash;
+      needsSave = true;
+    }
+    if (needsSave) {
+      await admin.save();
+    }
+  }
+
+  return admin;
+}
+
 export async function getSessionUser(req?: NextRequest): Promise<SessionUser | null> {
   try {
     let token: string | undefined;
@@ -86,7 +127,7 @@ export async function getSessionUser(req?: NextRequest): Promise<SessionUser | n
       userDoc = await User.findOne({ email: payload.email }).lean();
     }
 
-    if (!userDoc || userDoc.status === "suspended") {
+    if (!userDoc || userDoc.status !== "active") {
       return null;
     }
 
@@ -106,7 +147,7 @@ export async function getSessionUser(req?: NextRequest): Promise<SessionUser | n
 
 export async function requireAuth(req?: NextRequest): Promise<SessionUser | null> {
   const user = await getSessionUser(req);
-  if (!user || user.status === "suspended") {
+  if (!user || user.status !== "active") {
     return null;
   }
   return user;
@@ -114,7 +155,7 @@ export async function requireAuth(req?: NextRequest): Promise<SessionUser | null
 
 export async function requireAdmin(req?: NextRequest): Promise<SessionUser | null> {
   const user = await getSessionUser(req);
-  if (!user || user.role !== "admin" || user.status === "suspended") {
+  if (!user || user.role !== "admin" || user.status !== "active") {
     return null;
   }
   return user;
