@@ -16,6 +16,12 @@ interface AuthContextType {
   ) => Promise<{ success: boolean; pendingApproval?: boolean; message?: string; error?: string }>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
+  updateProfile: (data: {
+    name?: string;
+    avatar?: string;
+    currentPassword?: string;
+    newPassword?: string;
+  }) => Promise<{ success: boolean; error?: string; user?: SessionUser }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -100,6 +106,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateProfile = async (profileData: {
+    name?: string;
+    avatar?: string;
+    currentPassword?: string;
+    newPassword?: string;
+  }) => {
+    try {
+      const res = await fetch("/api/auth/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profileData),
+      });
+      const data = await res.json();
+      if (res.ok && data.success && data.data) {
+        setUser(data.data);
+        return { success: true, user: data.data };
+      }
+      return { success: false, error: data.error || "Failed to update profile" };
+    } catch {
+      return { success: false, error: "Network error during profile update" };
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -110,6 +139,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         logout,
         refresh,
+        updateProfile,
       }}
     >
       {children}

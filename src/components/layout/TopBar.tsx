@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { EditProfileModal } from "@/components/user/EditProfileModal";
 import {
   ChevronLeft,
   ChevronRight,
@@ -13,12 +14,14 @@ import {
   LogIn,
   Sliders,
   ChevronDown,
+  User,
 } from "lucide-react";
 
 export function TopBar() {
   const router = useRouter();
   const { user, isAdmin, logout } = useAuth();
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -225,6 +228,28 @@ export function TopBar() {
                   </Link>
                 )}
 
+                {/* Edit Profile Action */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsProfileMenuOpen(false);
+                    setIsEditProfileOpen(true);
+                  }}
+                  className="w-full flex items-center gap-2 px-2.5 py-1.5 font-bold uppercase transition-colors hover:bg-[#F6EEDE] text-[#111111] text-left cursor-pointer"
+                >
+                  <User className="w-3.5 h-3.5 text-[#F05A28]" />
+                  <span>[ EDIT PROFILE ]</span>
+                </button>
+
+                <Link
+                  href="/profile"
+                  onClick={() => setIsProfileMenuOpen(false)}
+                  className="flex items-center gap-2 px-2.5 py-1.5 font-bold uppercase transition-colors hover:bg-[#F6EEDE] text-[#7A7166] hover:text-[#111111]"
+                >
+                  <Sliders className="w-3.5 h-3.5 text-[#F05A28]" />
+                  <span>[ OPERATOR DESK ]</span>
+                </Link>
+
                 <Link
                   href="/library"
                   onClick={() => setIsProfileMenuOpen(false)}
@@ -272,6 +297,12 @@ export function TopBar() {
           </Link>
         )}
       </div>
+
+      {/* Profile Edit Modal */}
+      <EditProfileModal
+        isOpen={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
+      />
     </header>
   );
 }

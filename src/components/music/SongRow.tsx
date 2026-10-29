@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Song } from "@/types";
 import { usePlayer } from "@/context/PlayerContext";
-import { Play, Pause } from "lucide-react";
+import { Play, Pause, ListPlus } from "lucide-react";
+import { AddToTapeModal } from "./AddToTapeModal";
 
 interface SongRowProps {
   song: Song;
@@ -20,6 +21,7 @@ export function SongRow({
 }: SongRowProps) {
   const router = useRouter();
   const { currentSong, isPlaying, playSong, togglePlay } = usePlayer();
+  const [tapeModalOpen, setTapeModalOpen] = useState(false);
 
   const isCurrent = currentSong?.id === song.id;
   const isCurrentlyPlaying = isCurrent && isPlaying;
@@ -126,11 +128,37 @@ export function SongRow({
         </div>
       </div>
 
-      {/* Right: Duration + Tactile Square Play Button */}
-      <div className="flex items-center gap-4 shrink-0">
-        <span className="text-xs font-bold text-[#7A7166] font-mono tracking-wider">
+      {/* Right: Duration + Add to Tape + Tactile Square Play Button */}
+      <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+        <span className="text-xs font-bold text-[#7A7166] font-mono tracking-wider hidden sm:inline">
           {song.durationFormatted}
         </span>
+
+        {/* Record to Tape Button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setTapeModalOpen(true);
+          }}
+          className="w-8 h-8 flex items-center justify-center transition-all cursor-pointer group/btn"
+          style={{
+            backgroundColor: "#FAF7EE",
+            color: "#111111",
+            border: "1.5px solid #111111",
+            boxShadow: "1.5px 1.5px 0px #111111",
+          }}
+          title="Record signal to cassette tape"
+          aria-label="Record signal to cassette tape"
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#F6EEDE";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "#FAF7EE";
+          }}
+        >
+          <ListPlus className="w-3.5 h-3.5 group-hover/btn:text-[#F05A28] transition-colors" />
+        </button>
 
         <button
           type="button"
@@ -151,6 +179,15 @@ export function SongRow({
           )}
         </button>
       </div>
+
+      {/* Add To Tape Modal */}
+      {tapeModalOpen && (
+        <AddToTapeModal
+          song={song}
+          isOpen={tapeModalOpen}
+          onClose={() => setTapeModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

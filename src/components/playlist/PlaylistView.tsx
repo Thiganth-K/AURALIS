@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { PlaylistDTO, SongDTO } from "@/types/music";
 import { usePlayer } from "@/context/PlayerContext";
+import { useAuth } from "@/context/AuthContext";
 import { formatTime } from "@/lib/utils";
 import {
   Play,
@@ -15,7 +16,16 @@ import {
   Heart,
   Music2,
   Radio,
+  Plus,
+  Search,
+  Check,
+  X,
+  Loader2,
+  Trash2,
+  Pencil,
 } from "lucide-react";
+import { EditTapeModal } from "@/components/playlist/EditTapeModal";
+import { Playlist } from "@/types";
 
 interface PlaylistViewProps {
   playlist: PlaylistDTO;
@@ -24,6 +34,7 @@ interface PlaylistViewProps {
 
 export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
   const router = useRouter();
+  const { user } = useAuth();
   const {
     currentSong,
     isPlaying,
@@ -38,18 +49,46 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
   } = usePlayer();
 
   const [copied, setCopied] = useState(false);
+  const [currentPlaylistData, setCurrentPlaylistData] = useState<any>(playlist);
+  const [tapeSongs, setTapeSongs] = useState<SongDTO[]>(songs);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [searchCatalogQuery, setSearchCatalogQuery] = useState("");
+  const [catalogResults, setCatalogResults] = useState<SongDTO[]>([]);
+  const [searchingCatalog, setSearchingCatalog] = useState(false);
+  const [addingSongId, setAddingSongId] = useState<string | null>(null);
+  const [removingSongId, setRemovingSongId] = useState<string | null>(null);
+
+  // Sync with prop updates
+  useEffect(() => {
+    setCurrentPlaylistData(playlist);
+  }, [playlist]);
+
+  useEffect(() => {
+    setTapeSongs(songs);
+  }, [songs]);
+
+  // Can the current user record/remove tracks on this cassette tape?
+  const canEditTape =
+    Boolean(user) &&
+    (!currentPlaylistData.isCurated ||
+      user?.role === "admin" ||
+      (currentPlaylistData.ownerId &&
+        currentPlaylistData.ownerId.toString() === user?.id?.toString()));
 
   // Split playlist name into words for stacked title (e.g., "GOLDEN", "HOUR", "TAPE")
-  const nameWords = playlist.name ? playlist.name.split(" ") : ["PLAYLIST"];
+  const nameWords: string[] = currentPlaylistData.name
+    ? String(currentPlaylistData.name).split(" ")
+    : ["PLAYLIST"];
 
-  // Total runtime calculation
-  const totalSeconds = songs.reduce((acc, s) => acc + (s.duration || 0), 0);
+  // Total runtime calculation based on live tape songs
+  const totalSeconds = tapeSongs.reduce((acc, s) => acc + (s.duration || 0), 0);
   const totalMinutes = Math.floor(totalSeconds / 60);
   const remainingSeconds = totalSeconds % 60;
   const runtimeFormatted = `${totalMinutes}M ${remainingSeconds.toString().padStart(2, "0")}S`;
 
   const isCurrentPlaylistPlaying =
-    isPlaying && songs.some((s) => s.id === currentSong?.id);
+    isPlaying && tapeSongs.some((s) => s.id === currentSong?.id);
 
   const activeDuration = duration > 0 ? duration : 180;
   const progressRatio =
@@ -57,22 +96,92 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
       ? Math.min(Math.max(progress / activeDuration, 0), 1)
       : 0.22; // default analog tape position indicator ~22%
 
+  // Search catalog songs when Add Tracks modal is open
+  useEffect(() => {
+    if (!addModalOpen) return;
+    setSearchingCatalog(true);
+    const url = searchCatalogQuery.trim()
+      ? `/api/search?q=${encodeURIComponent(searchCatalogQuery.trim())}`
+      : `/api/songs?limit=30`;
+
+    const timer = setTimeout(() => {
+      fetch(url)
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (data && data.success) {
+            const list = data.data?.songs || data.data || data.songs || [];
+            if (Array.isArray(list)) setCatalogResults(list);
+          }
+        })
+        .catch((err) => console.error("Failed to search songs:", err))
+        .finally(() => setSearchingCatalog(false));
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [addModalOpen, searchCatalogQuery]);
+
+  const handleAddTrack = async (song: SongDTO) => {
+    try {
+      setAddingSongId(song.id);
+      const res = await fetch(`/api/library/playlists/${playlist.id}/songs`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ songId: song.id }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setTapeSongs((prev) => {
+          if (prev.some((s) => s.id === song.id)) return prev;
+          return [...prev, song];
+        });
+      } else {
+        alert(data.error || "Failed to add song to tape");
+      }
+    } catch (err) {
+      console.error("Add track error:", err);
+      alert("Failed to add track");
+    } finally {
+      setAddingSongId(null);
+    }
+  };
+
+  const handleRemoveTrack = async (songId: string) => {
+    try {
+      setRemovingSongId(songId);
+      const res = await fetch(
+        `/api/library/playlists/${playlist.id}/songs/${songId}`,
+        { method: "DELETE" }
+      );
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setTapeSongs((prev) => prev.filter((s) => s.id !== songId));
+      } else {
+        alert(data.error || "Failed to remove song from tape");
+      }
+    } catch (err) {
+      console.error("Remove track error:", err);
+      alert("Failed to remove track");
+    } finally {
+      setRemovingSongId(null);
+    }
+  };
+
   const handlePlayAll = () => {
-    if (songs.length === 0) return;
+    if (tapeSongs.length === 0) return;
     if (isCurrentPlaylistPlaying) {
       togglePlay();
     } else {
-      playSong(songs[0], songs);
+      playSong(tapeSongs[0], tapeSongs);
     }
   };
 
   const handleShufflePlay = () => {
-    if (songs.length === 0) return;
+    if (tapeSongs.length === 0) return;
     if (!isShuffle) {
       toggleShuffle();
     }
-    const randomIndex = Math.floor(Math.random() * songs.length);
-    playSong(songs[randomIndex], songs);
+    const randomIndex = Math.floor(Math.random() * tapeSongs.length);
+    playSong(tapeSongs[randomIndex], tapeSongs);
   };
 
   const handleCopyLink = () => {
@@ -146,76 +255,81 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
 
         {/* ── CONCENTRIC GROOVE LINES & VINYL RECORD (RIGHT SIDE) ── */}
         <div className="absolute top-0 right-0 bottom-0 w-80 lg:w-96 pointer-events-none overflow-hidden hidden md:block">
-          {/* Subtle Concentric Radiating Groove Arcs */}
-          <svg
-            className="absolute top-0 right-0 w-full h-full opacity-60"
-            viewBox="0 0 400 360"
-            fill="none"
-          >
-            <circle cx="380" cy="180" r="120" stroke="#DFD5C0" strokeWidth="1" strokeDasharray="3 1" />
-            <circle cx="380" cy="180" r="150" stroke="#DFD5C0" strokeWidth="1" />
-            <circle cx="380" cy="180" r="180" stroke="#DFD5C0" strokeWidth="1" strokeDasharray="4 2" />
-            <circle cx="380" cy="180" r="210" stroke="#DFD5C0" strokeWidth="1" />
-            <circle cx="380" cy="180" r="240" stroke="#DFD5C0" strokeWidth="1" />
-            <circle cx="380" cy="180" r="270" stroke="#DFD5C0" strokeWidth="1" strokeDasharray="5 2" />
-            <circle cx="380" cy="180" r="300" stroke="#DFD5C0" strokeWidth="1" />
-            <circle cx="380" cy="180" r="330" stroke="#DFD5C0" strokeWidth="1" />
-            <circle cx="380" cy="180" r="360" stroke="#DFD5C0" strokeWidth="1" strokeDasharray="6 3" />
-            <circle cx="380" cy="180" r="390" stroke="#DFD5C0" strokeWidth="1" />
-          </svg>
+          {/* Vinyl Record Platter & Radiating Grooves strictly sharing the exact same center */}
+          <div className="absolute -right-16 top-[48%] -translate-y-1/2 w-72 h-72 pointer-events-none flex items-center justify-center">
+            {/* Concentric Radiating Groove Arcs strictly concentric with vinyl spindle hole */}
+            <svg
+              className="absolute w-[960px] h-[960px] pointer-events-none opacity-55 overflow-visible"
+              viewBox="-480 -480 960 960"
+              fill="none"
+            >
+              <circle cx="0" cy="0" r="165" stroke="#DFD5C0" strokeWidth="1" strokeDasharray="3 2" />
+              <circle cx="0" cy="0" r="195" stroke="#DFD5C0" strokeWidth="1" />
+              <circle cx="0" cy="0" r="225" stroke="#DFD5C0" strokeWidth="1" strokeDasharray="4 2" />
+              <circle cx="0" cy="0" r="255" stroke="#DFD5C0" strokeWidth="1" />
+              <circle cx="0" cy="0" r="285" stroke="#DFD5C0" strokeWidth="1" />
+              <circle cx="0" cy="0" r="315" stroke="#DFD5C0" strokeWidth="1" strokeDasharray="5 3" />
+              <circle cx="0" cy="0" r="345" stroke="#DFD5C0" strokeWidth="1" />
+              <circle cx="0" cy="0" r="375" stroke="#DFD5C0" strokeWidth="1" />
+              <circle cx="0" cy="0" r="410" stroke="#DFD5C0" strokeWidth="1" strokeDasharray="6 3" />
+              <circle cx="0" cy="0" r="445" stroke="#DFD5C0" strokeWidth="1" />
+              <circle cx="0" cy="0" r="480" stroke="#DFD5C0" strokeWidth="1" />
+            </svg>
 
-          {/* Vinyl Record Platter peeking in from right */}
-          <div
-            className="absolute -right-16 top-1/2 -translate-y-1/2 w-64 h-64 rounded-full overflow-hidden"
-            style={{
-              boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
-              border: "2px solid #111111",
-              animation: isCurrentPlaylistPlaying ? "vinylSpin 8s linear infinite" : "none",
-            }}
-          >
-            {/* Outer Disc Body with Grooves */}
+            {/* Vinyl Record Platter */}
             <div
-              className="w-full h-full rounded-full relative flex items-center justify-center"
+              className="w-full h-full rounded-full overflow-hidden relative z-10"
               style={{
-                background:
-                  "radial-gradient(circle, #252525 0%, #151515 50%, #0d0d0d 85%, #050505 100%)",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.3)",
+                border: "2px solid #111111",
+                animation: isCurrentPlaylistPlaying ? "vinylSpin 8s linear infinite" : "none",
+                transformOrigin: "center",
               }}
             >
-              {/* Subtle Grooves Texture */}
+              {/* Outer Disc Body with Grooves */}
               <div
-                className="absolute inset-3 rounded-full border border-white/5 pointer-events-none"
-                style={{
-                  boxShadow:
-                    "inset 0 0 0 6px rgba(255,255,255,0.02), inset 0 0 0 14px rgba(0,0,0,0.4), inset 0 0 0 22px rgba(255,255,255,0.03), inset 0 0 0 32px rgba(0,0,0,0.5), inset 0 0 0 42px rgba(255,255,255,0.03)",
-                }}
-              />
-
-              {/* Light Sheen */}
-              <div
-                className="absolute inset-0 pointer-events-none rounded-full"
+                className="w-full h-full rounded-full relative flex items-center justify-center"
                 style={{
                   background:
-                    "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 40%, rgba(255,255,255,0.06) 60%, transparent 100%)",
-                }}
-              />
-
-              {/* Orange Center Label */}
-              <div
-                className="w-20 h-20 rounded-full flex flex-col items-center justify-center relative border border-[#111111] z-10"
-                style={{
-                  backgroundColor: "#F05A28",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.35)",
+                    "radial-gradient(circle, #252525 0%, #151515 50%, #0d0d0d 85%, #050505 100%)",
                 }}
               >
-                {/* Center Spindle Hole */}
+                {/* Subtle Grooves Texture */}
                 <div
-                  className="w-4 h-4 rounded-full flex items-center justify-center"
+                  className="absolute inset-3 rounded-full border border-white/5 pointer-events-none"
                   style={{
-                    backgroundColor: "#FAF7EE",
-                    border: "1.5px solid #111111",
+                    boxShadow:
+                      "inset 0 0 0 6px rgba(255,255,255,0.02), inset 0 0 0 14px rgba(0,0,0,0.4), inset 0 0 0 22px rgba(255,255,255,0.03), inset 0 0 0 32px rgba(0,0,0,0.5), inset 0 0 0 42px rgba(255,255,255,0.03)",
+                  }}
+                />
+
+                {/* Light Sheen */}
+                <div
+                  className="absolute inset-0 pointer-events-none rounded-full"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 40%, rgba(255,255,255,0.06) 60%, transparent 100%)",
+                  }}
+                />
+
+                {/* Orange Center Label */}
+                <div
+                  className="w-20 h-20 rounded-full flex flex-col items-center justify-center relative border border-[#111111] z-10"
+                  style={{
+                    backgroundColor: "#F05A28",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.35)",
                   }}
                 >
-                  <div className="w-1 h-1 rounded-full bg-[#111111]" />
+                  {/* Center Spindle Hole */}
+                  <div
+                    className="w-4 h-4 rounded-full flex items-center justify-center"
+                    style={{
+                      backgroundColor: "#FAF7EE",
+                      border: "1.5px solid #111111",
+                    }}
+                  >
+                    <div className="w-1 h-1 rounded-full bg-[#111111]" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -245,10 +359,10 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={
-                  playlist.artworkUrl ||
+                  currentPlaylistData.artworkUrl ||
                   "https://res.cloudinary.com/dvgllw3rq/image/upload/v1793273289/auralis/artwork/qclsrhggy4iytsp0drhq.jpg"
                 }
-                alt={playlist.name}
+                alt={currentPlaylistData.name}
                 style={{
                   width: "100%",
                   height: "100%",
@@ -348,7 +462,7 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
 
             {/* Description */}
             <p className="text-xs text-[#4A433A] font-mono leading-relaxed max-w-md">
-              {playlist.description ||
+              {currentPlaylistData.description ||
                 "Sunlit downtempo rhythms pressed through analog warmth. A high-fidelity soundtrack for golden hours and evening drift."}
             </p>
 
@@ -441,6 +555,63 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
                 <ArrowUpRight className="w-3.5 h-3.5 text-[#111111]" />
                 <span>{copied ? "COPIED!" : "SHARE"}</span>
               </button>
+
+              {/* RECORD TRACKS (ADD SONGS TO TAPE) */}
+              {canEditTape && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setAddModalOpen(true)}
+                    className="h-9 px-4 text-xs font-black uppercase tracking-wider inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer font-mono"
+                    style={{
+                      backgroundColor: "#FAF7EE",
+                      color: "#F05A28",
+                      border: "2px solid #111111",
+                      boxShadow: "2.5px 2.5px 0px #111111",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#FFF0ED";
+                      e.currentTarget.style.transform = "translate(-1px,-1px)";
+                      e.currentTarget.style.boxShadow = "3.5px 3.5px 0px #111111";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "#FAF7EE";
+                      e.currentTarget.style.transform = "";
+                      e.currentTarget.style.boxShadow = "2.5px 2.5px 0px #111111";
+                    }}
+                    title="Record songs from catalog into this tape"
+                  >
+                    <Plus className="w-4 h-4 text-[#F05A28]" />
+                    <span>RECORD TRACKS</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditModalOpen(true)}
+                    className="h-9 px-4 text-xs font-bold uppercase tracking-wider inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer font-mono"
+                    style={{
+                      backgroundColor: "#FAF7EE",
+                      color: "#111111",
+                      border: "2px solid #111111",
+                      boxShadow: "2.5px 2.5px 0px #111111",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = "#F6EEDE";
+                      e.currentTarget.style.transform = "translate(-1px,-1px)";
+                      e.currentTarget.style.boxShadow = "3.5px 3.5px 0px #111111";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = "#FAF7EE";
+                      e.currentTarget.style.transform = "";
+                      e.currentTarget.style.boxShadow = "2.5px 2.5px 0px #111111";
+                    }}
+                    title="Edit tape specifications, cover image, and sleeve notes"
+                  >
+                    <Pencil className="w-3.5 h-3.5 text-[#F05A28]" />
+                    <span>EDIT TAPE</span>
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Connected Metadata Stats Boxes */}
@@ -456,7 +627,7 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
                 className="px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center text-[#111111]"
                 style={{ borderRight: "1px solid #111111" }}
               >
-                {songs.length} {songs.length === 1 ? "TRACK" : "TRACKS"}
+                {tapeSongs.length} {tapeSongs.length === 1 ? "TRACK" : "TRACKS"}
               </div>
 
               {/* Box 2: Runtime */}
@@ -509,35 +680,59 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
           <div className="flex items-center gap-2">
             <Radio className="w-4 h-4 text-[#F05A28]" />
             <h2 className="text-xs font-bold uppercase tracking-wider text-[#111111]">
-              CASSETTE TRACK DIRECTORY // {songs.length} SIGNALS
+              CASSETTE TRACK DIRECTORY // {tapeSongs.length} SIGNALS
             </h2>
           </div>
-          <span className="text-[10px] font-bold text-[#111111] uppercase tracking-wider">
-            STUDIO FLAC 24-BIT
-          </span>
+          <div className="flex items-center gap-3">
+            {canEditTape && (
+              <button
+                type="button"
+                onClick={() => setAddModalOpen(true)}
+                className="text-[11px] font-bold text-[#F05A28] hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>[ + RECORD TRACKS ]</span>
+              </button>
+            )}
+            <span className="text-[10px] font-bold text-[#111111] uppercase tracking-wider hidden sm:inline">
+              STUDIO FLAC 24-BIT
+            </span>
+          </div>
         </div>
 
-        {songs.length === 0 ? (
+        {tapeSongs.length === 0 ? (
           <div className="p-10 text-center space-y-3 font-mono">
             <Music2 className="w-8 h-8 mx-auto text-[#7A7166]" />
             <p className="text-sm font-bold uppercase text-[#111111]">
               NO TRACKS LOADED ONTO THIS CASSETTE
             </p>
             <p className="text-xs text-[#7A7166]">
-              Add songs from the catalog or explore discovery streams.
+              Record tracks from the Auralis catalog directly onto this cassette tape.
             </p>
-            <Link
-              href="/discover"
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase mt-2"
-              style={{
-                backgroundColor: "#F05A28",
-                color: "#111111",
-                border: "2px solid #111111",
-                boxShadow: "2px 2px 0px #111111",
-              }}
-            >
-              EXPLORE DISCOVERY
-            </Link>
+            <div className="pt-2 flex items-center justify-center gap-3">
+              {canEditTape && (
+                <button
+                  type="button"
+                  onClick={() => setAddModalOpen(true)}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-black uppercase cursor-pointer"
+                  style={{
+                    backgroundColor: "#F05A28",
+                    color: "#111111",
+                    border: "2px solid #111111",
+                    boxShadow: "2.5px 2.5px 0px #111111",
+                  }}
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>RECORD FIRST TRACK</span>
+                </button>
+              )}
+              <Link
+                href="/discover"
+                className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase bg-[#FAF7EE] text-[#111111] border-2 border-[#111111] shadow-[2px_2px_0px_#111111]"
+              >
+                EXPLORE CATALOG
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -552,14 +747,15 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
                   <th className="py-2 px-4 hidden md:table-cell">ALBUM</th>
                   <th className="py-2 px-4 hidden sm:table-cell text-center">GENRE</th>
                   <th className="py-2 px-4 w-24 text-right">TIME</th>
-                  <th className="py-2 px-4 w-20 text-center">ACTION</th>
+                  <th className="py-2 px-4 w-24 text-center">ACTION</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#111111]/15">
-                {songs.map((song) => {
+                {tapeSongs.map((song) => {
                   const isThisPlaying = currentSong?.id === song.id && isPlaying;
                   const isCurrentSelected = currentSong?.id === song.id;
                   const isLiked = likedSongIds.has(song.id);
+                  const isRemoving = removingSongId === song.id;
 
                   return (
                     <tr
@@ -588,7 +784,7 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
                               if (isThisPlaying) {
                                 togglePlay();
                               } else {
-                                playSong(song, songs);
+                                playSong(song, tapeSongs);
                               }
                             }}
                             className="w-6 h-6 rounded-full inline-flex items-center justify-center font-bold text-[11px] transition-all cursor-pointer"
@@ -664,25 +860,47 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
                         {formatTime(song.duration)}
                       </td>
 
-                      {/* Like Action */}
+                      {/* Like Action + Remove from Tape Action */}
                       <td className="py-2.5 px-4 text-center">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleLike(song.id);
-                          }}
-                          className="p-1.5 transition-colors cursor-pointer inline-flex items-center justify-center"
-                          title={isLiked ? "Unlike track" : "Like track"}
-                        >
-                          <Heart
-                            className="w-4 h-4 transition-transform hover:scale-110"
-                            style={{
-                              color: isLiked ? "#D62828" : "#7A7166",
-                              fill: isLiked ? "#D62828" : "none",
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleLike(song.id);
                             }}
-                          />
-                        </button>
+                            className="p-1.5 transition-colors cursor-pointer inline-flex items-center justify-center"
+                            title={isLiked ? "Unlike track" : "Like track"}
+                          >
+                            <Heart
+                              className="w-4 h-4 transition-transform hover:scale-110"
+                              style={{
+                                color: isLiked ? "#D62828" : "#7A7166",
+                                fill: isLiked ? "#D62828" : "none",
+                              }}
+                            />
+                          </button>
+
+                          {/* Remove from Tape if owner/admin */}
+                          {canEditTape && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveTrack(song.id);
+                              }}
+                              disabled={isRemoving}
+                              className="p-1.5 text-[#7A7166] hover:text-[#D62828] transition-colors cursor-pointer inline-flex items-center justify-center"
+                              title="Eject track from cassette tape"
+                            >
+                              {isRemoving ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin text-[#D62828]" />
+                              ) : (
+                                <Trash2 className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -692,6 +910,194 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
           </div>
         )}
       </div>
+
+      {/* ── RECORD TRACKS TO CASSETTE MODAL (ADD TRACKS DIALOG) ── */}
+      {addModalOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 font-mono select-none"
+          onClick={() => setAddModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-lg p-6 relative"
+            style={{
+              backgroundColor: "#FAF7EE",
+              border: "2px solid #111111",
+              boxShadow: "6px 6px 0px #111111",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Technical Corner Crop Marks */}
+            <span className="absolute top-1.5 left-2 text-sm font-bold text-[#F05A28]">┌</span>
+            <span className="absolute top-1.5 right-2 text-sm font-bold text-[#F05A28]">┐</span>
+            <span className="absolute bottom-1.5 left-2 text-sm font-bold text-[#F05A28]">└</span>
+            <span className="absolute bottom-1.5 right-2 text-sm font-bold text-[#F05A28]">┘</span>
+
+            {/* Modal Header */}
+            <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-[#111111]">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 bg-[#F05A28] animate-pulse" />
+                <h3 className="text-sm font-black uppercase text-[#111111] tracking-wide">
+                  RECORD TRACKS // {playlist.name.toUpperCase()}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setAddModalOpen(false)}
+                className="p-1 text-[#7A7166] hover:text-[#111111] hover:bg-[#F6EEDE] transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Search Input Bar */}
+            <div
+              className="flex items-center gap-2.5 px-3 py-2 mb-4"
+              style={{
+                backgroundColor: "#F6EEDE",
+                border: "2px solid #111111",
+                boxShadow: "2px 2px 0px #111111",
+              }}
+            >
+              <Search className="w-4 h-4 text-[#F05A28] shrink-0" />
+              <input
+                type="text"
+                placeholder="Search catalog by title, artist, genre..."
+                value={searchCatalogQuery}
+                onChange={(e) => setSearchCatalogQuery(e.target.value)}
+                className="w-full bg-transparent text-xs font-mono text-[#111111] placeholder-[#7A7166] focus:outline-none"
+                autoFocus
+              />
+              {searchCatalogQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchCatalogQuery("")}
+                  className="text-xs text-[#7A7166] hover:text-[#111111]"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Catalog Tracks Results List */}
+            <div className="max-h-80 overflow-y-auto space-y-2 pr-1">
+              {searchingCatalog ? (
+                <div className="py-12 text-center text-xs text-[#7A7166] flex items-center justify-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-[#F05A28]" />
+                  <span>TRANSMITTING FREQUENCY SEARCH...</span>
+                </div>
+              ) : catalogResults.length === 0 ? (
+                <div className="p-8 text-center space-y-2 bg-[#F6EEDE] border-1 border-[#111111]">
+                  <Music2 className="w-6 h-6 mx-auto text-[#7A7166]" />
+                  <p className="text-xs font-bold uppercase text-[#111111]">
+                    NO SIGNALS FOUND
+                  </p>
+                  <p className="text-[11px] text-[#7A7166]">
+                    Try another search term or browse the Discover catalog.
+                  </p>
+                </div>
+              ) : (
+                catalogResults.map((s) => {
+                  const alreadyOnTape = tapeSongs.some((ts) => ts.id === s.id);
+                  const isAdding = addingSongId === s.id;
+
+                  return (
+                    <div
+                      key={s.id}
+                      className="flex items-center justify-between p-2.5 transition-all"
+                      style={{
+                        backgroundColor: "#FAF7EE",
+                        border: "1.5px solid #111111",
+                        boxShadow: "2px 2px 0px #111111",
+                      }}
+                    >
+                      <div className="flex items-center gap-3 min-w-0 pr-2">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={s.artworkUrl}
+                          alt={s.title}
+                          className="w-9 h-9 object-cover shrink-0"
+                          style={{ border: "1px solid #111111" }}
+                        />
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold uppercase text-[#111111] truncate">
+                            {s.title}
+                          </p>
+                          <p className="text-[10px] text-[#F05A28] font-bold uppercase truncate">
+                            {s.artistName}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-[11px] font-mono text-[#7A7166]">
+                          {s.durationFormatted || formatTime(s.duration)}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() => handleAddTrack(s)}
+                          disabled={alreadyOnTape || isAdding}
+                          className="px-3 py-1 text-[11px] font-black uppercase tracking-wider inline-flex items-center gap-1.5 transition-all cursor-pointer disabled:cursor-default"
+                          style={{
+                            backgroundColor: alreadyOnTape ? "#F6EEDE" : "#F05A28",
+                            color: alreadyOnTape ? "#7A7166" : "#111111",
+                            border: "1.5px solid #111111",
+                            boxShadow: alreadyOnTape ? "none" : "1.5px 1.5px 0px #111111",
+                          }}
+                        >
+                          {isAdding ? (
+                            <>
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                              <span>RECORDING...</span>
+                            </>
+                          ) : alreadyOnTape ? (
+                            <>
+                              <Check className="w-3 h-3 text-[#F05A28]" />
+                              <span>ON TAPE</span>
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="w-3 h-3" />
+                              <span>RECORD</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="mt-5 pt-3 border-t-2 border-[#111111] flex items-center justify-between">
+              <span className="text-[11px] font-bold text-[#7A7166]">
+                CASSETTE CAPACITY: {tapeSongs.length} SIGNALS
+              </span>
+              <button
+                type="button"
+                onClick={() => setAddModalOpen(false)}
+                className="px-5 py-1.5 text-xs font-black uppercase tracking-wider bg-[#F05A28] text-[#111111] border-2 border-[#111111] shadow-[2px_2px_0px_#111111] hover:bg-[#e84e1d] transition-all cursor-pointer"
+              >
+                DONE RECORDING
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── EDIT TAPE SPECIFICATIONS MODAL ── */}
+      <EditTapeModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        playlist={currentPlaylistData}
+        onSaved={(updated) => {
+          setCurrentPlaylistData(updated);
+        }}
+        onDeleted={() => {
+          router.push("/library?tab=playlists");
+        }}
+      />
     </div>
   );
 }

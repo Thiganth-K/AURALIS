@@ -21,14 +21,22 @@ export function QueueDrawer() {
   const upNext = queue.slice(queueIndex + 1);
 
   return (
-    <div
-      className="fixed inset-y-0 right-0 z-50 w-80 sm:w-96 flex flex-col font-mono select-none animate-in slide-in-from-right duration-150"
-      style={{
-        backgroundColor: "#FAF7EE",
-        borderLeft: "2px solid #111111",
-        boxShadow: "-4px 0px 0px #111111",
-      }}
-    >
+    <>
+      {/* Click outside backdrop for dismissal */}
+      <div
+        className="fixed inset-0 bg-black/40 z-[70] backdrop-blur-[1.5px] animate-in fade-in duration-150 cursor-pointer"
+        onClick={() => setQueueOpen(false)}
+        aria-label="Close queue backdrop"
+      />
+
+      <div
+        className="fixed inset-y-0 right-0 z-[75] w-80 sm:w-96 flex flex-col font-mono select-none animate-in slide-in-from-right duration-150"
+        style={{
+          backgroundColor: "#FAF7EE",
+          borderLeft: "2px solid #111111",
+          boxShadow: "-4px 0px 0px #111111",
+        }}
+      >
       {/* Drawer Header */}
       <div
         className="flex items-center justify-between px-4 py-3.5"
@@ -227,5 +235,6 @@ export function QueueDrawer() {
         </div>
       </div>
     </div>
-  );
+  </>
+);
 }

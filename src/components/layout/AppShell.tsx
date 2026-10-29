@@ -45,9 +45,6 @@ export function AppShell({ children }: AppShellProps) {
                 {children}
               </main>
 
-              {/* Playback Queue Drawer */}
-              <QueueDrawer />
-
               {/* Desktop Persistent Player */}
               <div className="hidden md:block">
                 <GlobalPlayer />
@@ -64,6 +61,9 @@ export function AppShell({ children }: AppShellProps) {
             </div>
           </div>
         )}
+
+        {/* Global Playback Queue Drawer (renders on top of everything including ExpandedPlayer & /song/[id] views) */}
+        <QueueDrawer />
       </PlayerProvider>
     </AuthProvider>
   );

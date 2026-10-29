@@ -18,10 +18,15 @@ import {
   ArrowRight,
   Disc3,
   X,
+  Search,
+  Pencil,
+  Upload,
 } from "lucide-react";
-import { Song, Playlist } from "@/types";
+import { Song, Playlist, Artist } from "@/types";
 import { SongRow } from "@/components/music/SongRow";
 import { PlaylistCard } from "@/components/music/PlaylistCard";
+import { ArtistCard } from "@/components/music/ArtistCard";
+import { EditTapeModal } from "@/components/playlist/EditTapeModal";
 
 interface HistoryItem {
   id: string;
@@ -29,24 +34,27 @@ interface HistoryItem {
   song: Song;
 }
 
+type LibraryTab = "liked" | "playlists" | "artists" | "history";
+
 function LibraryContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const paramTab = searchParams.get("tab");
-  const initialTab =
-    paramTab === "playlists" || paramTab === "history" ? paramTab : "liked";
+  const initialTab: LibraryTab =
+    paramTab === "playlists" || paramTab === "history" || paramTab === "artists"
+      ? paramTab
+      : "liked";
 
   const { user } = useAuth();
   const { playSong } = usePlayer();
-  const [activeTab, setActiveTab] = useState<"liked" | "playlists" | "history">(
-    initialTab
-  );
+  const [activeTab, setActiveTab] = useState<LibraryTab>(initialTab);
 
   useEffect(() => {
     if (
       paramTab === "playlists" ||
       paramTab === "history" ||
-      paramTab === "liked"
+      paramTab === "liked" ||
+      paramTab === "artists"
     ) {
       setActiveTab(paramTab);
     }
@@ -55,6 +63,9 @@ function LibraryContent() {
   const [likedSongs, setLikedSongs] = useState<Song[]>([]);
   const [userPlaylists, setUserPlaylists] = useState<Playlist[]>([]);
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+  const [artists, setArtists] = useState<Artist[]>([]);
+  const [artistSearch, setArtistSearch] = useState("");
+  const [artistFilter, setArtistFilter] = useState<"all" | "favorites">("all");
   const [loading, setLoading] = useState(true);
 
   // Deduplicate history items: Keep only the first (most recent) occurrence of each unique song
@@ -78,7 +89,9 @@ function LibraryContent() {
   // Create playlist modal state
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
+  const [newPlaylistArtwork, setNewPlaylistArtwork] = useState("");
   const [creatingPlaylist, setCreatingPlaylist] = useState(false);
+  const [editingPlaylist, setEditingPlaylist] = useState<Playlist | null>(null);
 
   useEffect(() => {
     async function loadLibraryData() {
@@ -88,10 +101,11 @@ function LibraryContent() {
       }
       try {
         setLoading(true);
-        const [likedRes, plRes, histRes] = await Promise.all([
+        const [likedRes, plRes, histRes, artistsRes] = await Promise.all([
           fetch("/api/library/liked"),
           fetch("/api/library/playlists"),
           fetch("/api/library/history"),
+          fetch("/api/artists?limit=60"),
         ]);
 
         if (likedRes.ok) {
@@ -106,6 +120,10 @@ function LibraryContent() {
           const hData = await histRes.json();
           if (hData.success) setHistoryItems(hData.history || []);
         }
+        if (artistsRes.ok) {
+          const aData = await artistsRes.json();
+          if (aData.success && aData.data) setArtists(aData.data);
+        }
       } catch (err) {
         console.error("Failed to load user library:", err);
       } finally {
@@ -116,7 +134,35 @@ function LibraryContent() {
     loadLibraryData();
   }, [user]);
 
-  const handleTabChange = (tab: "liked" | "playlists" | "history") => {
+  // Set of artist names from user's liked songs
+  const likedArtistNames = React.useMemo(() => {
+    const s = new Set<string>();
+    likedSongs.forEach((song) => {
+      if (song.artistName) s.add(song.artistName.toLowerCase().trim());
+    });
+    return s;
+  }, [likedSongs]);
+
+  // Filtered artists based on search & favorites toggle
+  const filteredArtists = React.useMemo(() => {
+    let list = artists;
+    if (artistFilter === "favorites") {
+      list = list.filter((a) =>
+        likedArtistNames.has(a.name.toLowerCase().trim())
+      );
+    }
+    if (artistSearch.trim()) {
+      const q = artistSearch.toLowerCase().trim();
+      list = list.filter(
+        (a) =>
+          a.name.toLowerCase().includes(q) ||
+          (a.genres && a.genres.some((g) => g.toLowerCase().includes(q)))
+      );
+    }
+    return list;
+  }, [artists, artistFilter, artistSearch, likedArtistNames]);
+
+  const handleTabChange = (tab: LibraryTab) => {
     setActiveTab(tab);
     router.replace(`/library?tab=${tab}`, { scroll: false });
   };
@@ -130,12 +176,16 @@ function LibraryContent() {
       const res = await fetch("/api/library/playlists", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newPlaylistName.trim() }),
+        body: JSON.stringify({
+          name: newPlaylistName.trim(),
+          artworkUrl: newPlaylistArtwork.trim(),
+        }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
         setUserPlaylists((prev) => [data.playlist, ...prev]);
         setNewPlaylistName("");
+        setNewPlaylistArtwork("");
         setCreateModalOpen(false);
       }
     } catch (err) {
@@ -266,8 +316,13 @@ function LibraryContent() {
 
             {/* Description */}
             <p className="text-xs sm:text-[13px] text-[#7A7166] font-mono leading-relaxed max-w-lg">
-              Personal station archive containing verified liked broadcasts, custom
-              curated analog cassette tapes, and verified playback history.
+              {activeTab === "artists"
+                ? "Curated roster of transmitting artists, acoustic architects, and frequency creators."
+                : activeTab === "playlists"
+                ? "Custom analog cassette tapes and curated mixtape playlists pressed into your station deck."
+                : activeTab === "history"
+                ? "Verified acoustic playback timeline sorted by your most recently transmitted signals."
+                : "Personal station archive containing verified liked broadcasts and favorite frequencies."}
             </p>
 
             {/* Tactical Navigation Tabs */}
@@ -326,7 +381,34 @@ function LibraryContent() {
                 </span>
               </button>
 
-              {/* Tab 3: TIMELINE / HISTORY */}
+              {/* Tab 3: ARTISTS */}
+              <button
+                type="button"
+                onClick={() => handleTabChange("artists")}
+                className="h-9 px-4 text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2 transition-all cursor-pointer font-mono"
+                style={{
+                  backgroundColor: activeTab === "artists" ? "#F05A28" : "#FAF7EE",
+                  color: "#111111",
+                  border: "2px solid #111111",
+                  boxShadow: activeTab === "artists" ? "1.5px 1.5px 0px #111111" : "2.5px 2.5px 0px #111111",
+                  transform: activeTab === "artists" ? "translate(0.5px, 0.5px)" : "none",
+                }}
+              >
+                <Radio className="w-3.5 h-3.5" />
+                <span>ARTISTS</span>
+                <span
+                  className="px-1.5 py-0.2 text-[9px] font-bold"
+                  style={{
+                    backgroundColor: activeTab === "artists" ? "#111111" : "#F6EEDE",
+                    color: activeTab === "artists" ? "#FAF7EE" : "#F05A28",
+                    border: "1px solid #111111",
+                  }}
+                >
+                  {artists.length}
+                </span>
+              </button>
+
+              {/* Tab 4: TIMELINE / HISTORY */}
               <button
                 type="button"
                 onClick={() => handleTabChange("history")}
@@ -551,6 +633,118 @@ function LibraryContent() {
 
                 {/* Left Shell Specular Highlight */}
                 <rect x="11.5" y="21" width="2" height="44" fill="#FFFFFF" opacity="0.2" />
+              </svg>
+            ) : activeTab === "artists" ? (
+              <svg
+                width="132"
+                height="120"
+                viewBox="0 0 96 88"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="shrink-0 drop-shadow-[3px_3px_0px_#111111]"
+              >
+                {/* ── Floating Pixel Stars / Sparkles ── */}
+                <rect x="6" y="8" width="4" height="4" fill="#F05A28" opacity="0.9" />
+                <rect x="2" y="12" width="12" height="2" fill="#F05A28" opacity="0.5" />
+                <rect x="8" y="6" width="2" height="12" fill="#F05A28" opacity="0.5" />
+
+                <rect x="82" y="6" width="3" height="3" fill="#F05A28" opacity="0.85" />
+                <rect x="79" y="9" width="9" height="1" fill="#F05A28" opacity="0.5" />
+                <rect x="83" y="5" width="1" height="9" fill="#F05A28" opacity="0.5" />
+
+                <rect x="8" y="72" width="3" height="3" fill="#F05A28" opacity="0.6" />
+                <rect x="6" y="75" width="7" height="1" fill="#F05A28" opacity="0.35" />
+
+                <rect x="84" y="68" width="3" height="3" fill="#F05A28" opacity="0.6" />
+                <rect x="82" y="71" width="7" height="1" fill="#F05A28" opacity="0.35" />
+
+                {/* ── Left Floating Pixel Musical Note: Eighth Note (♪) ── */}
+                <rect x="14" y="38" width="7" height="6" fill="#F05A28" />
+                <rect x="19" y="24" width="2.5" height="18" fill="#F05A28" />
+                <rect x="21.5" y="24" width="4.5" height="2.5" fill="#F05A28" />
+                <rect x="24" y="26.5" width="2.5" height="4.5" fill="#F05A28" />
+                {/* Specular on note */}
+                <rect x="15" y="39" width="2" height="2" fill="#FFFFFF" opacity="0.8" />
+
+                {/* ── Right Floating Pixel Musical Note: Beamed Pair (♫) ── */}
+                <rect x="74" y="34" width="6" height="5" fill="#F05A28" />
+                <rect x="78" y="22" width="2.5" height="14" fill="#F05A28" />
+                <rect x="78" y="20" width="14" height="3" fill="#F05A28" />
+                <rect x="89.5" y="22" width="2.5" height="16" fill="#F05A28" />
+                <rect x="86" y="36" width="6" height="5" fill="#F05A28" />
+                {/* Specular on notes */}
+                <rect x="75" y="35" width="1.5" height="1.5" fill="#FFFFFF" opacity="0.8" />
+                <rect x="87" y="37" width="1.5" height="1.5" fill="#FFFFFF" opacity="0.8" />
+
+                {/* ── Acoustic Radiating Broadcast Arcs ── */}
+                <path d="M 27 20 Q 21 30 27 40" stroke="#F05A28" strokeWidth="2" strokeDasharray="3 2" fill="none" opacity="0.8" />
+                <path d="M 69 20 Q 75 30 69 40" stroke="#F05A28" strokeWidth="2" strokeDasharray="3 2" fill="none" opacity="0.8" />
+
+                {/* ── "LIVE" / "ON-AIR" Top Indicator Badge ── */}
+                <rect x="42" y="5" width="12" height="5" rx="1" fill="#F05A28" stroke="#111111" strokeWidth="1.5" />
+                <rect x="44.5" y="6.5" width="7" height="2" fill="#FFFFFF" opacity="0.9" />
+
+                {/* ── Studio Broadcast Ribbon Mic Head ── */}
+                {/* Top Rounded Crown */}
+                <rect x="39" y="11" width="18" height="4" rx="2" fill="#FAF7EE" stroke="#111111" strokeWidth="2" />
+                {/* Main Mic Capsule Frame */}
+                <rect x="34" y="14" width="28" height="30" rx="4" fill="#F6EEDE" stroke="#111111" strokeWidth="3" />
+                {/* Acoustic Chamber Interior Backing in Signal Orange */}
+                <rect x="38" y="17" width="20" height="24" fill="#F05A28" />
+
+                {/* Horizontal Chrome Grille Slats */}
+                <rect x="36" y="18" width="24" height="2" fill="#FAF7EE" stroke="#111111" strokeWidth="0.8" />
+                <rect x="36" y="22" width="24" height="2" fill="#FAF7EE" stroke="#111111" strokeWidth="0.8" />
+                <rect x="36" y="26" width="24" height="2" fill="#FAF7EE" stroke="#111111" strokeWidth="0.8" />
+                <rect x="36" y="30" width="24" height="2" fill="#FAF7EE" stroke="#111111" strokeWidth="0.8" />
+                <rect x="36" y="34" width="24" height="2" fill="#FAF7EE" stroke="#111111" strokeWidth="0.8" />
+                <rect x="36" y="38" width="24" height="2" fill="#FAF7EE" stroke="#111111" strokeWidth="0.8" />
+
+                {/* Vertical Center Rib */}
+                <rect x="46" y="15" width="4" height="28" fill="#FAF7EE" stroke="#111111" strokeWidth="1" />
+                {/* Specular Reflection on Grille */}
+                <rect x="36" y="15" width="3" height="3" fill="#FFFFFF" opacity="0.95" />
+                <rect x="39" y="15" width="4" height="2" fill="#FFFFFF" opacity="0.95" />
+
+                {/* ── U-Shaped Pivot Yoke Mount ── */}
+                <path
+                  d="M 29 28 L 29 44 Q 29 50 40 50 L 56 50 Q 67 50 67 44 L 67 28"
+                  fill="none"
+                  stroke="#111111"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                />
+                {/* Left & Right Pivot Thumbscrews */}
+                <circle cx="29" cy="28" r="4" fill="#F05A28" stroke="#111111" strokeWidth="2" />
+                <circle cx="29" cy="28" r="1.5" fill="#FAF7EE" />
+                <circle cx="67" cy="28" r="4" fill="#F05A28" stroke="#111111" strokeWidth="2" />
+                <circle cx="67" cy="28" r="1.5" fill="#FAF7EE" />
+
+                {/* ── Center Pivot Swivel Joint ── */}
+                <rect x="44" y="49" width="8" height="6" fill="#242321" stroke="#111111" strokeWidth="1.5" />
+
+                {/* ── Knurled Chrome Clutch Ring ── */}
+                <rect x="42" y="55" width="12" height="4" fill="#FAF7EE" stroke="#111111" strokeWidth="1.5" />
+                <rect x="44" y="56" width="2" height="2" fill="#111111" />
+                <rect x="47" y="56" width="2" height="2" fill="#111111" />
+                <rect x="50" y="56" width="2" height="2" fill="#111111" />
+
+                {/* ── Stand Metal Tube Shaft ── */}
+                <rect x="46" y="59" width="4" height="12" fill="#3D3B36" stroke="#111111" strokeWidth="1.5" />
+                <rect x="47" y="59" width="1" height="12" fill="#FFFFFF" opacity="0.5" />
+
+                {/* ── Stepped Cast Desk Stand Base ── */}
+                {/* Upper Bevel Collar */}
+                <polygon points="36,73 41,68 55,68 60,73" fill="#242321" stroke="#111111" strokeWidth="2" />
+                {/* Solid Round Foot Base */}
+                <rect x="26" y="73" width="44" height="8" rx="2" fill="#FAF7EE" stroke="#111111" strokeWidth="2.5" />
+                {/* Base Specular & Orange Stripe */}
+                <rect x="28" y="74.5" width="40" height="1.5" fill="#FFFFFF" />
+                <rect x="30" y="77" width="36" height="1.5" fill="#F05A28" />
+
+                {/* Twin Rubber Isolation Pads */}
+                <rect x="28" y="81" width="7" height="2" fill="#111111" />
+                <rect x="61" y="81" width="7" height="2" fill="#111111" />
               </svg>
             ) : (
               <svg
@@ -872,7 +1066,169 @@ function LibraryContent() {
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {userPlaylists.map((playlist) => (
-                <PlaylistCard key={playlist.id} playlist={playlist} />
+                <div key={playlist.id} className="relative group">
+                  <PlaylistCard playlist={playlist} />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setEditingPlaylist(playlist);
+                    }}
+                    className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 p-1.5 transition-all cursor-pointer font-mono"
+                    style={{
+                      backgroundColor: "#FAF7EE",
+                      border: "1.5px solid #111111",
+                      boxShadow: "1.5px 1.5px 0px #111111",
+                    }}
+                    title="Edit Tape Specifications"
+                  >
+                    <Pencil className="w-3.5 h-3.5 text-[#F05A28]" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      ) : activeTab === "artists" ? (
+        /* ── TRANSMITTING ARTISTS TAB ── */
+        filteredArtists.length === 0 ? (
+          <div
+            className="relative p-10 sm:p-14 text-center space-y-4"
+            style={{
+              backgroundColor: "#FAF7EE",
+              border: "2px solid #111111",
+              boxShadow: "3px 3px 0px #111111",
+            }}
+          >
+            <span className="absolute top-1.5 left-2 text-sm font-bold text-[#F05A28]">┌</span>
+            <span className="absolute top-1.5 right-2 text-sm font-bold text-[#F05A28]">┐</span>
+            <span className="absolute bottom-1.5 left-2 text-sm font-bold text-[#F05A28]">└</span>
+            <span className="absolute bottom-1.5 right-2 text-sm font-bold text-[#F05A28]">┘</span>
+
+            <div
+              className="w-14 h-14 mx-auto flex items-center justify-center"
+              style={{
+                backgroundColor: "#F6EEDE",
+                border: "2px solid #111111",
+                boxShadow: "2px 2px 0px #111111",
+              }}
+            >
+              <Radio className="w-7 h-7 text-[#F05A28]" />
+            </div>
+
+            <div className="space-y-2 max-w-md mx-auto">
+              <h2 className="text-base sm:text-lg font-black uppercase tracking-tight text-[#111111]">
+                // NO TRANSMITTING ARTISTS FOUND
+              </h2>
+              <p className="text-xs text-[#7A7166] leading-relaxed">
+                {artistSearch
+                  ? `No artists matching "${artistSearch}". Try searching by another name or clearing the filter.`
+                  : "Explore the Discover catalog to stream and follow transmitting artists across the AURALIS network."}
+              </p>
+            </div>
+
+            <div className="pt-2 flex items-center justify-center gap-3">
+              {artistSearch ? (
+                <button
+                  type="button"
+                  onClick={() => setArtistSearch("")}
+                  className="px-4 py-2 text-xs font-bold uppercase tracking-wider font-mono border-2 border-[#111111] bg-[#FAF7EE] hover:bg-[#F6EEDE]"
+                >
+                  CLEAR SEARCH
+                </button>
+              ) : (
+                <Link
+                  href="/discover"
+                  className="px-5 py-2.5 text-xs font-black uppercase tracking-wider inline-flex items-center gap-2 transition-all cursor-pointer font-mono"
+                  style={{
+                    backgroundColor: "#F05A28",
+                    color: "#111111",
+                    border: "2px solid #111111",
+                    boxShadow: "2.5px 2.5px 0px #111111",
+                  }}
+                >
+                  <span>EXPLORE DISCOVER CATALOG</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            {/* Toolbar: Count + Search + Filter Pills */}
+            <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 pb-3 border-b-2 border-[#111111]">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 inline-block shrink-0 bg-[#F05A28]" />
+                <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#111111]">
+                  TRANSMITTING ARTISTS // {filteredArtists.length}{" "}
+                  {filteredArtists.length === 1 ? "ARTIST" : "ARTISTS"}
+                </h2>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5">
+                {/* Search Box */}
+                <div
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono"
+                  style={{
+                    backgroundColor: "#FAF7EE",
+                    border: "2px solid #111111",
+                    boxShadow: "2px 2px 0px #111111",
+                  }}
+                >
+                  <Search className="w-3.5 h-3.5 text-[#F05A28] shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Search artists..."
+                    value={artistSearch}
+                    onChange={(e) => setArtistSearch(e.target.value)}
+                    className="bg-transparent text-[#111111] placeholder-[#7A7166] focus:outline-none text-xs font-mono w-32 sm:w-44"
+                  />
+                  {artistSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setArtistSearch("")}
+                      className="text-[10px] text-[#7A7166] hover:text-[#111111]"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+
+                {/* Filter Pills */}
+                <div className="inline-flex border-2 border-[#111111] bg-[#FAF7EE] shadow-[2px_2px_0px_#111111]">
+                  <button
+                    type="button"
+                    onClick={() => setArtistFilter("all")}
+                    className="px-2.5 py-1 text-[11px] font-bold uppercase transition-all"
+                    style={{
+                      backgroundColor:
+                        artistFilter === "all" ? "#F05A28" : "transparent",
+                      color: "#111111",
+                    }}
+                  >
+                    ALL ({artists.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setArtistFilter("favorites")}
+                    className="px-2.5 py-1 text-[11px] font-bold uppercase transition-all border-l-2 border-[#111111]"
+                    style={{
+                      backgroundColor:
+                        artistFilter === "favorites" ? "#F05A28" : "transparent",
+                      color: "#111111",
+                    }}
+                  >
+                    FROM LIKED ({likedArtistNames.size})
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Artists Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {filteredArtists.map((artist) => (
+                <ArtistCard key={artist.id} artist={artist} />
               ))}
             </div>
           </div>
@@ -1042,6 +1398,24 @@ function LibraryContent() {
                 />
               </div>
 
+              <div>
+                <label className="block text-xs font-bold text-[#7A7166] uppercase mb-1.5">
+                  COVER ARTWORK URL (OPTIONAL)
+                </label>
+                <input
+                  type="url"
+                  value={newPlaylistArtwork}
+                  onChange={(e) => setNewPlaylistArtwork(e.target.value)}
+                  placeholder="https://... image URL for the cassette label"
+                  className="w-full px-3 py-2 text-xs text-[#111111] font-mono focus:outline-none"
+                  style={{
+                    backgroundColor: "#FAF7EE",
+                    border: "2px solid #111111",
+                    boxShadow: "2px 2px 0px #111111",
+                  }}
+                />
+              </div>
+
               <div className="flex justify-end gap-2.5 pt-2">
                 <button
                   type="button"
@@ -1074,6 +1448,29 @@ function LibraryContent() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* ── EDIT CASSETTE SPECIFICATIONS MODAL ── */}
+      {editingPlaylist && (
+        <EditTapeModal
+          isOpen={Boolean(editingPlaylist)}
+          onClose={() => setEditingPlaylist(null)}
+          playlist={editingPlaylist}
+          onSaved={(updated) => {
+            setUserPlaylists((prev) =>
+              prev.map((p) => (p.id === updated.id ? updated : p))
+            );
+            setEditingPlaylist(null);
+          }}
+          onDeleted={() => {
+            if (editingPlaylist) {
+              setUserPlaylists((prev) =>
+                prev.filter((p) => p.id !== editingPlaylist.id)
+              );
+            }
+            setEditingPlaylist(null);
+          }}
+        />
       )}
     </div>
   );

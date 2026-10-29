@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdmin } from "@/lib/auth";
+import { requireAuth, requireAdmin } from "@/lib/auth";
 import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
@@ -29,18 +29,26 @@ const MAX_IMAGE_SIZE = 15 * 1024 * 1024; // 15MB
 
 export async function POST(request: NextRequest) {
   try {
-    // 1. Enforce admin authorization
-    const admin = await requireAdmin(request);
-    if (!admin) {
+    // 1. Enforce authentication (any authenticated user can upload artwork/avatar)
+    const user = await requireAuth(request);
+    if (!user) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized: Admin access required" },
-        { status: 403 }
+        { success: false, error: "Unauthorized: Please log in to upload files" },
+        { status: 401 }
       );
     }
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const type = (formData.get("type") as string) || "artwork";
+
+    // Audio uploads require admin authorization
+    if (type === "audio" && user.role !== "admin") {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized: Admin access required for audio files" },
+        { status: 403 }
+      );
+    }
 
     if (!file) {
       return NextResponse.json(
