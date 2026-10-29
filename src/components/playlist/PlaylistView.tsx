@@ -52,9 +52,10 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
     isPlaying && songs.some((s) => s.id === currentSong?.id);
 
   const activeDuration = duration > 0 ? duration : 180;
-  const progressRatio = isCurrentPlaylistPlaying && activeDuration > 0
-    ? Math.min(Math.max(progress / activeDuration, 0), 1)
-    : 0.22; // default analog tape position indicator ~22%
+  const progressRatio =
+    isCurrentPlaylistPlaying && activeDuration > 0
+      ? Math.min(Math.max(progress / activeDuration, 0), 1)
+      : 0.22; // default analog tape position indicator ~22%
 
   const handlePlayAll = () => {
     if (songs.length === 0) return;
@@ -83,7 +84,7 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
   };
 
   return (
-    <div className="w-full max-w-[1400px] mx-auto p-4 sm:p-6 space-y-4 select-none font-mono text-[#111111]">
+    <div className="w-full max-w-[1440px] mx-auto p-4 sm:p-6 space-y-4 select-none font-mono text-[#111111]">
       <style>{`
         @keyframes vinylSpin {
           from { transform: rotate(0deg); }
@@ -135,18 +136,12 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
           boxShadow: "2.5px 2.5px 0px #111111",
         }}
       >
-        {/* Corner Crop Marks in Orange (#F05A28) */}
+        {/* Technical Corner Crop Mark in Orange (#F05A28) */}
         <span
           className="absolute top-1.5 right-2 text-xl font-bold font-mono select-none"
           style={{ color: "#F05A28" }}
         >
           ┐
-        </span>
-        <span
-          className="absolute bottom-1.5 right-2 text-xl font-bold font-mono select-none"
-          style={{ color: "#F05A28" }}
-        >
-          ┘
         </span>
 
         {/* ── CONCENTRIC GROOVE LINES & VINYL RECORD (RIGHT SIDE) ── */}
@@ -229,17 +224,24 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
 
         {/* ── MAIN CONTENT (LEFT CARD + CENTER DETAILS) ── */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 lg:gap-8 relative z-10">
-          {/* ── LEFT: CASSETTE / VINYL CARD ── */}
+          {/* ── LEFT: CASSETTE / VINYL SLEEVE CARD (EXACT FIT, NO EMPTY BLACK GAPS) ── */}
           <div
-            className="w-56 sm:w-60 md:w-64 shrink-0 overflow-hidden"
+            className="w-[250px] sm:w-[260px] shrink-0 flex flex-col overflow-hidden"
             style={{
               backgroundColor: "#FAF7EE",
               border: "1.5px solid #111111",
               boxShadow: "2px 2px 0px #111111",
             }}
           >
-            {/* Pristine Clean Artwork Image (No cluttering text overlays) */}
-            <div className="relative aspect-[4/4.2] w-full overflow-hidden bg-[#181818]">
+            {/* Artwork Container: Fits full width edge-to-edge down to scrubber */}
+            <div
+              className="relative w-full overflow-hidden"
+              style={{
+                width: "100%",
+                height: "250px",
+                backgroundColor: "#181818",
+              }}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={
@@ -247,13 +249,43 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
                   "https://res.cloudinary.com/dvgllw3rq/image/upload/v1793273289/auralis/artwork/qclsrhggy4iytsp0drhq.jpg"
                 }
                 alt={playlist.name}
-                className="w-full h-full object-cover block"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: "block",
+                }}
               />
+
+              {/* Overlaid Typography - Top Left */}
+              <div
+                className="absolute top-3.5 left-3.5 text-left pointer-events-none select-none"
+                style={{ textShadow: "0 1px 4px rgba(0,0,0,0.85)" }}
+              >
+                <div className="text-sm font-black tracking-widest text-[#F5EDE0] uppercase leading-tight font-mono">
+                  {nameWords.map((word, idx) => (
+                    <div key={idx}>{word}</div>
+                  ))}
+                </div>
+                <div className="text-[9px] font-bold tracking-[0.2em] text-[#D8CCA8] uppercase mt-1.5 font-mono leading-tight">
+                  AURALIS
+                  <br />
+                  ARCHIVE
+                </div>
+              </div>
+
+              {/* Overlaid Barcode / Sound Marks - Bottom Left */}
+              <div
+                className="absolute bottom-2 left-3 text-[9px] tracking-widest text-[#F5EDE0]/85 font-mono pointer-events-none select-none"
+                style={{ textShadow: "0 1px 3px rgba(0,0,0,0.85)" }}
+              >
+                |||||UHL|II
+              </div>
             </div>
 
-            {/* Bottom Scrubber Compartment */}
+            {/* Bottom Scrubber Compartment - Sits Directly Under Image Without Gap */}
             <div
-              className="h-10 px-3 flex items-center justify-between gap-3"
+              className="h-10 px-3 flex items-center justify-between gap-3 shrink-0"
               style={{
                 backgroundColor: "#FAF7EE",
                 borderTop: "1.5px solid #111111",

@@ -139,11 +139,11 @@ export function HomeClient({
       <style>{`
         @keyframes auralisWaveDance {
           0%, 100% {
-            transform: scaleY(0.18);
-            opacity: 0.55;
+            transform: scaleY(0.2);
+            opacity: 0.6;
           }
           50% {
-            transform: scaleY(1.08);
+            transform: scaleY(1.15);
             opacity: 1;
           }
         }
@@ -303,46 +303,47 @@ export function HomeClient({
             </div>
           </div>
 
-          {/* Right Visual: Slowly Spinning Vinyl Record & Dancing Waveform */}
+          {/* Right Visual: Slogan + Dynamic Dancing Waveform + Spinning Vinyl Record on the Right */}
           <div className="hidden lg:flex items-center gap-6 shrink-0">
-            {/* Spinning Vinyl Record + ToneArm */}
-            <div className="relative mx-4">
-              <div style={{ animation: "vinylSpin 8s linear infinite", transformOrigin: "center" }}>
-                <VinylRecord />
-              </div>
-              <div className="absolute -right-4 -top-2 pointer-events-none">
-                <ToneArm />
-              </div>
+            {/* Slogan */}
+            <div
+              className="text-right text-xs sm:text-[13px] font-black tracking-widest text-[#111111] uppercase leading-tight pr-5 shrink-0"
+              style={{ borderRight: "2px solid rgba(17,17,17,0.15)" }}
+            >
+              <p>REAL PEOPLE.</p>
+              <p className="my-1">REAL MUSIC.</p>
+              <p style={{ color: "#F05A28" }}>AURALIS.</p>
             </div>
 
-            {/* 25-Bar Waveform Dance */}
-            <div className="flex items-center gap-0.5 h-16">
+            {/* Dynamic Soundwave Dance (Directly on Disk's Left Side) */}
+            <div className="flex items-center gap-1 h-18 select-none">
               {WIDE_SOUNDWAVE_BARS.map((h, i) => (
                 <span
                   key={i}
-                  className="rounded-sm"
+                  className="rounded-full"
                   style={{
                     display: "inline-block",
                     width: "3px",
-                    height: `${h * 0.7}px`,
+                    height: `${h * 0.8}px`,
                     backgroundColor: "#F05A28",
+                    boxShadow: "0 0 8px rgba(240, 90, 40, 0.45)",
                     transformOrigin: "center",
-                    animation: "auralisWaveDance 1.35s ease-in-out infinite",
-                    animationDelay: `${(i * 0.055).toFixed(3)}s`,
+                    animation: "auralisWaveDance 1.25s ease-in-out infinite alternate",
+                    animationDelay: `${(i * 0.05).toFixed(3)}s`,
                     willChange: "transform",
                   }}
                 />
               ))}
             </div>
 
-            {/* Slogan on the Right */}
-            <div
-              className="text-right text-[10px] font-black tracking-widest text-[#111111] uppercase leading-snug pl-5 shrink-0"
-              style={{ borderLeft: "2px solid rgba(17,17,17,0.15)" }}
-            >
-              <p>REAL PEOPLE.</p>
-              <p className="my-0.5">REAL MUSIC.</p>
-              <p style={{ color: "#F05A28" }}>AURALIS.</p>
+            {/* Spinning Vinyl Record + ToneArm (Right Side) */}
+            <div className="relative mx-3">
+              <div style={{ animation: "vinylSpin 8s linear infinite", transformOrigin: "center" }}>
+                <VinylRecord />
+              </div>
+              <div className="absolute -right-4 -top-2 pointer-events-none">
+                <ToneArm />
+              </div>
             </div>
           </div>
         </div>
