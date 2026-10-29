@@ -40,6 +40,10 @@ interface PlaylistOpt {
   songCount?: number;
 }
 
+const WIDE_SOUNDWAVE_BARS = [
+  8, 12, 17, 24, 30, 38, 46, 54, 60, 65, 70, 74, 76, 74, 70, 65, 60, 54, 46, 38, 30, 24, 17, 12, 8
+];
+
 export default function AdminFeaturedPage() {
   const [songs, setSongs] = useState<SongOpt[]>([]);
   const [albums, setAlbums] = useState<AlbumOpt[]>([]);
@@ -199,7 +203,10 @@ export default function AdminFeaturedPage() {
             </div>
 
             {/* Title */}
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#111111] uppercase leading-none">
+            <h1
+              className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-[#111111] uppercase leading-tight select-text"
+              style={{ fontWeight: 900 }}
+            >
               FEATURED SHOWCASE // CURATION
             </h1>
 
@@ -212,24 +219,48 @@ export default function AdminFeaturedPage() {
           </div>
 
           {/* Right Side: Soundwave Bars & Editorial Slogan */}
-          <div className="hidden sm:flex items-center gap-5 shrink-0">
-            {/* Center Soundwave Graphic in Vivid Orange */}
-            <div className="flex items-center gap-[3px] h-12 px-2">
-              <span className="w-[3px] bg-[#F05A28] h-3 rounded-xs" />
-              <span className="w-[3px] bg-[#F05A28] h-5 rounded-xs" />
-              <span className="w-[3px] bg-[#F05A28] h-8 rounded-xs" />
-              <span className="w-[3px] bg-[#F05A28] h-11 rounded-xs" />
-              <span className="w-[3px] bg-[#F05A28] h-12 rounded-xs" />
-              <span className="w-[3px] bg-[#F05A28] h-9 rounded-xs" />
-              <span className="w-[3px] bg-[#F05A28] h-7 rounded-xs" />
-              <span className="w-[3px] bg-[#F05A28] h-4 rounded-xs" />
-              <span className="w-[3px] bg-[#F05A28] h-2 rounded-xs" />
+          <div className="hidden sm:flex items-center gap-4 sm:gap-5 shrink-0">
+            {/* Inline Keyframes to guarantee instant rendering */}
+            <style>{`
+              @keyframes auralisWaveDance {
+                0%, 100% {
+                  transform: scaleY(0.18);
+                  opacity: 0.6;
+                }
+                50% {
+                  transform: scaleY(1.08);
+                  opacity: 1;
+                }
+              }
+            `}</style>
+
+            {/* Wide Soundwave bars with smooth up-and-down wave animation */}
+            <div
+              className="flex items-center gap-1 sm:gap-1.5 h-20 px-2 select-none"
+              title="Auralis Live Audio Equalizer Spectrum"
+            >
+              {WIDE_SOUNDWAVE_BARS.map((height, idx) => (
+                <span
+                  key={idx}
+                  className="bg-[#F05A28]"
+                  style={{
+                    display: "inline-block",
+                    width: "5px",
+                    height: `${height}px`,
+                    borderRadius: "1.5px",
+                    transformOrigin: "center",
+                    animation: "auralisWaveDance 1.35s ease-in-out infinite",
+                    animationDelay: `${(idx * 0.055).toFixed(3)}s`,
+                    willChange: "transform",
+                  }}
+                />
+              ))}
             </div>
 
             {/* Tagline on the Right */}
             <div
-              className="text-left text-[10px] font-bold tracking-widest text-[#111111] uppercase leading-tight font-mono pl-5"
-              style={{ borderLeft: "1px solid rgba(17, 17, 17, 0.15)" }}
+              className="text-left text-[10px] font-bold tracking-widest text-[#111111] uppercase leading-tight font-mono pl-4 sm:pl-5 shrink-0"
+              style={{ borderLeft: "1.5px solid rgba(17, 17, 17, 0.2)" }}
             >
               <p>BETTER MUSIC</p>
               <p className="my-0.5">BETTER PEOPLE</p>

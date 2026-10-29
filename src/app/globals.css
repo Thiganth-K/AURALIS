@@ -288,3 +288,21 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #F05A28;
 }
+
+/* Undulating Soundwave Animation */
+@keyframes auralisWaveDance {
+  0%, 100% {
+    transform: scaleY(0.25);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scaleY(1.05);
+    opacity: 1;
+  }
+}
+
+.animate-auralis-wave {
+  animation: auralisWaveDance 1.6s ease-in-out infinite;
+  transform-origin: center;
+  will-change: transform;
+}

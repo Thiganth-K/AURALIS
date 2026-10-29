@@ -48,9 +48,9 @@
     "semantic_hash": ""
   },
   "src/app/admin/albums/page.tsx": {
-    "mtime": 1793079487.3837066,
-    "seen": 1793080120.8696046,
-    "ast_hash": "b91c1bbcbf57f607ad0aaed7b8f81f65",
+    "mtime": 1793244171.0663092,
+    "seen": 1793245367.6948128,
+    "ast_hash": "9b633a80e4cdb965dfc9b02fc949f1e3",
     "semantic_hash": ""
   },
   "src/app/admin/artists/new/page.tsx": {
@@ -60,15 +60,15 @@
     "semantic_hash": ""
   },
   "src/app/admin/artists/page.tsx": {
-    "mtime": 1793079427.803138,
-    "seen": 1793080120.86961,
-    "ast_hash": "db0d5cd1edf9166d1226e14d458f16ff",
+    "mtime": 1793244136.3641262,
+    "seen": 1793245367.6948152,
+    "ast_hash": "ff13db8f84dff21861a4060000cc5d71",
     "semantic_hash": ""
   },
   "src/app/admin/featured/page.tsx": {
-    "mtime": 1793079690.0186775,
-    "seen": 1793080120.8696117,
-    "ast_hash": "6c7f75d5a2f34db76d775d0428627c25",
+    "mtime": 1793244248.1065104,
+    "seen": 1793245367.6948164,
+    "ast_hash": "c34b8451fd928e556a60d23a6520bc6b",
     "semantic_hash": ""
   },
   "src/app/admin/layout.tsx": {
@@ -78,15 +78,15 @@
     "semantic_hash": "3c9a7aa4c2f605e9a1a0759764e1fc76"
   },
   "src/app/admin/page.tsx": {
-    "mtime": 1793078475.6329222,
-    "seen": 1793078538.961906,
-    "ast_hash": "3ed3192e95de7df9169b6216b434319f",
+    "mtime": 1793243715.2705677,
+    "seen": 1793243968.720114,
+    "ast_hash": "ed47f95c4b51ee6794333213c2359042",
     "semantic_hash": ""
   },
   "src/app/admin/playlists/page.tsx": {
-    "mtime": 1793079639.689327,
-    "seen": 1793080120.869618,
-    "ast_hash": "9977647b799a9fcfdc9746fc9977f3f0",
+    "mtime": 1793244211.3688476,
+    "seen": 1793245367.6948192,
+    "ast_hash": "1ea59f46c990bbea8736692832427eb9",
     "semantic_hash": ""
   },
   "src/app/admin/songs/new/page.tsx": {
@@ -96,9 +96,9 @@
     "semantic_hash": ""
   },
   "src/app/admin/songs/page.tsx": {
-    "mtime": 1793079096.4845986,
-    "seen": 1793079143.6296022,
-    "ast_hash": "6b88f98426ec84b68e762f3eb9fee5a1",
+    "mtime": 1793262510.4531631,
+    "seen": 1793264417.6895452,
+    "ast_hash": "9457938e8911e60f485e8302b9c03c64",
     "semantic_hash": ""
   },
   "src/app/admin/users/new/page.tsx": {
@@ -108,9 +108,9 @@
     "semantic_hash": ""
   },
   "src/app/admin/users/page.tsx": {
-    "mtime": 1793078762.4483838,
-    "seen": 1793078827.8197982,
-    "ast_hash": "e96b8490a8b2d9752d53cdbaf3559b3e",
+    "mtime": 1793244062.6147256,
+    "seen": 1793245367.694823,
+    "ast_hash": "30e1e48d9d7e8839cc122f9b195b50f2",
     "semantic_hash": ""
   },
   "src/app/api/admin/albums/[id]/route.ts": {
@@ -360,9 +360,9 @@
     "semantic_hash": ""
   },
   "src/components/admin/AdminShell.tsx": {
-    "mtime": 1792994205.2767594,
-    "seen": 1792994316.852177,
-    "ast_hash": "c0f00ffe051e81561d431c4b60fecf80",
+    "mtime": 1793245621.882963,
+    "seen": 1793246078.1545372,
+    "ast_hash": "6d622fa34e80a4a5789117ddb779ca55",
     "semantic_hash": ""
   },
   "src/components/brand/Logo.tsx": {
@@ -753,6 +753,12 @@
     "mtime": 1792987368.6172836,
     "seen": 1792987837.502822,
     "ast_hash": "2be39fcd4d823aaeb20bbd458a0a7563",
+    "semantic_hash": ""
+  },
+  "src/app/admin/instructions/page.tsx": {
+    "mtime": 1793245687.3520498,
+    "seen": 1793246078.1543639,
+    "ast_hash": "823c55347d41355f786ceb7f639b8fb6",
     "semantic_hash": ""
   }
 }

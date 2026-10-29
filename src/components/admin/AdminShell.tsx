@@ -18,6 +18,7 @@ import {
   ChevronDown,
   Menu,
   X,
+  BookOpen,
 } from "lucide-react";
 
 interface AdminShellProps {
@@ -32,6 +33,7 @@ const navItems = [
   { name: "ALBUMS", href: "/admin/albums", icon: Disc3 },
   { name: "PLAYLISTS", href: "/admin/playlists", icon: ListMusic },
   { name: "FEATURED", href: "/admin/featured", icon: Star },
+  { name: "INSTRUCTIONS", href: "/admin/instructions", icon: BookOpen },
 ];
 
 export function AdminShell({ children }: AdminShellProps) {

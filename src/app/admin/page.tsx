@@ -162,15 +162,68 @@ export default function AdminDashboardPage() {
     playlists: 0,
   };
 
-  // Dynamic Greeting
-  const currentHour = new Date().getHours();
-  const greeting =
-    currentHour < 12
-      ? "GOOD MORNING"
-      : currentHour < 17
-      ? "GOOD AFTERNOON"
-      : "GOOD EVENING";
-  const adminName = user?.name ? user.name.toUpperCase() : "ADMIN";
+  // Dynamic Time-Based Greeting and Wishes
+  const [dynamicWish, setDynamicWish] = useState<{
+    salutation: string;
+    subtext: string;
+    badge: string;
+  }>({
+    salutation: "GOOD MORNING",
+    subtext:
+      "Start your morning broadcast session with live telemetry from your catalog, registered listeners, and audio pipeline.",
+    badge: "MORNING TELEMETRY",
+  });
+
+  useEffect(() => {
+    const computeWish = () => {
+      const hour = new Date().getHours();
+      if (hour >= 4 && hour < 12) {
+        setDynamicWish({
+          salutation: "GOOD MORNING",
+          subtext:
+            "Good morning! Real-time telemetry from your live catalog, registered listeners, and audio pipeline.",
+          badge: "MORNING TELEMETRY",
+        });
+      } else if (hour >= 12 && hour < 17) {
+        setDynamicWish({
+          salutation: "GOOD AFTERNOON",
+          subtext:
+            "Good afternoon! Peak daytime stream hours active. Real-time telemetry from your live catalog, registered listeners, and audio pipeline.",
+          badge: "AFTERNOON BROADCAST",
+        });
+      } else if (hour >= 17 && hour < 22) {
+        setDynamicWish({
+          salutation: "GOOD EVENING",
+          subtext:
+            "Good evening! Nocturnal audio sessions engaged. Real-time telemetry from your live catalog, registered listeners, and audio pipeline.",
+          badge: "EVENING TRANSMISSION",
+        });
+      } else {
+        setDynamicWish({
+          salutation: "GOOD NIGHT",
+          subtext:
+            "Late night broadcast operational. High-fidelity acoustic streams running smoothly across all network nodes.",
+          badge: "NIGHT DISPATCH",
+        });
+      }
+    };
+
+    computeWish();
+    const interval = setInterval(computeWish, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const adminName = user?.name
+    ? user.name.toUpperCase().includes("AURALIS")
+      ? user.name.toUpperCase()
+      : user.name.toUpperCase() === "ADMIN"
+      ? "AURALIS ADMIN"
+      : user.name.toUpperCase()
+    : "AURALIS ADMIN";
+
+  const WIDE_SOUNDWAVE_BARS = [
+    8, 12, 17, 24, 30, 38, 46, 54, 60, 65, 70, 74, 76, 74, 70, 65, 60, 54, 46, 38, 30, 24, 17, 12, 8
+  ];
 
   // 6 KPI Cards with Folded Top-Right Corners
   const statCards = [
@@ -332,9 +385,9 @@ export default function AdminDashboardPage() {
         <div className="absolute bottom-1.5 left-1.5 w-2 h-2 border-b-2 border-l-2 border-[#111111]" />
         <div className="absolute bottom-1.5 right-1.5 w-2 h-2 border-b-2 border-r-2 border-[#111111]" />
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
           <div className="max-w-2xl">
-            {/* Header Tag + Manual Refresh Button */}
+            {/* Header Tag + Dynamic Wish Badge + Manual Refresh Button */}
             <div className="flex items-center gap-3 mb-2 flex-wrap">
               <span
                 className="w-2 h-2 inline-block shrink-0"
@@ -342,6 +395,10 @@ export default function AdminDashboardPage() {
               />
               <span className="text-[11px] font-bold tracking-widest uppercase text-[#F05A28]">
                 AURALIS // CONTROL ROOM
+              </span>
+
+              <span className="text-[9px] font-bold tracking-widest uppercase px-1.5 py-0.5 bg-[#FFF0ED] text-[#F05A28] border border-[#F05A28]/40">
+                {dynamicWish.badge}
               </span>
 
               <button
@@ -364,36 +421,66 @@ export default function AdminDashboardPage() {
               </button>
             </div>
 
-            {/* Dynamic Greeting */}
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-[#111111] uppercase leading-none">
-              {greeting}, {adminName}
+            {/* Dynamic Greeting in heavy bold */}
+            <h1
+              className="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-[#111111] uppercase leading-none select-text"
+              style={{ fontWeight: 900 }}
+            >
+              {dynamicWish.salutation}, {adminName}
             </h1>
 
-            {/* Sub-text */}
-            <p className="text-xs sm:text-[13px] text-[#7A7166] mt-2 font-mono leading-relaxed">
-              Real-time telemetry from your live catalog, registered listeners, and audio pipeline.
+            {/* Dynamic Sub-text */}
+            <p className="text-xs sm:text-[13px] text-[#7A7166] mt-2.5 font-mono leading-relaxed">
+              {dynamicWish.subtext}
             </p>
           </div>
 
-          {/* Right Side: Retro Soundwave Graphics & Editorial Slogan */}
-          <div className="hidden sm:flex items-center gap-4 shrink-0">
-            {/* Soundwave bars */}
-            <div className="flex items-center gap-[3px] h-10 px-2">
-              <span className="w-[3px] bg-[#F05A28] h-3 rounded-xs" />
-              <span className="w-[3px] bg-[#F05A28] h-5 rounded-xs" />
-              <span className="w-[3px] bg-[#F05A28] h-7 rounded-xs" />
-              <span className="w-[3px] bg-[#F05A28] h-9 rounded-xs" />
-              <span className="w-[3px] bg-[#F05A28] h-10 rounded-xs" />
-              <span className="w-[3px] bg-[#F05A28] h-8 rounded-xs" />
-              <span className="w-[3px] bg-[#F05A28] h-6 rounded-xs" />
-              <span className="w-[3px] bg-[#F05A28] h-4 rounded-xs" />
-              <span className="w-[3px] bg-[#F05A28] h-2 rounded-xs" />
+          {/* Right Side: Retro Wide Soundwave Graphics & Editorial Slogan */}
+          <div className="hidden sm:flex items-center gap-4 sm:gap-5 shrink-0">
+            {/* Inline Keyframes to guarantee instant rendering */}
+            <style>{`
+              @keyframes auralisWaveDance {
+                0%, 100% {
+                  transform: scaleY(0.18);
+                  opacity: 0.6;
+                }
+                50% {
+                  transform: scaleY(1.08);
+                  opacity: 1;
+                }
+              }
+            `}</style>
+
+            {/* Wide Soundwave bars with smooth up-and-down wave animation */}
+            <div
+              className="flex items-center gap-1 sm:gap-1.5 h-20 px-2 select-none"
+              title="Auralis Live Audio Equalizer Spectrum"
+            >
+              {WIDE_SOUNDWAVE_BARS.map((height, idx) => (
+                <span
+                  key={idx}
+                  className="bg-[#F05A28]"
+                  style={{
+                    display: "inline-block",
+                    width: "5px",
+                    height: `${height}px`,
+                    borderRadius: "1.5px",
+                    transformOrigin: "center",
+                    animation: "auralisWaveDance 1.35s ease-in-out infinite",
+                    animationDelay: `${(idx * 0.055).toFixed(3)}s`,
+                    willChange: "transform",
+                  }}
+                />
+              ))}
             </div>
 
             {/* Editorial Stacked Tagline */}
-            <div className="text-right text-[10px] font-bold tracking-widest text-[#111111] uppercase leading-tight font-mono">
+            <div
+              className="text-left text-[10px] font-bold tracking-widest text-[#111111] uppercase leading-tight font-mono pl-4 sm:pl-5 shrink-0"
+              style={{ borderLeft: "1.5px solid rgba(17, 17, 17, 0.2)" }}
+            >
               <p>BETTER MUSIC</p>
-              <p>BETTER PEOPLE</p>
+              <p className="my-0.5">BETTER PEOPLE</p>
               <p className="text-[#F05A28]">AURALIS</p>
             </div>
           </div>
