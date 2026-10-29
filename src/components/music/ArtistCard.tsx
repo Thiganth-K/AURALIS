@@ -37,12 +37,22 @@ export function ArtistCard({ artist }: ArtistCardProps) {
         ┘
       </span>
 
-      {/* Circular Artist Image */}
+      {/* Header bar matching AlbumCard / PlaylistCard format */}
       <div
-        className="relative w-24 h-24 p-1 mb-2.5 rounded-full overflow-hidden"
+        className="flex items-center justify-between pb-1.5 mb-2 w-full text-[9px] font-bold uppercase tracking-wider text-[#7A7166]"
+        style={{ borderBottom: "1.5px solid rgba(17,17,17,0.15)" }}
+      >
+        <span>TRANSMITTER</span>
+        <span style={{ color: "#F05A28" }}>#ARTIST</span>
+      </div>
+
+      {/* Artist Portrait Image - SAME SIZE (aspect-square w-full) as Albums & Tapes */}
+      <div
+        className="relative aspect-square w-full p-1 mb-2.5 rounded-full overflow-hidden flex items-center justify-center shrink-0"
         style={{
           border: "2px solid #111111",
           backgroundColor: "#F6EEDE",
+          boxShadow: "2px 2px 0px #111111",
         }}
       >
         <div className="w-full h-full rounded-full overflow-hidden">
@@ -50,7 +60,7 @@ export function ArtistCard({ artist }: ArtistCardProps) {
           <img
             src={artist.image}
             alt={artist.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 block"
             loading="lazy"
           />
         </div>

@@ -7,6 +7,7 @@ export interface SongDTO {
   albumId?: string;
   albumTitle?: string;
   audioUrl: string;
+  videoUrl?: string;
   artworkUrl: string;
   duration: number; // in seconds
   durationFormatted: string;

@@ -10,6 +10,9 @@ import {
   AlertCircle,
   Loader2,
   FileAudio,
+  Video,
+  Film,
+  Check,
 } from "lucide-react";
 
 interface ArtistOption {
@@ -45,8 +48,11 @@ export default function AdminNewSongPage() {
   // Media Uploads
   const [audioUrl, setAudioUrl] = useState("");
   const [audioFilename, setAudioFilename] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [videoFilename, setVideoFilename] = useState("");
   const [artworkUrl, setArtworkUrl] = useState("");
   const [uploadingAudio, setUploadingAudio] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
@@ -93,6 +99,7 @@ export default function AdminNewSongPage() {
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("type", "audio");
       formData.append("resourceType", "video");
 
       const res = await fetch("/api/upload", {
@@ -103,6 +110,11 @@ export default function AdminNewSongPage() {
 
       if (res.ok && data.url) {
         setAudioUrl(data.url);
+        // If an MP4 was uploaded directly as the master signal, set videoUrl too
+        if (file.name.toLowerCase().endsWith(".mp4") && !videoUrl) {
+          setVideoUrl(data.url);
+          setVideoFilename(file.name);
+        }
         if (data.duration && !duration) {
           setDuration(Math.round(data.duration).toString());
         }
@@ -116,6 +128,43 @@ export default function AdminNewSongPage() {
     }
   };
 
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setError(null);
+    setUploadingVideo(true);
+    setVideoFilename(file.name);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", "video");
+      formData.append("resourceType", "video");
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (res.ok && data.url) {
+        setVideoUrl(data.url);
+        // If no audio signal yet, MP4 audio can also serve as the audioUrl
+        if (!audioUrl) {
+          setAudioUrl(data.url);
+          setAudioFilename(file.name);
+        }
+      } else {
+        setError(data.error || "Failed to upload MP4 video signal");
+      }
+    } catch {
+      setError("Network error while uploading video file");
+    } finally {
+      setUploadingVideo(false);
+    }
+  };
+
   const handleArtworkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -126,6 +175,7 @@ export default function AdminNewSongPage() {
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("type", "artwork");
       formData.append("resourceType", "image");
 
       const res = await fetch("/api/upload", {
@@ -171,6 +221,7 @@ export default function AdminNewSongPage() {
         artistId,
         albumId: albumId || undefined,
         audioUrl,
+        videoUrl: videoUrl || undefined,
         artworkUrl: artworkUrl || undefined,
         duration: Number(duration) || 180,
         genre: genre.trim() || "Electronic",
@@ -500,6 +551,92 @@ export default function AdminNewSongPage() {
                 >
                   {audioFilename}
                 </span>
+              )}
+            </div>
+          </div>
+
+          {/* ── VIDEO SIGNAL INPUT (MP4 / MUSIC VIDEO - OPTIONAL) ── */}
+          <div
+            className="p-4 sm:p-5 space-y-3"
+            style={{
+              backgroundColor: "#F6EEDE",
+              border: "2px solid #111111",
+              boxShadow: "2px 2px 0px #111111",
+            }}
+          >
+            <div className="flex items-center justify-between pb-2 border-b border-[#111111]/15">
+              <label className="text-xs font-bold uppercase tracking-wider flex items-center gap-2 text-[#111111]">
+                <Film className="w-4 h-4" style={{ color: "#F05A28" }} />
+                <span>// VIDEO SIGNAL INPUT (MP4 MUSIC VIDEO - OPTIONAL)</span>
+              </label>
+              {videoUrl && (
+                <span className="text-[10px] font-bold text-[#15803D] uppercase flex items-center gap-1">
+                  ✓ VIDEO MOUNTED
+                </span>
+              )}
+            </div>
+
+            <p className="text-[11px] text-[#7A7166] tracking-wide">
+              Ingest master video visual signal (.MP4, .WEBM, .MOV). Allows listeners to toggle and stream the music video in high fidelity.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3 pt-1">
+              <label
+                className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all"
+                style={{
+                  backgroundColor: "#FAF7EE",
+                  color: "#111111",
+                  border: "2px solid #111111",
+                  boxShadow: "2px 2px 0px #111111",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#FFF0ED";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#FAF7EE";
+                }}
+              >
+                {uploadingVideo ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>[ INGESTING VIDEO... ]</span>
+                  </>
+                ) : (
+                  <>
+                    <Video className="w-3.5 h-3.5 text-[#F05A28]" />
+                    <span>[ SELECT MP4 VIDEO FILE ]</span>
+                  </>
+                )}
+                <input
+                  type="file"
+                  accept="video/mp4,video/webm,video/quicktime"
+                  onChange={handleVideoUpload}
+                  disabled={uploadingVideo}
+                  className="hidden"
+                />
+              </label>
+
+              {videoFilename && (
+                <span
+                  className="text-[11px] font-bold uppercase px-2.5 py-1 truncate max-w-xs"
+                  style={{
+                    backgroundColor: "#FAF7EE",
+                    border: "1.5px solid #111111",
+                    color: "#111111",
+                  }}
+                >
+                  {videoFilename}
+                </span>
+              )}
+
+              {videoUrl && (
+                <div className="w-full pt-2">
+                  <video
+                    src={videoUrl}
+                    controls
+                    className="w-full max-w-md h-36 object-contain bg-black border-2 border-[#111111]"
+                  />
+                </div>
               )}
             </div>
           </div>

@@ -4,14 +4,14 @@ import React, { useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import {
   Search, Filter, Play, Pause, Trash2, Loader2, AlertCircle,
-  Edit3, X, Upload, Check, Disc3, Mic2, CheckCircle2, FileAudio, UploadCloud, Info,
+  Edit3, X, Upload, Check, Disc3, Mic2, CheckCircle2, FileAudio, UploadCloud, Info, Film, Video,
 } from "lucide-react";
 
 interface AdminSongItem {
   id: string; title: string; slug: string; artistId?: string; albumId?: string;
   artist?: { _id?: string; id?: string; name: string; image?: string };
   album?: { _id?: string; id?: string; title: string; artworkUrl?: string };
-  audioUrl: string; artworkUrl: string; duration: number; genre: string;
+  audioUrl: string; videoUrl?: string; artworkUrl: string; duration: number; genre: string;
   playCount: number; explicit: boolean; status: "draft" | "published" | "archived";
   releaseDate?: string; createdAt: string;
 }
@@ -78,11 +78,13 @@ export default function AdminSongsPage() {
   const [formGenre, setFormGenre] = useState("");
   const [formDuration, setFormDuration] = useState("180");
   const [formAudioUrl, setFormAudioUrl] = useState("");
+  const [formVideoUrl, setFormVideoUrl] = useState("");
   const [formArtworkUrl, setFormArtworkUrl] = useState("");
   const [formStatus, setFormStatus] = useState<"draft" | "published" | "archived">("published");
   const [formExplicit, setFormExplicit] = useState(false);
   const [formReleaseDate, setFormReleaseDate] = useState("");
   const [uploadingAudio, setUploadingAudio] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [uploadingArtwork, setUploadingArtwork] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
@@ -170,7 +172,7 @@ export default function AdminSongsPage() {
     setFormArtistId(song.artist?._id || song.artist?.id || song.artistId || "");
     setFormAlbumId(song.album?._id || song.album?.id || song.albumId || "");
     setFormGenre(song.genre || ""); setFormDuration(song.duration?.toString() || "180");
-    setFormAudioUrl(song.audioUrl || ""); setFormArtworkUrl(song.artworkUrl || "");
+    setFormAudioUrl(song.audioUrl || ""); setFormVideoUrl(song.videoUrl || ""); setFormArtworkUrl(song.artworkUrl || "");
     setFormStatus(song.status || "published"); setFormExplicit(Boolean(song.explicit));
     setFormReleaseDate(song.releaseDate ? song.releaseDate.split("T")[0] : "");
     setEditError(null); setEditModalOpen(true);
@@ -186,6 +188,18 @@ export default function AdminSongsPage() {
       if (res.ok && data.success) setFormAudioUrl(data.url);
       else setEditError(data.error || "Upload failed");
     } catch { setEditError("Network error"); } finally { setUploadingAudio(false); }
+  };
+
+  const handleVideoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    setUploadingVideo(true); setEditError(null);
+    const fd = new FormData(); fd.append("file", file); fd.append("type", "video");
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (res.ok && data.success) setFormVideoUrl(data.url);
+      else setEditError(data.error || "Upload failed");
+    } catch { setEditError("Network error"); } finally { setUploadingVideo(false); }
   };
 
   const handleArtworkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,6 +228,7 @@ export default function AdminSongsPage() {
           title: formTitle.trim(), artistId: formArtistId,
           albumId: formAlbumId || undefined, genre: formGenre.trim() || "Electronic",
           duration: Number(formDuration) || 180, audioUrl: formAudioUrl.trim(),
+          videoUrl: formVideoUrl.trim() || undefined,
           artworkUrl: formArtworkUrl.trim(), status: formStatus,
           explicit: formExplicit, releaseDate: formReleaseDate || undefined,
         }),
@@ -633,6 +648,36 @@ export default function AdminSongsPage() {
                     : <><Upload className="w-3.5 h-3.5 text-[#F05A28]" /><span>RE-UPLOAD AUDIO</span></>}
                   <input type="file" accept="audio/*" onChange={handleAudioUpload} disabled={uploadingAudio} className="hidden" />
                 </label>
+              </div>
+              <div className="p-3.5 space-y-2.5" style={{ backgroundColor: "#F6EEDE", border: "2px solid #111111" }}>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold uppercase text-[#111111] flex items-center gap-2">
+                    <Film className="w-4 h-4 text-[#F05A28]" />MP4 MUSIC VIDEO (OPTIONAL)
+                  </label>
+                  {formVideoUrl && <span className="text-[9px] font-bold uppercase px-1.5 py-0.5 bg-[#FFF0ED] text-[#F05A28] border border-[#F05A28]">MOUNTED</span>}
+                </div>
+                {formVideoUrl && (
+                  <div className="space-y-1.5">
+                    <video src={formVideoUrl} controls className="w-full h-28 object-contain bg-black" />
+                    <input type="text" value={formVideoUrl} onChange={(e) => setFormVideoUrl(e.target.value)}
+                      placeholder="Video URL (Cloudinary or local /uploads/...)"
+                      className="w-full px-2.5 py-1.5 text-[10px] font-mono bg-[#FAF7EE] border border-[#111111] focus:outline-none truncate" />
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <label className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold uppercase"
+                    style={{ backgroundColor: "#FAF7EE", border: "1.5px solid #111111", boxShadow: "2px 2px 0px #111111" }}>
+                    {uploadingVideo
+                      ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /><span>UPLOADING MP4...</span></>
+                      : <><Upload className="w-3.5 h-3.5 text-[#F05A28]" /><span>{formVideoUrl ? "RE-UPLOAD VIDEO" : "UPLOAD MP4 VIDEO"}</span></>}
+                    <input type="file" accept="video/mp4,video/webm,video/*" onChange={handleVideoUpload} disabled={uploadingVideo} className="hidden" />
+                  </label>
+                  {formVideoUrl && (
+                    <button type="button" onClick={() => setFormVideoUrl("")} className="px-2 py-1 text-[10px] font-bold text-red-600 uppercase border border-red-300">
+                      CLEAR VIDEO
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="p-3.5 space-y-2.5" style={{ backgroundColor: "#F6EEDE", border: "2px solid #111111" }}>
                 <label className="text-xs font-bold uppercase text-[#111111] flex items-center gap-2">

@@ -21,10 +21,12 @@ if (
   });
 }
 
-const ALLOWED_AUDIO_EXTENSIONS = [".mp3", ".wav", ".m4a", ".ogg"];
-const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp"];
+const ALLOWED_AUDIO_EXTENSIONS = [".mp3", ".wav", ".m4a", ".ogg", ".flac", ".aac"];
+const ALLOWED_VIDEO_EXTENSIONS = [".mp4", ".webm", ".mkv", ".mov"];
+const ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
 
 const MAX_AUDIO_SIZE = 100 * 1024 * 1024; // 100MB
+const MAX_VIDEO_SIZE = 250 * 1024 * 1024; // 250MB
 const MAX_IMAGE_SIZE = 15 * 1024 * 1024; // 15MB
 
 export async function POST(request: NextRequest) {
@@ -40,16 +42,6 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
-    const type = (formData.get("type") as string) || "artwork";
-
-    // Audio uploads require admin authorization
-    if (type === "audio" && user.role !== "admin") {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized: Admin access required for audio files" },
-        { status: 403 }
-      );
-    }
-
     if (!file) {
       return NextResponse.json(
         { success: false, error: "No file uploaded" },
@@ -61,9 +53,33 @@ export async function POST(request: NextRequest) {
     const ext = path.extname(filename).toLowerCase();
     const size = file.size;
 
+    // Auto-detect or sanitize media type based on extension or client request
+    const rawType = (formData.get("type") as string) || (formData.get("resourceType") as string) || "";
+    let type = rawType.toLowerCase().trim();
+
+    if (!type || type === "image" || type === "video") {
+      if (ALLOWED_AUDIO_EXTENSIONS.includes(ext)) {
+        type = "audio";
+      } else if (ALLOWED_VIDEO_EXTENSIONS.includes(ext)) {
+        type = "video";
+      } else if (ALLOWED_IMAGE_EXTENSIONS.includes(ext)) {
+        type = "artwork";
+      } else {
+        type = "artwork";
+      }
+    }
+
+    // Audio & Video master signal uploads require admin authorization
+    if ((type === "audio" || type === "video") && user.role !== "admin") {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized: Admin access required for master media signals" },
+        { status: 403 }
+      );
+    }
+
     // 2. Validate file type and size
     if (type === "audio") {
-      if (!ALLOWED_AUDIO_EXTENSIONS.includes(ext)) {
+      if (!ALLOWED_AUDIO_EXTENSIONS.includes(ext) && !ALLOWED_VIDEO_EXTENSIONS.includes(ext)) {
         return NextResponse.json(
           {
             success: false,
@@ -75,6 +91,22 @@ export async function POST(request: NextRequest) {
       if (size > MAX_AUDIO_SIZE) {
         return NextResponse.json(
           { success: false, error: "Audio file exceeds 100MB limit" },
+          { status: 400 }
+        );
+      }
+    } else if (type === "video") {
+      if (!ALLOWED_VIDEO_EXTENSIONS.includes(ext)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Unsupported video format. Allowed: ${ALLOWED_VIDEO_EXTENSIONS.join(", ")}`,
+          },
+          { status: 400 }
+        );
+      }
+      if (size > MAX_VIDEO_SIZE) {
+        return NextResponse.json(
+          { success: false, error: "Video file exceeds 250MB limit" },
           { status: 400 }
         );
       }
@@ -106,7 +138,7 @@ export async function POST(request: NextRequest) {
         // A. If an unsigned upload preset is provided, use direct REST API
         if (uploadPreset) {
           const endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/${
-            type === "audio" ? "video" : "image"
+            type === "audio" || type === "video" ? "video" : "image"
           }/upload`;
 
           const cloudFormData = new FormData();
@@ -134,7 +166,7 @@ export async function POST(request: NextRequest) {
         }
 
         // B. Otherwise try signed SDK stream upload
-        const resourceType = type === "audio" ? "video" : "image";
+        const resourceType = type === "audio" || type === "video" ? "video" : "image";
         const cloudResult = await new Promise<UploadApiResponse>((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
             {

@@ -66,17 +66,25 @@ export async function PATCH(
     if (body.title) song.title = body.title.trim();
     if (body.artistId) {
       const art = await Artist.findById(body.artistId);
-      if (art) song.artistId = art._id;
+      if (art) {
+        song.artistId = art._id;
+        song.artistName = art.name;
+      }
     }
     if (body.albumId !== undefined) {
       if (body.albumId) {
         const alb = await Album.findById(body.albumId);
-        if (alb) song.albumId = alb._id;
+        if (alb) {
+          song.albumId = alb._id;
+          song.albumTitle = alb.title;
+        }
       } else {
         song.albumId = undefined;
+        song.albumTitle = undefined;
       }
     }
     if (body.audioUrl) song.audioUrl = body.audioUrl.trim();
+    if (body.videoUrl !== undefined) song.videoUrl = body.videoUrl ? body.videoUrl.trim() : "";
     if (body.artworkUrl) song.artworkUrl = body.artworkUrl.trim();
     if (body.duration !== undefined) song.duration = Number(body.duration);
     if (body.genre) song.genre = body.genre.trim();

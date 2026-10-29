@@ -7,10 +7,16 @@ import mongoose from "mongoose";
 // Helper to safely format raw/lean Mongo song document into client-safe SongDTO
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function transformSongDocument(doc: any): SongDTO {
-  const artistName =
-    doc.artistId && typeof doc.artistId === "object" && doc.artistId.name
-      ? doc.artistId.name
-      : doc.artistName || "Unknown Artist";
+  let artistName = "Unknown Artist";
+  if (doc.artistId && typeof doc.artistId === "object" && doc.artistId.name) {
+    artistName = doc.artistId.name;
+  } else if (doc.artistName) {
+    artistName = doc.artistName;
+  } else if (doc.artist && typeof doc.artist === "object" && doc.artist.name) {
+    artistName = doc.artist.name;
+  } else if (doc.artist && typeof doc.artist === "string") {
+    artistName = doc.artist;
+  }
 
   const artistIdStr =
     doc.artistId && typeof doc.artistId === "object" && doc.artistId._id
@@ -19,10 +25,14 @@ export function transformSongDocument(doc: any): SongDTO {
       ? doc.artistId.toString()
       : "";
 
-  const albumTitle =
-    doc.albumId && typeof doc.albumId === "object" && doc.albumId.title
-      ? doc.albumId.title
-      : doc.albumTitle || undefined;
+  let albumTitle: string | undefined = undefined;
+  if (doc.albumId && typeof doc.albumId === "object" && doc.albumId.title) {
+    albumTitle = doc.albumId.title;
+  } else if (doc.albumTitle) {
+    albumTitle = doc.albumTitle;
+  } else if (doc.album && typeof doc.album === "object" && doc.album.title) {
+    albumTitle = doc.album.title;
+  }
 
   const albumIdStr =
     doc.albumId && typeof doc.albumId === "object" && doc.albumId._id
@@ -40,6 +50,7 @@ export function transformSongDocument(doc: any): SongDTO {
     albumId: albumIdStr,
     albumTitle,
     audioUrl: doc.audioUrl,
+    videoUrl: doc.videoUrl || undefined,
     artworkUrl: doc.artworkUrl,
     duration: doc.duration,
     durationFormatted: formatTime(doc.duration),

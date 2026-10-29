@@ -157,16 +157,25 @@ export function TopBar() {
                 e.currentTarget.style.backgroundColor = "#FAF7EE";
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={
-                  user.avatar ||
-                  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-                }
-                alt={user.name}
-                className="w-6 h-6 object-cover shrink-0"
-                style={{ border: "1px solid #111111" }}
-              />
+              <div
+                className="w-6 h-6 min-w-[24px] min-h-[24px] max-w-[24px] max-h-[24px] shrink-0 overflow-hidden"
+                style={{
+                  width: "24px",
+                  height: "24px",
+                  border: "1px solid #111111",
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={
+                    user.avatar ||
+                    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
+                  }
+                  alt={user.name}
+                  className="w-full h-full object-cover block"
+                  style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                />
+              </div>
               <span className="hidden sm:inline text-[11px] tracking-wider max-w-[130px] truncate">
                 {user.name.toUpperCase()}
               </span>
@@ -240,15 +249,6 @@ export function TopBar() {
                   <User className="w-3.5 h-3.5 text-[#F05A28]" />
                   <span>[ EDIT PROFILE ]</span>
                 </button>
-
-                <Link
-                  href="/profile"
-                  onClick={() => setIsProfileMenuOpen(false)}
-                  className="flex items-center gap-2 px-2.5 py-1.5 font-bold uppercase transition-colors hover:bg-[#F6EEDE] text-[#7A7166] hover:text-[#111111]"
-                >
-                  <Sliders className="w-3.5 h-3.5 text-[#F05A28]" />
-                  <span>[ OPERATOR DESK ]</span>
-                </Link>
 
                 <Link
                   href="/library"

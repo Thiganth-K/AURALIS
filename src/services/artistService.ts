@@ -49,11 +49,12 @@ export async function getArtistById(idOrSlug: string): Promise<ArtistDTO | null>
 
   const artistDTO = transformArtistDocument(doc);
 
-  // Fetch top 5 songs for this artist
+  // Fetch top 10 songs for this artist
   const songs = await Song.find({ artistId: doc._id, status: "published" })
     .sort({ playCount: -1 })
-    .limit(5)
-    .populate("albumId", "title slug")
+    .limit(10)
+    .populate("artistId", "name slug image")
+    .populate("albumId", "title slug artworkUrl")
     .lean();
 
   artistDTO.popularSongs = songs.map(transformSongDocument);

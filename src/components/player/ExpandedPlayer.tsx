@@ -21,6 +21,8 @@ import {
   Volume1,
   Radio,
   Music2,
+  Film,
+  Video,
 } from "lucide-react";
 
 export function ExpandedPlayer() {
@@ -49,6 +51,25 @@ export function ExpandedPlayer() {
   } = usePlayer();
 
   const { user } = useAuth();
+  const [videoMode, setVideoMode] = React.useState(false);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
+
+  // Sync video playback with audio
+  React.useEffect(() => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.play().catch(() => {});
+      } else {
+        videoRef.current.pause();
+      }
+    }
+  }, [isPlaying]);
+
+  React.useEffect(() => {
+    if (videoRef.current && Math.abs(videoRef.current.currentTime - progress) > 2) {
+      videoRef.current.currentTime = progress;
+    }
+  }, [progress]);
 
   if (!isExpandedPlayerOpen || !currentSong) return null;
 
@@ -184,36 +205,83 @@ export function ExpandedPlayer() {
             <RetroAudioVisualizer isPlaying={isPlaying} side="left" barsCount={18} />
           </div>
 
-          {/* Center: Album Jacket Card */}
+          {/* Center: Album Jacket Card / Music Video */}
           <div className="flex flex-col items-center shrink-0 mx-auto">
+            {/* Optional Video Mode Switcher */}
+            {currentSong.videoUrl && (
+              <div className="mb-2.5 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setVideoMode(!videoMode)}
+                  className="px-3 py-1 text-[10px] font-black uppercase tracking-wider inline-flex items-center gap-1.5 transition-all cursor-pointer font-mono"
+                  style={{
+                    backgroundColor: videoMode ? "#F05A28" : "#FAF7EE",
+                    color: videoMode ? "#FAF7EE" : "#111111",
+                    border: "1.5px solid #111111",
+                    boxShadow: "1.5px 1.5px 0px #111111",
+                  }}
+                >
+                  <Film className="w-3.5 h-3.5" />
+                  <span>{videoMode ? "[ 📺 VIDEO MODE ACTIVE ]" : "[ 🎬 SWITCH TO MUSIC VIDEO ]"}</span>
+                </button>
+              </div>
+            )}
+
             <div
-              className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 overflow-hidden transition-all duration-300"
+              className={`relative overflow-hidden transition-all duration-300 flex items-center justify-center ${
+                videoMode && currentSong.videoUrl
+                  ? "w-80 sm:w-[480px] md:w-[600px] aspect-video"
+                  : "w-64 sm:w-80 md:w-96 aspect-square"
+              }`}
               style={{
-                backgroundColor: "#FAF7EE",
+                backgroundColor: "#111111",
                 border: "2px solid #111111",
                 boxShadow: "4px 4px 0px #111111",
               }}
             >
               {/* Corner crop marks */}
-              <span className="absolute top-1.5 left-2 text-xs font-mono leading-none select-none z-10" style={{ color: "#F05A28" }}>
+              <span className="absolute top-1.5 left-2 text-xs font-mono leading-none select-none z-20" style={{ color: "#F05A28" }}>
                 ┌
               </span>
-              <span className="absolute top-1.5 right-2 text-xs font-mono leading-none select-none z-10" style={{ color: "#F05A28" }}>
+              <span className="absolute top-1.5 right-2 text-xs font-mono leading-none select-none z-20" style={{ color: "#F05A28" }}>
                 ┐
               </span>
-              <span className="absolute bottom-1.5 left-2 text-xs font-mono leading-none select-none z-10" style={{ color: "#F05A28" }}>
+              <span className="absolute bottom-1.5 left-2 text-xs font-mono leading-none select-none z-20" style={{ color: "#F05A28" }}>
                 └
               </span>
-              <span className="absolute bottom-1.5 right-2 text-xs font-mono leading-none select-none z-10" style={{ color: "#F05A28" }}>
+              <span className="absolute bottom-1.5 right-2 text-xs font-mono leading-none select-none z-20" style={{ color: "#F05A28" }}>
                 ┘
               </span>
 
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={currentSong.artworkUrl}
-                alt={currentSong.title}
-                className="w-full h-full object-cover"
-              />
+              {videoMode && currentSong.videoUrl ? (
+                <video
+                  ref={videoRef}
+                  src={currentSong.videoUrl}
+                  className="w-full h-full object-contain bg-black relative z-10"
+                  playsInline
+                  muted
+                  loop
+                />
+              ) : (
+                <>
+                  {/* Dynamic blurred ambient background filling any aspect ratio letterbox */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={currentSong.artworkUrl}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 w-full h-full object-cover blur-md opacity-35 scale-110 pointer-events-none"
+                  />
+                  <div className="absolute inset-0 bg-black/30 pointer-events-none z-[1]" />
+                  {/* Main centered artwork with crisp aspect fit */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={currentSong.artworkUrl}
+                    alt={currentSong.title}
+                    className="relative z-10 max-w-full max-h-full object-contain p-2 block drop-shadow-md select-none"
+                  />
+                </>
+              )}
             </div>
 
             {/* Bottom Metadata Pill */}

@@ -227,8 +227,17 @@ export function EditProfileModal({ isOpen, onClose }: EditProfileModalProps) {
               </label>
 
               <div className="flex flex-col sm:flex-row items-center gap-4 p-3.5" style={{ backgroundColor: "#F6EEDE", border: "1.5px solid #111111" }}>
-                {/* Photo Preview with Corner Marks */}
-                <div className="relative w-20 h-20 shrink-0">
+                {/* Photo Preview Frame (Strict 80x80 Square Box, Never Overflows) */}
+                <div
+                  className="relative w-20 h-20 min-w-[80px] min-h-[80px] max-w-[80px] max-h-[80px] shrink-0 overflow-hidden"
+                  style={{
+                    width: "80px",
+                    height: "80px",
+                    border: "2px solid #111111",
+                    boxShadow: "2.5px 2.5px 0px #111111",
+                    backgroundColor: "#FAF7EE",
+                  }}
+                >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={
@@ -236,14 +245,16 @@ export function EditProfileModal({ isOpen, onClose }: EditProfileModalProps) {
                       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80"
                     }
                     alt={name || "User Avatar"}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover block"
                     style={{
-                      border: "2px solid #111111",
-                      boxShadow: "2px 2px 0px #111111",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
                     }}
                   />
                   {uploadingImage && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center z-10">
                       <Loader2 className="w-5 h-5 text-white animate-spin" />
                     </div>
                   )}
@@ -314,14 +325,22 @@ export function EditProfileModal({ isOpen, onClose }: EditProfileModalProps) {
                       key={i}
                       type="button"
                       onClick={() => setAvatar(url)}
-                      className="w-6 h-6 overflow-hidden cursor-pointer transition-transform hover:scale-110"
+                      className="w-7 h-7 min-w-[28px] min-h-[28px] max-w-[28px] max-h-[28px] shrink-0 overflow-hidden cursor-pointer transition-transform hover:scale-105"
                       style={{
-                        border: avatar === url ? "2px solid #F05A28" : "1px solid #111111",
+                        width: "28px",
+                        height: "28px",
+                        border: avatar === url ? "2px solid #F05A28" : "1.5px solid #111111",
+                        boxShadow: avatar === url ? "1px 1px 0px #F05A28" : "none",
                       }}
                       title={`Preset ${i + 1}`}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={url} alt={`Preset ${i + 1}`} className="w-full h-full object-cover" />
+                      <img
+                        src={url}
+                        alt={`Preset ${i + 1}`}
+                        className="w-full h-full object-cover block"
+                        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                      />
                     </button>
                   ))}
                 </div>

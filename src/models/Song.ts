@@ -4,8 +4,11 @@ export interface ISong extends Document {
   title: string;
   slug: string;
   artistId: mongoose.Types.ObjectId;
+  artistName?: string;
   albumId?: mongoose.Types.ObjectId;
+  albumTitle?: string;
   audioUrl: string;
+  videoUrl?: string;
   artworkUrl: string;
   duration: number; // in seconds
   genre: string;
@@ -29,12 +32,15 @@ const SongSchema = new Schema<ISong>(
       required: true,
       index: true,
     },
+    artistName: { type: String, trim: true },
     albumId: {
       type: Schema.Types.ObjectId,
       ref: "Album",
       index: true,
     },
+    albumTitle: { type: String, trim: true },
     audioUrl: { type: String, required: true },
+    videoUrl: { type: String, default: "" },
     artworkUrl: { type: String, required: true },
     duration: { type: Number, required: true },
     genre: { type: String, required: true, index: true },
