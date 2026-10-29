@@ -12,7 +12,7 @@ interface LogoProps {
 export function Logo({ collapsed = false, className = "", size = "md" }: LogoProps) {
   return (
     <Link
-      href="/"
+      href="/home"
       className={`group flex items-center gap-2.5 select-none transition-all ${className}`}
       aria-label="AURALIS Home"
     >

@@ -47,7 +47,7 @@ export function AdminShell({ children }: AdminShellProps) {
       if (!user) {
         router.push("/login");
       } else if (!isAdmin) {
-        router.push("/");
+        router.push("/home");
       }
     }
   }, [user, isAdmin, isLoading, router]);
@@ -258,7 +258,7 @@ export function AdminShell({ children }: AdminShellProps) {
           >
             {/* Public Stream Button */}
             <Link
-              href="/"
+              href="/home"
               className="flex items-center justify-between px-3 py-2 text-xs font-bold uppercase transition-all"
               style={{
                 backgroundColor: "#FAF7EE",

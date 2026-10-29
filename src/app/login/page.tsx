@@ -86,7 +86,7 @@ export default function LoginPage() {
     } else if (isAdmin) {
       router.push("/admin");
     } else {
-      router.push("/");
+      router.push("/home");
     }
   };
 

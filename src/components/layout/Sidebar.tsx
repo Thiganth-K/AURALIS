@@ -40,7 +40,7 @@ export function Sidebar() {
   }, []);
 
   const mainNav = [
-    { label: "Home", href: "/", icon: Home },
+    { label: "Home", href: "/home", icon: Home },
     { label: "Discover", href: "/discover", icon: Compass },
     { label: "Search", href: "/search", icon: Search },
   ];
@@ -87,7 +87,9 @@ export function Sidebar() {
           <div className="space-y-1">
             {mainNav.map((item) => {
               const Icon = item.icon;
-              const isActive = pathname === item.href;
+              const isActive =
+                pathname === item.href ||
+                (item.href === "/home" && pathname === "/");
               return (
                 <Link
                   key={item.href}
@@ -203,7 +205,7 @@ export function Sidebar() {
             {playlists.slice(0, 4).map((pl) => (
               <Link
                 key={pl.id}
-                href={`/playlist/${pl.id}`}
+                href={`/playlist/${encodeURIComponent(pl.name || pl.id)}`}
                 className="flex items-center justify-between px-2.5 py-1 text-[11px] text-[#7A7166] hover:text-[#111111] hover:bg-[#F6EEDE] transition-colors truncate font-bold uppercase"
               >
                 <span className="truncate">▸ {pl.name}</span>

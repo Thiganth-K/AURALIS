@@ -65,10 +65,23 @@ export async function getPlaylistById(idOrSlug: string): Promise<PlaylistDTO | n
   void Artist;
   void Album;
 
-  const isObjectId = mongoose.Types.ObjectId.isValid(idOrSlug);
-  const query = isObjectId ? { _id: idOrSlug } : { slug: idOrSlug };
+  const raw = idOrSlug ? decodeURIComponent(idOrSlug).trim() : "";
+  if (!raw) return null;
 
-  const doc = await Playlist.findOne(query)
+  const isObjectId = mongoose.Types.ObjectId.isValid(raw);
+  const escaped = raw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const slugVariant = raw.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+  const queryConditions: Record<string, unknown>[] = [
+    { slug: raw.toLowerCase() },
+    { slug: slugVariant },
+    { name: new RegExp(`^${escaped}$`, "i") },
+  ];
+  if (isObjectId) {
+    queryConditions.unshift({ _id: raw });
+  }
+
+  const doc = await Playlist.findOne({ $or: queryConditions })
     .populate("ownerId", "name avatar")
     .populate({
       path: "songs.songId",

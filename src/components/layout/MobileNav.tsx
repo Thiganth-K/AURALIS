@@ -9,7 +9,7 @@ export function MobileNav() {
   const pathname = usePathname();
 
   const items = [
-    { label: "Home", href: "/", icon: Home },
+    { label: "Home", href: "/home", icon: Home },
     { label: "Discover", href: "/discover", icon: Compass },
     { label: "Search", href: "/search", icon: Search },
     { label: "Library", href: "/library", icon: Library },
@@ -25,7 +25,9 @@ export function MobileNav() {
     >
       {items.map((item) => {
         const Icon = item.icon;
-        const isActive = pathname === item.href;
+        const isActive =
+          pathname === item.href ||
+          (item.href === "/home" && pathname === "/");
         return (
           <Link
             key={item.href}

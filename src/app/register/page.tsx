@@ -100,7 +100,7 @@ export default function RegisterPage() {
       return;
     }
 
-    router.push("/");
+    router.push("/home");
   };
 
   const chamfer =

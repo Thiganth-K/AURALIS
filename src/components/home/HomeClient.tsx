@@ -230,7 +230,7 @@ export function HomeClient({
                 <button
                   type="button"
                   onClick={() => playSong(heroTrack, trendingSongs)}
-                  className="px-6 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2.5 transition-all cursor-pointer"
+                  className="h-11 min-w-[210px] px-5 text-xs sm:text-sm font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2.5 transition-all cursor-pointer font-mono select-none"
                   style={{
                     backgroundColor: "#F05A28",
                     color: "#111111",
@@ -255,7 +255,7 @@ export function HomeClient({
 
               <Link
                 href="/discover"
-                className="px-5 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer"
+                className="h-11 min-w-[210px] px-5 text-xs sm:text-sm font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2.5 transition-all cursor-pointer font-mono select-none"
                 style={{
                   backgroundColor: "#FAF7EE",
                   color: "#111111",
@@ -280,7 +280,7 @@ export function HomeClient({
               {isAdmin && (
                 <Link
                   href="/admin/songs/new"
-                  className="px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer"
+                  className="h-11 px-4 text-xs sm:text-sm font-bold uppercase tracking-wider inline-flex items-center justify-center gap-2 transition-all cursor-pointer font-mono"
                   style={{
                     backgroundColor: "#F6EEDE",
                     color: "#111111",

@@ -52,7 +52,7 @@ export async function proxy(request: NextRequest) {
 
     // Force user to start with the login page
     const loginUrl = new URL("/login", request.url);
-    if (pathname !== "/") {
+    if (pathname !== "/" && pathname !== "/home") {
       loginUrl.searchParams.set("redirect", pathname);
     }
     return NextResponse.redirect(loginUrl);
@@ -60,13 +60,18 @@ export async function proxy(request: NextRequest) {
 
   // 5. If ALREADY authenticated and visiting /login or /register:
   if (isAuthPage) {
-    const destination = session.role === "admin" ? "/admin" : "/";
+    const destination = session.role === "admin" ? "/admin" : "/home";
     return NextResponse.redirect(new URL(destination, request.url));
   }
 
   // 6. Admin portal protection
   if (pathname.startsWith("/admin") && session.role !== "admin") {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/home", request.url));
+  }
+
+  // 7. Route / directly to /home when authenticated
+  if (pathname === "/") {
+    return NextResponse.redirect(new URL("/home", request.url));
   }
 
   return NextResponse.next();
@@ -79,7 +84,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - public files (files with extensions)
      */
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

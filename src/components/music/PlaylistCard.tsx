@@ -10,9 +10,11 @@ interface PlaylistCardProps {
 }
 
 export function PlaylistCard({ playlist }: PlaylistCardProps) {
+  const targetParam = playlist.name || playlist.slug || playlist.id;
+
   return (
     <Link
-      href={`/playlist/${playlist.id}`}
+      href={`/playlist/${encodeURIComponent(targetParam)}`}
       className="group relative flex flex-col p-3 transition-all select-none font-mono"
       style={{
         backgroundColor: "#FAF7EE",

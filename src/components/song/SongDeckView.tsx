@@ -143,7 +143,7 @@ export function SongDeckView({ song, playlistContext = [] }: SongDeckViewProps) 
           </button>
 
           <Link
-            href="/"
+            href="/home"
             className="flex items-center gap-2 px-3 py-1 cursor-pointer transition-colors hover:bg-[#F6EEDE]"
             style={{
               backgroundColor: "#F6EEDE",
