@@ -44,7 +44,7 @@ export function transformSongDocument(doc: any): SongDTO {
     duration: doc.duration,
     durationFormatted: formatTime(doc.duration),
     genre: doc.genre,
-    releaseDate: doc.releaseDate ? new Date(doc.releaseDate).toISOString() : new Date().toISOString(),
+    releaseDate: doc.releaseDate ? new Date(doc.releaseDate).toISOString() : "2026-01-01T00:00:00.000Z",
     playCount: doc.playCount || 0,
     explicit: doc.explicit || false,
   };

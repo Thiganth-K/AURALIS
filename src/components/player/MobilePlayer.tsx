@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { usePlayer } from "@/context/PlayerContext";
 import {
   Play,
@@ -9,6 +10,7 @@ import {
 } from "lucide-react";
 
 export function MobilePlayer() {
+  const router = useRouter();
   const {
     currentSong,
     isPlaying,
@@ -18,7 +20,6 @@ export function MobilePlayer() {
     likedSongIds,
     togglePlay,
     toggleLike,
-    setExpandedPlayerOpen,
   } = usePlayer();
 
   if (!currentSong) return null;
@@ -31,14 +32,25 @@ export function MobilePlayer() {
       {/* FLOATING MINI PLAYER: Visible on mobile (screens < md) above bottom nav */}
       {!isExpandedPlayerOpen && (
         <div
-          onClick={() => setExpandedPlayerOpen(true)}
-          className="md:hidden fixed bottom-16 left-2 right-2 z-40 h-14 bg-[#08041c] border-2 border-[#5c32c4] rounded-lg px-3 flex items-center justify-between shadow-[0_0_15px_rgba(92,50,196,0.35)] cursor-pointer"
+          onClick={() => router.push(`/song/${currentSong.id}`)}
+          className="md:hidden fixed bottom-16 left-2 right-2 z-40 h-14 px-3 flex items-center justify-between cursor-pointer font-mono select-none"
+          style={{
+            backgroundColor: "#FAF7EE",
+            border: "2px solid #111111",
+            boxShadow: "3px 3px 0px #111111",
+          }}
         >
           {/* Progress bar line at top edge */}
-          <div className="absolute top-0 left-0 right-0 h-[2px] bg-[#180e38] rounded-t-lg overflow-hidden">
+          <div
+            className="absolute top-0 left-0 right-0 h-[3px] overflow-hidden"
+            style={{ backgroundColor: "#F6EEDE" }}
+          >
             <div
-              className="h-full bg-[#d7ff3f] shadow-[0_0_6px_#d7ff3f]"
-              style={{ width: `${progressPercent}%` }}
+              className="h-full transition-all"
+              style={{
+                width: `${progressPercent}%`,
+                backgroundColor: "#F05A28",
+              }}
             />
           </div>
 
@@ -47,13 +59,17 @@ export function MobilePlayer() {
             <img
               src={currentSong.artworkUrl}
               alt={currentSong.title}
-              className="w-9 h-9 rounded border border-[#ff2a85] object-cover shrink-0"
+              className="w-9 h-9 object-cover shrink-0"
+              style={{ border: "1.5px solid #111111" }}
             />
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-pixel text-white truncate">
+              <p className="text-xs font-bold text-[#111111] uppercase truncate">
                 {currentSong.title}
               </p>
-              <p className="text-[11px] font-pixel text-[#00f0ff] truncate">
+              <p
+                className="text-[10px] font-mono truncate mt-0.5"
+                style={{ color: "#F05A28" }}
+              >
                 {currentSong.artistName}
               </p>
             </div>
@@ -66,11 +82,13 @@ export function MobilePlayer() {
                 e.stopPropagation();
                 toggleLike(currentSong.id);
               }}
-              className={`p-1.5 rounded border transition-colors ${
-                isLiked
-                  ? "border-[#d7ff3f] text-[#d7ff3f] bg-[#160c3c]"
-                  : "border-[#4d2db7] text-[#a79cd0] bg-[#0c0628]"
-              }`}
+              className="w-7 h-7 flex items-center justify-center transition-all cursor-pointer"
+              style={{
+                backgroundColor: isLiked ? "#FFF0ED" : "#FAF7EE",
+                border: isLiked ? "1.5px solid #F05A28" : "1.5px solid #111111",
+                boxShadow: "1px 1px 0px #111111",
+                color: isLiked ? "#F05A28" : "#111111",
+              }}
               aria-label="Like"
             >
               <Heart className={`w-3.5 h-3.5 ${isLiked ? "fill-current" : ""}`} />
@@ -82,13 +100,19 @@ export function MobilePlayer() {
                 e.stopPropagation();
                 togglePlay();
               }}
-              className="w-8 h-8 rounded-md bg-[#d7ff3f] text-black border-2 border-black flex items-center justify-center shadow-[0_0_10px_rgba(215,255,63,0.5)] active:translate-y-0.5"
+              className="w-8 h-8 flex items-center justify-center transition-all cursor-pointer"
+              style={{
+                backgroundColor: isPlaying ? "#F05A28" : "#111111",
+                color: "#FFFFFF",
+                border: "1.5px solid #111111",
+                boxShadow: "1.5px 1.5px 0px #111111",
+              }}
               aria-label={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? (
-                <Pause className="w-3.5 h-3.5 fill-black stroke-black" />
+                <Pause className="w-3.5 h-3.5 fill-current" />
               ) : (
-                <Play className="w-3.5 h-3.5 fill-black stroke-black ml-0.5" />
+                <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
               )}
             </button>
           </div>

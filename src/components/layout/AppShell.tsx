@@ -18,18 +18,21 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
-  const isAdminOrAuthRoute =
-    pathname.startsWith("/admin") || pathname === "/login" || pathname === "/register";
+  const isDedicatedRoute =
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/song/") ||
+    pathname === "/login" ||
+    pathname === "/register";
 
   return (
     <AuthProvider>
       <PlayerProvider>
-        {isAdminOrAuthRoute ? (
-          <div className="h-screen w-screen overflow-hidden bg-[#F6EEDE] text-[#111111]">
+        {isDedicatedRoute ? (
+          <div className="min-h-screen w-screen overflow-x-hidden bg-[#FAF7EE] text-[#111111]">
             {children}
           </div>
         ) : (
-          <div className="flex h-screen w-screen overflow-hidden bg-[#F5F1E8] text-[#111111]">
+          <div className="flex h-screen w-screen overflow-hidden bg-[#FAF7EE] text-[#111111] font-mono">
             {/* Desktop Sidebar */}
             <Sidebar />
 

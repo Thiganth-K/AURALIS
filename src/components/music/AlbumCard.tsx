@@ -13,10 +13,36 @@ export function AlbumCard({ album }: AlbumCardProps) {
   return (
     <Link
       href={`/album/${album.id}`}
-      className="group relative flex flex-col p-3 rounded-lg bg-[#0c0628] border border-[#8b5cf6] shadow-[0_0_12px_rgba(139,92,246,0.2)] hover:border-[#00f0ff] hover:shadow-[0_0_15px_rgba(0,240,255,0.3)] hover:-translate-y-0.5 transition-all select-none"
+      className="group relative flex flex-col p-3 transition-all select-none font-mono"
+      style={{
+        backgroundColor: "#FAF7EE",
+        border: "2px solid #111111",
+        boxShadow: "3px 3px 0px #111111",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translate(-1.5px,-1.5px)";
+        e.currentTarget.style.boxShadow = "4px 4px 0px #111111";
+        e.currentTarget.style.backgroundColor = "#F6EEDE";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "";
+        e.currentTarget.style.boxShadow = "3px 3px 0px #111111";
+        e.currentTarget.style.backgroundColor = "#FAF7EE";
+      }}
     >
+      {/* Corner crop ticks */}
+      <span className="absolute top-1 left-1.5 text-[10px] font-mono leading-none select-none text-[#F05A28]">
+        ┌
+      </span>
+      <span className="absolute bottom-1 right-1.5 text-[10px] font-mono leading-none select-none text-[#F05A28]">
+        ┘
+      </span>
+
       {/* Vinyl record sleeve depth frame */}
-      <div className="relative aspect-square w-full rounded overflow-hidden bg-[#180e38] mb-3 border border-[#8b5cf6]">
+      <div
+        className="relative aspect-square w-full overflow-hidden mb-2.5"
+        style={{ border: "1.5px solid #111111", backgroundColor: "#F6EEDE" }}
+      >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={album.artworkUrl}
@@ -26,18 +52,25 @@ export function AlbumCard({ album }: AlbumCardProps) {
         />
 
         {/* Retro release badge */}
-        <div className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-[#09041a]/90 border border-[#8b5cf6] text-[9px] font-pixel text-[#00f0ff] flex items-center gap-1 shadow-[0_0_8px_rgba(139,92,246,0.4)]">
-          <Disc3 className="w-2.5 h-2.5 text-[#ff2a85]" />
+        <div
+          className="absolute top-2 left-2 px-1.5 py-0.5 text-[9px] font-bold font-mono uppercase flex items-center gap-1"
+          style={{
+            backgroundColor: "#FAF7EE",
+            border: "1px solid #111111",
+            color: "#111111",
+          }}
+        >
+          <Disc3 className="w-2.5 h-2.5 text-[#F05A28]" />
           <span>{album.releaseYear}</span>
         </div>
       </div>
 
-      <div className="flex flex-col">
-        <h4 className="text-sm font-pixel text-white group-hover:text-[#00f0ff] transition-colors truncate">
+      <div className="flex flex-col min-w-0">
+        <h4 className="text-xs font-bold uppercase text-[#111111] group-hover:text-[#F05A28] transition-colors truncate">
           {album.title}
         </h4>
-        <p className="text-xs text-[#a79cd0] font-sans truncate mt-1">
-          {album.artistName} • <span className="font-pixel text-[10px] text-[#ffbe0b]">{album.songCount} TRK</span>
+        <p className="text-[11px] text-[#7A7166] font-mono truncate mt-0.5">
+          {album.artistName} • <span className="font-bold text-[#F05A28]">{album.songCount} TRK</span>
         </p>
       </div>
     </Link>

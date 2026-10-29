@@ -124,7 +124,7 @@ export async function PATCH(
         : "USER_UPDATED";
 
     await AdminAudit.create({
-      adminId: adminUser._id,
+      adminId: new mongoose.Types.ObjectId(adminUser.id),
       action: auditAction,
       resourceType: "user",
       resourceId: id,

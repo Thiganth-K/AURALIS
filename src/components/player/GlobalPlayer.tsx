@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { usePlayer } from "@/context/PlayerContext";
 import { formatTime } from "@/lib/utils";
 import {
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 
 export function GlobalPlayer() {
+  const router = useRouter();
   const {
     currentSong,
     isPlaying,
@@ -54,21 +56,39 @@ export function GlobalPlayer() {
   };
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 z-40 h-20 bg-[#060317] border-t-2 border-[#5c32c4] shadow-[0_-4px_25px_rgba(92,50,196,0.35)] px-4 md:px-6 flex items-center justify-between select-none">
+    <footer
+      className="fixed bottom-0 left-0 right-0 z-40 h-20 px-4 md:px-6 flex items-center justify-between select-none font-mono"
+      style={{
+        backgroundColor: "#FAF7EE",
+        borderTop: "2px solid #111111",
+        boxShadow: "0 -2px 0px #111111",
+      }}
+    >
       {/* Decorative corner notch brackets */}
-      <span className="absolute top-1.5 left-2 text-[#5c32c4] font-mono text-xs leading-none select-none">
+      <span
+        className="absolute top-1.5 left-2 font-mono text-xs leading-none select-none"
+        style={{ color: "#F05A28" }}
+      >
         ┌
       </span>
-      <span className="absolute top-1.5 right-2 text-[#5c32c4] font-mono text-xs leading-none select-none">
+      <span
+        className="absolute top-1.5 right-2 font-mono text-xs leading-none select-none"
+        style={{ color: "#F05A28" }}
+      >
         ┐
       </span>
 
-      {/* LEFT: Current Track Info with Synthwave Framing */}
+      {/* LEFT: Current Track Info */}
       <div className="flex items-center gap-3 w-1/4 min-w-[180px] max-w-[300px]">
-        {/* Artwork with glowing pink border */}
+        {/* Artwork with sharp border */}
         <div
-          onClick={() => setExpandedPlayerOpen(true)}
-          className="relative w-11 h-11 rounded bg-[#0e072b] shrink-0 cursor-pointer group border border-[#ff2a85] shadow-[0_0_10px_rgba(255,42,133,0.35)] hover:border-[#00f0ff] transition-all overflow-hidden"
+          onClick={() => router.push(`/song/${currentSong.id}`)}
+          className="relative w-11 h-11 shrink-0 cursor-pointer group transition-all overflow-hidden"
+          style={{
+            border: "1.5px solid #111111",
+            boxShadow: "1.5px 1.5px 0px #111111",
+            backgroundColor: "#F6EEDE",
+          }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -77,38 +97,47 @@ export function GlobalPlayer() {
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-            <Maximize2 className="w-3.5 h-3.5 text-[#00f0ff]" />
+            <Maximize2 className="w-3.5 h-3.5 text-white" />
           </div>
         </div>
 
-        {/* Animated Green/Cyan Equalizer Bars */}
+        {/* Animated Equalizer Bars */}
         <div className="flex items-end gap-0.5 h-4 w-3.5 shrink-0" title="Audio Stream Active">
           <span
-            className={`w-1 bg-[#00ff88] rounded-xs transition-all ${
-              isPlaying ? "h-3.5 animate-pulse" : "h-2 opacity-50"
-            }`}
+            className="w-1 rounded-xs transition-all"
+            style={{
+              backgroundColor: "#F05A28",
+              height: isPlaying ? "14px" : "6px",
+              opacity: isPlaying ? 1 : 0.5,
+            }}
           />
           <span
-            className={`w-1 bg-[#00f0ff] rounded-xs transition-all ${
-              isPlaying ? "h-4 animate-bounce" : "h-3 opacity-50"
-            }`}
+            className="w-1 rounded-xs transition-all"
+            style={{
+              backgroundColor: "#F05A28",
+              height: isPlaying ? "16px" : "10px",
+              opacity: isPlaying ? 1 : 0.5,
+            }}
           />
           <span
-            className={`w-1 bg-[#d7ff3f] rounded-xs transition-all ${
-              isPlaying ? "h-2.5 animate-pulse" : "h-1.5 opacity-50"
-            }`}
+            className="w-1 rounded-xs transition-all"
+            style={{
+              backgroundColor: "#F05A28",
+              height: isPlaying ? "10px" : "4px",
+              opacity: isPlaying ? 1 : 0.5,
+            }}
           />
         </div>
 
         {/* Title and Artist */}
         <div className="flex flex-col min-w-0 pr-1">
           <span
-            onClick={() => setExpandedPlayerOpen(true)}
-            className="text-xs font-pixel text-white font-bold truncate hover:text-[#00f0ff] cursor-pointer"
+            onClick={() => router.push(`/song/${currentSong.id}`)}
+            className="text-xs font-bold uppercase text-[#111111] truncate hover:text-[#F05A28] cursor-pointer"
           >
             {currentSong.title}
           </span>
-          <span className="text-[11px] font-pixel text-[#00f0ff] truncate">
+          <span className="text-[10px] text-[#7A7166] font-mono truncate">
             {currentSong.artistName}
           </span>
         </div>
@@ -122,11 +151,13 @@ export function GlobalPlayer() {
           <button
             type="button"
             onClick={toggleShuffle}
-            className={`w-7 h-7 flex items-center justify-center rounded border transition-all ${
-              isShuffle
-                ? "bg-[#160c3c] text-[#d7ff3f] border-[#d7ff3f] shadow-[0_0_8px_rgba(215,255,63,0.4)]"
-                : "bg-[#0c0628] border-[#4d2db7] text-[#a79cd0] hover:text-[#00f0ff] hover:border-[#00f0ff]"
-            }`}
+            className="w-7 h-7 flex items-center justify-center transition-all cursor-pointer"
+            style={{
+              backgroundColor: isShuffle ? "#F6EEDE" : "#FAF7EE",
+              color: isShuffle ? "#F05A28" : "#111111",
+              border: isShuffle ? "1.5px solid #F05A28" : "1.5px solid #111111",
+              boxShadow: "1.5px 1.5px 0px #111111",
+            }}
             title={isShuffle ? "Shuffle On" : "Shuffle Off"}
           >
             <Shuffle className="w-3.5 h-3.5" />
@@ -136,23 +167,45 @@ export function GlobalPlayer() {
           <button
             type="button"
             onClick={previous}
-            className="w-7 h-7 flex items-center justify-center rounded border border-[#4d2db7] bg-[#0c0628] text-[#a79cd0] hover:text-white hover:border-[#00f0ff] active:translate-y-0.5 transition-all"
+            className="w-7 h-7 flex items-center justify-center transition-all cursor-pointer"
+            style={{
+              backgroundColor: "#FAF7EE",
+              border: "1.5px solid #111111",
+              boxShadow: "1.5px 1.5px 0px #111111",
+              color: "#111111",
+            }}
             title="Previous track"
           >
             <SkipBack className="w-3.5 h-3.5 fill-current" />
           </button>
 
-          {/* Play / Pause Tactile Neon Lime Primary Button */}
+          {/* Play / Pause Tactile Primary Button */}
           <button
             type="button"
             onClick={togglePlay}
-            className="w-9 h-9 rounded-md bg-[#d7ff3f] text-black border-2 border-black flex items-center justify-center shadow-[0_0_15px_rgba(215,255,63,0.55)] active:translate-y-0.5 hover:bg-[#cbf532] transition-transform"
+            className="w-9 h-9 flex items-center justify-center transition-all cursor-pointer"
+            style={{
+              backgroundColor: "#F05A28",
+              color: "#111111",
+              border: "2px solid #111111",
+              boxShadow: "2px 2px 0px #111111",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "#e84e1d";
+              e.currentTarget.style.transform = "translate(-1px,-1px)";
+              e.currentTarget.style.boxShadow = "3px 3px 0px #111111";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "#F05A28";
+              e.currentTarget.style.transform = "";
+              e.currentTarget.style.boxShadow = "2px 2px 0px #111111";
+            }}
             aria-label={isPlaying ? "Pause" : "Play"}
           >
             {isPlaying ? (
-              <Pause className="w-4 h-4 fill-black stroke-black" />
+              <Pause className="w-4 h-4 fill-current stroke-current" />
             ) : (
-              <Play className="w-4 h-4 fill-black stroke-black ml-0.5" />
+              <Play className="w-4 h-4 fill-current stroke-current ml-0.5" />
             )}
           </button>
 
@@ -160,7 +213,13 @@ export function GlobalPlayer() {
           <button
             type="button"
             onClick={next}
-            className="w-7 h-7 flex items-center justify-center rounded border border-[#4d2db7] bg-[#0c0628] text-[#a79cd0] hover:text-white hover:border-[#00f0ff] active:translate-y-0.5 transition-all"
+            className="w-7 h-7 flex items-center justify-center transition-all cursor-pointer"
+            style={{
+              backgroundColor: "#FAF7EE",
+              border: "1.5px solid #111111",
+              boxShadow: "1.5px 1.5px 0px #111111",
+              color: "#111111",
+            }}
             title="Next track"
           >
             <SkipForward className="w-3.5 h-3.5 fill-current" />
@@ -170,11 +229,13 @@ export function GlobalPlayer() {
           <button
             type="button"
             onClick={toggleRepeat}
-            className={`w-7 h-7 flex items-center justify-center rounded border transition-all ${
-              repeatMode !== "off"
-                ? "bg-[#160c3c] text-[#d7ff3f] border-[#d7ff3f] shadow-[0_0_8px_rgba(215,255,63,0.4)]"
-                : "bg-[#0c0628] border-[#4d2db7] text-[#a79cd0] hover:text-[#00f0ff] hover:border-[#00f0ff]"
-            }`}
+            className="w-7 h-7 flex items-center justify-center transition-all cursor-pointer"
+            style={{
+              backgroundColor: repeatMode !== "off" ? "#F6EEDE" : "#FAF7EE",
+              color: repeatMode !== "off" ? "#F05A28" : "#111111",
+              border: repeatMode !== "off" ? "1.5px solid #F05A28" : "1.5px solid #111111",
+              boxShadow: "1.5px 1.5px 0px #111111",
+            }}
             title={`Repeat mode: ${repeatMode}`}
           >
             {repeatMode === "one" ? (
@@ -187,7 +248,7 @@ export function GlobalPlayer() {
 
         {/* Digital Retro Scrubbing Bar */}
         <div className="w-full flex items-center gap-3">
-          <span className="text-[11px] font-pixel text-white w-10 text-right select-none">
+          <span className="text-[11px] font-mono font-bold text-[#111111] w-10 text-right select-none">
             {formatTime(progress)}
           </span>
 
@@ -202,20 +263,33 @@ export function GlobalPlayer() {
               className="absolute inset-0 w-full h-2 bg-transparent cursor-pointer appearance-none z-10 opacity-0"
             />
             {/* Scrubber Track Background */}
-            <div className="w-full h-1.5 bg-[#180e38] rounded-full overflow-hidden flex items-center border border-[#2d1b69]">
+            <div
+              className="w-full h-2 overflow-hidden flex items-center"
+              style={{
+                backgroundColor: "#F6EEDE",
+                border: "1px solid #111111",
+              }}
+            >
               <div
-                className="h-full bg-[#d7ff3f] shadow-[0_0_8px_#d7ff3f] transition-all"
-                style={{ width: `${progressPercent}%` }}
+                className="h-full transition-all"
+                style={{
+                  width: `${progressPercent}%`,
+                  backgroundColor: "#F05A28",
+                }}
               />
             </div>
             {/* Scrubber Knob */}
             <div
-              className="absolute w-2.5 h-2.5 bg-[#d7ff3f] rounded-full shadow-[0_0_10px_#d7ff3f] pointer-events-none -ml-1 transition-all"
-              style={{ left: `${progressPercent}%` }}
+              className="absolute w-2.5 h-2.5 pointer-events-none -ml-1 transition-all"
+              style={{
+                left: `${progressPercent}%`,
+                backgroundColor: "#111111",
+                border: "1px solid #FAF7EE",
+              }}
             />
           </div>
 
-          <span className="text-[11px] font-pixel text-white w-10 text-left select-none">
+          <span className="text-[11px] font-mono font-bold text-[#7A7166] w-10 text-left select-none">
             {formatTime(duration)}
           </span>
         </div>
@@ -224,11 +298,18 @@ export function GlobalPlayer() {
       {/* RIGHT: Volume & Utilities */}
       <div className="flex items-center justify-end gap-2.5 w-1/4 min-w-[180px] max-w-[300px]">
         {/* Volume Slider Deck */}
-        <div className="hidden sm:flex items-center gap-1.5 bg-[#0c0628] border border-[#4d2db7] rounded-lg px-2.5 py-1 shadow-[0_0_8px_rgba(77,45,183,0.2)]">
+        <div
+          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1"
+          style={{
+            backgroundColor: "#FAF7EE",
+            border: "1.5px solid #111111",
+            boxShadow: "1.5px 1.5px 0px #111111",
+          }}
+        >
           <button
             type="button"
             onClick={toggleMute}
-            className="text-[#a79cd0] hover:text-white transition-colors"
+            className="text-[#111111] hover:text-[#F05A28] transition-colors cursor-pointer"
             title={isMuted ? "Unmute" : "Mute"}
           >
             {isMuted || volume === 0 ? (
@@ -236,7 +317,7 @@ export function GlobalPlayer() {
             ) : volume < 0.5 ? (
               <Volume1 className="w-3.5 h-3.5" />
             ) : (
-              <Volume2 className="w-3.5 h-3.5 text-[#00f0ff]" />
+              <Volume2 className="w-3.5 h-3.5 text-[#F05A28]" />
             )}
           </button>
           <input
@@ -246,7 +327,7 @@ export function GlobalPlayer() {
             step={0.01}
             value={isMuted ? 0 : volume}
             onChange={handleVolumeChange}
-            className="w-16 h-1.5 bg-[#180e38] accent-[#d7ff3f] cursor-pointer"
+            className="w-16 h-1.5 accent-[#F05A28] cursor-pointer"
           />
         </div>
 
@@ -254,11 +335,13 @@ export function GlobalPlayer() {
         <button
           type="button"
           onClick={() => setQueueOpen(!isQueueOpen)}
-          className={`p-2 rounded-lg border transition-all ${
-            isQueueOpen
-              ? "bg-[#160c3c] text-[#d7ff3f] border-[#d7ff3f] shadow-[0_0_8px_rgba(215,255,63,0.4)]"
-              : "bg-[#0c0628] border-[#4d2db7] text-[#a79cd0] hover:text-[#00f0ff] hover:border-[#00f0ff]"
-          }`}
+          className="p-2 transition-all cursor-pointer"
+          style={{
+            backgroundColor: isQueueOpen ? "#F05A28" : "#FAF7EE",
+            color: isQueueOpen ? "#FAF7EE" : "#111111",
+            border: "1.5px solid #111111",
+            boxShadow: "1.5px 1.5px 0px #111111",
+          }}
           title="Playback Queue"
         >
           <ListMusic className="w-4 h-4" />
@@ -267,8 +350,14 @@ export function GlobalPlayer() {
         {/* Fullscreen Player toggle */}
         <button
           type="button"
-          onClick={() => setExpandedPlayerOpen(true)}
-          className="p-2 rounded-lg border border-[#4d2db7] bg-[#0c0628] text-[#a79cd0] hover:text-[#00f0ff] hover:border-[#00f0ff] active:translate-y-0.5 transition-all"
+          onClick={() => router.push(`/song/${currentSong.id}`)}
+          className="p-2 transition-all cursor-pointer"
+          style={{
+            backgroundColor: "#FAF7EE",
+            border: "1.5px solid #111111",
+            boxShadow: "1.5px 1.5px 0px #111111",
+            color: "#111111",
+          }}
           title="Full Player"
         >
           <Maximize2 className="w-4 h-4" />

@@ -10,7 +10,6 @@ import { SongRow } from "@/components/music/SongRow";
 import { AlbumCard } from "@/components/music/AlbumCard";
 import { ArtistCard } from "@/components/music/ArtistCard";
 import { PlaylistCard } from "@/components/music/PlaylistCard";
-import { SynthwaveHeroIllustration } from "@/components/home/SynthwaveHeroIllustration";
 import {
   Play,
   Heart,
@@ -38,6 +37,49 @@ interface HomeClientProps {
   };
 }
 
+const WIDE_SOUNDWAVE_BARS = [
+  8, 12, 17, 24, 30, 38, 46, 54, 60, 65, 70, 74, 76, 74, 70, 65, 60, 54, 46, 38, 30, 24, 17, 12, 8
+];
+
+function VinylRecord() {
+  return (
+    <svg
+      width="130"
+      height="130"
+      viewBox="0 0 130 130"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ filter: "drop-shadow(4px 4px 0px #111111)" }}
+    >
+      <circle cx="65" cy="65" r="64" fill="#1A1A1A" />
+      <circle cx="65" cy="65" r="58" fill="none" stroke="#2A2A2A" strokeWidth="0.8" />
+      <circle cx="65" cy="65" r="52" fill="none" stroke="#2A2A2A" strokeWidth="0.8" />
+      <circle cx="65" cy="65" r="46" fill="none" stroke="#2A2A2A" strokeWidth="0.8" />
+      <circle cx="65" cy="65" r="40" fill="none" stroke="#2A2A2A" strokeWidth="0.8" />
+      <circle cx="65" cy="65" r="34" fill="none" stroke="#2A2A2A" strokeWidth="0.8" />
+      <circle cx="65" cy="65" r="28" fill="none" stroke="#333" strokeWidth="0.8" />
+      <circle cx="65" cy="65" r="22" fill="#F05A28" />
+      <circle cx="65" cy="65" r="18" fill="#E04C1E" />
+      <circle cx="65" cy="65" r="4" fill="#1A1A1A" />
+      <rect x="50" y="58" width="30" height="1.5" fill="#FAF7EE" opacity="0.7" rx="0.5" />
+      <rect x="54" y="62" width="22" height="1.5" fill="#FAF7EE" opacity="0.5" rx="0.5" />
+      <rect x="58" y="66" width="14" height="1.5" fill="#FAF7EE" opacity="0.3" rx="0.5" />
+    </svg>
+  );
+}
+
+function ToneArm() {
+  return (
+    <svg width="60" height="120" viewBox="0 0 60 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="10" r="5" fill="#111111" />
+      <circle cx="50" cy="10" r="3" fill="#F05A28" />
+      <line x1="50" y1="10" x2="12" y2="90" stroke="#111111" strokeWidth="2.5" strokeLinecap="round" />
+      <rect x="6" y="88" width="14" height="6" rx="1" fill="#111111" />
+      <line x1="13" y1="94" x2="13" y2="100" stroke="#F05A28" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function HomeClient({
   trendingSongs,
   recentAlbums,
@@ -55,192 +97,323 @@ export function HomeClient({
   }, [user]);
 
   const heroTrack = featuredMeta?.featuredSong || trendingSongs[0];
-  const isCatalogEmpty = trendingSongs.length === 0 && recentAlbums.length === 0;
 
-  // 5 Signature Quick Access Categories matching the reference design
   const quickAccessCards = [
     {
       title: "Liked Songs",
       subtitle: "Your favorites",
       icon: Heart,
       href: "/library?tab=liked",
-      borderColor: "border-[#ff2a85]",
-      glowColor: "rgba(255,42,133,0.3)",
-      bgColor: "bg-[#14041b]",
-      accentColor: "text-[#ff2a85]",
-      cornerColor: "text-[#ff2a85]",
     },
     {
       title: "Recently Played",
       subtitle: "Continue listening",
       icon: Clock,
       href: "/library?tab=history",
-      borderColor: "border-[#00f0ff]",
-      glowColor: "rgba(0,240,255,0.3)",
-      bgColor: "bg-[#021422]",
-      accentColor: "text-[#00f0ff]",
-      cornerColor: "text-[#00f0ff]",
     },
     {
       title: "Albums",
       subtitle: "Explore albums",
       icon: Disc3,
       href: "/library?tab=albums",
-      borderColor: "border-[#8b5cf6]",
-      glowColor: "rgba(139,92,246,0.3)",
-      bgColor: "bg-[#0e072b]",
-      accentColor: "text-[#8b5cf6]",
-      cornerColor: "text-[#8b5cf6]",
     },
     {
       title: "Artists",
       subtitle: "Discover artists",
       icon: User,
       href: "/library?tab=artists",
-      borderColor: "border-[#ff9e00]",
-      glowColor: "rgba(255,158,0,0.3)",
-      bgColor: "bg-[#1a0e03]",
-      accentColor: "text-[#ff9e00]",
-      cornerColor: "text-[#ff9e00]",
     },
     {
       title: "Playlists",
       subtitle: "Your collections",
       icon: ListMusic,
       href: "/library?tab=playlists",
-      borderColor: "border-[#00f59b]",
-      glowColor: "rgba(0,245,155,0.3)",
-      bgColor: "bg-[#021a12]",
-      accentColor: "text-[#00f59b]",
-      cornerColor: "text-[#00f59b]",
     },
   ];
 
   return (
-    <div className="px-4 sm:px-8 py-6 space-y-10 max-w-7xl mx-auto select-none">
-      {/* 1. HERO SECTION (Cyberpunk Notched Frame with Synthwave Mic Illustration) */}
-      <section className="relative p-6 sm:p-8 rounded-xl bg-[#08041c] border-2 border-[#5c32c4] shadow-[0_0_25px_rgba(92,50,196,0.3)] overflow-hidden">
-        {/* Decorative corner notch brackets */}
-        <span className="absolute top-2 left-2 text-[#5c32c4] font-mono text-sm leading-none select-none">
+    <div
+      className="px-4 sm:px-8 py-6 space-y-10 max-w-7xl mx-auto select-none font-mono"
+      style={{ backgroundColor: "#FAF7EE" }}
+    >
+      <style>{`
+        @keyframes auralisWaveDance {
+          0%, 100% {
+            transform: scaleY(0.18);
+            opacity: 0.55;
+          }
+          50% {
+            transform: scaleY(1.08);
+            opacity: 1;
+          }
+        }
+        @keyframes vinylSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+
+      {/* 1. HERO SECTION (Warm Paper Retro Brutalist Frame with Spinning Vinyl & Dancing Wave) */}
+      <section
+        className="relative p-6 sm:p-8 overflow-hidden"
+        style={{
+          backgroundColor: "#FAF7EE",
+          border: "2px solid #111111",
+          boxShadow: "3px 3px 0px #111111",
+        }}
+      >
+        {/* Technical Corner Crop Ticks */}
+        <span
+          className="absolute top-1.5 left-2 text-sm font-bold font-mono select-none"
+          style={{ color: "#F05A28" }}
+        >
           ┌
         </span>
-        <span className="absolute top-2 right-2 text-[#5c32c4] font-mono text-sm leading-none select-none">
+        <span
+          className="absolute top-1.5 right-2 text-sm font-bold font-mono select-none"
+          style={{ color: "#F05A28" }}
+        >
           ┐
         </span>
-        <span className="absolute bottom-2 left-2 text-[#5c32c4] font-mono text-sm leading-none select-none">
+        <span
+          className="absolute bottom-1.5 left-2 text-sm font-bold font-mono select-none"
+          style={{ color: "#F05A28" }}
+        >
           └
         </span>
-        <span className="absolute bottom-2 right-2 text-[#5c32c4] font-mono text-sm leading-none select-none">
+        <span
+          className="absolute bottom-1.5 right-2 text-sm font-bold font-mono select-none"
+          style={{ color: "#F05A28" }}
+        >
           ┘
         </span>
 
         {/* Top Status Bar inside Hero */}
-        <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#2d1b69] text-xs font-pixel text-[#00f0ff]">
-          <div className="flex items-center gap-2">
-            <Radio className="w-3.5 h-3.5 text-[#00f0ff] animate-pulse" />
-            <span className="tracking-wider">((•)) AURALIS DECK // SIGNAL ACTIVE</span>
+        <div
+          className="flex items-center justify-between pb-3 mb-4 text-xs font-bold uppercase tracking-wider"
+          style={{ borderBottom: "1.5px solid rgba(17,17,17,0.15)" }}
+        >
+          <div className="flex items-center gap-2" style={{ color: "#F05A28" }}>
+            <Radio className="w-3.5 h-3.5 animate-pulse" />
+            <span className="tracking-widest">((•)) AURALIS DECK // SIGNAL ACTIVE</span>
           </div>
-          <span className="hidden sm:inline tracking-wider">
+          <span className="hidden sm:inline tracking-widest text-[#7A7166]">
             STUDIO FLAC 24-BIT / 96kHz
           </span>
         </div>
 
-        {/* Hero Content Left */}
-        <div className="relative z-10 max-w-xl space-y-4">
-          <p className="text-xs sm:text-sm font-pixel text-[#ff2a85] tracking-widest uppercase">
-            {"//"} {greeting.toUpperCase()}
-          </p>
-
-          <h1 className="text-2xl sm:text-4xl md:text-5xl font-pixel tracking-wide text-white uppercase leading-tight">
-            YOUR MUSIC SYSTEM IS READY
-          </h1>
-
-          <p className="text-xs sm:text-sm font-sans text-[#a79cd0] leading-relaxed max-w-lg">
-            {featuredMeta?.subheadline ||
-              "Curated high-fidelity acoustic streams from verified AURALIS artists."}
-          </p>
-
-          <div className="pt-2 flex flex-wrap items-center gap-3">
-            {heroTrack && (
-              <button
-                type="button"
-                onClick={() => playSong(heroTrack, trendingSongs)}
-                className="bg-[#d7ff3f] text-black font-pixel font-bold px-6 py-2.5 rounded-lg border-2 border-black flex items-center gap-2.5 shadow-[0_0_15px_rgba(215,255,63,0.45)] hover:bg-[#cbf532] active:translate-y-0.5 transition-all text-xs sm:text-sm"
-              >
-                <Play className="w-4 h-4 fill-black stroke-black" />
-                <span>RESUME SESSION</span>
-              </button>
-            )}
-
-            <Link
-              href="/discover"
-              className="border border-[#4d2db7] bg-[#0c0628] text-white hover:border-[#00f0ff] hover:text-[#00f0ff] font-pixel px-5 py-2.5 rounded-lg flex items-center gap-2 shadow-[0_0_10px_rgba(77,45,183,0.25)] active:translate-y-0.5 transition-all text-xs sm:text-sm"
+        {/* Hero Middle Content */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+          {/* Left Text Column */}
+          <div className="max-w-xl space-y-3.5">
+            <p
+              className="text-xs sm:text-sm font-bold tracking-widest uppercase"
+              style={{ color: "#F05A28" }}
             >
-              <Compass className="w-4 h-4 text-[#00f0ff]" />
-              <span>EXPLORE DISCOVERY</span>
-            </Link>
+              {"//"} {greeting.toUpperCase()}
+            </p>
 
-            {isAdmin && (
+            <h1
+              className="text-3xl sm:text-4xl lg:text-5xl uppercase leading-tight tracking-tight"
+              style={{ fontWeight: 900, color: "#111111" }}
+            >
+              YOUR MUSIC SYSTEM IS READY
+            </h1>
+
+            <p className="text-xs sm:text-sm text-[#7A7166] font-mono leading-relaxed max-w-lg">
+              {featuredMeta?.subheadline ||
+                "Curated high-fidelity acoustic streams from verified AURALIS artists."}
+            </p>
+
+            <div className="pt-2 flex flex-wrap items-center gap-3">
+              {heroTrack && (
+                <button
+                  type="button"
+                  onClick={() => playSong(heroTrack, trendingSongs)}
+                  className="px-6 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2.5 transition-all cursor-pointer"
+                  style={{
+                    backgroundColor: "#F05A28",
+                    color: "#111111",
+                    border: "2px solid #111111",
+                    boxShadow: "3px 3px 0px #111111",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#e84e1d";
+                    e.currentTarget.style.transform = "translate(-1px,-1px)";
+                    e.currentTarget.style.boxShadow = "4px 4px 0px #111111";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "#F05A28";
+                    e.currentTarget.style.transform = "";
+                    e.currentTarget.style.boxShadow = "3px 3px 0px #111111";
+                  }}
+                >
+                  <Play className="w-4 h-4 fill-current stroke-current" />
+                  <span>RESUME SESSION</span>
+                </button>
+              )}
+
               <Link
-                href="/admin/songs/new"
-                className="border border-[#ff2a85] bg-[#14041b] text-[#ff2a85] hover:bg-[#ff2a85] hover:text-white font-pixel px-4 py-2.5 rounded-lg flex items-center gap-2 shadow-[0_0_10px_rgba(255,42,133,0.25)] active:translate-y-0.5 transition-all text-xs sm:text-sm"
+                href="/discover"
+                className="px-5 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer"
+                style={{
+                  backgroundColor: "#FAF7EE",
+                  color: "#111111",
+                  border: "2px solid #111111",
+                  boxShadow: "3px 3px 0px #111111",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#F6EEDE";
+                  e.currentTarget.style.transform = "translate(-1px,-1px)";
+                  e.currentTarget.style.boxShadow = "4px 4px 0px #111111";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "#FAF7EE";
+                  e.currentTarget.style.transform = "";
+                  e.currentTarget.style.boxShadow = "3px 3px 0px #111111";
+                }}
               >
-                <Upload className="w-4 h-4" />
-                <span>[ UPLOAD ]</span>
+                <Compass className="w-4 h-4" style={{ color: "#F05A28" }} />
+                <span>EXPLORE DISCOVERY</span>
               </Link>
-            )}
+
+              {isAdmin && (
+                <Link
+                  href="/admin/songs/new"
+                  className="px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer"
+                  style={{
+                    backgroundColor: "#F6EEDE",
+                    color: "#111111",
+                    border: "2px solid #111111",
+                    boxShadow: "3px 3px 0px #111111",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = "translate(-1px,-1px)";
+                    e.currentTarget.style.boxShadow = "4px 4px 0px #111111";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = "";
+                    e.currentTarget.style.boxShadow = "3px 3px 0px #111111";
+                  }}
+                >
+                  <Upload className="w-4 h-4" style={{ color: "#F05A28" }} />
+                  <span>[ UPLOAD ]</span>
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {/* Right Visual: Slowly Spinning Vinyl Record & Dancing Waveform */}
+          <div className="hidden lg:flex items-center gap-6 shrink-0">
+            {/* Spinning Vinyl Record + ToneArm */}
+            <div className="relative mx-4">
+              <div style={{ animation: "vinylSpin 8s linear infinite", transformOrigin: "center" }}>
+                <VinylRecord />
+              </div>
+              <div className="absolute -right-4 -top-2 pointer-events-none">
+                <ToneArm />
+              </div>
+            </div>
+
+            {/* 25-Bar Waveform Dance */}
+            <div className="flex items-center gap-0.5 h-16">
+              {WIDE_SOUNDWAVE_BARS.map((h, i) => (
+                <span
+                  key={i}
+                  className="rounded-sm"
+                  style={{
+                    display: "inline-block",
+                    width: "3px",
+                    height: `${h * 0.7}px`,
+                    backgroundColor: "#F05A28",
+                    transformOrigin: "center",
+                    animation: "auralisWaveDance 1.35s ease-in-out infinite",
+                    animationDelay: `${(i * 0.055).toFixed(3)}s`,
+                    willChange: "transform",
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Slogan on the Right */}
+            <div
+              className="text-right text-[10px] font-black tracking-widest text-[#111111] uppercase leading-snug pl-5 shrink-0"
+              style={{ borderLeft: "2px solid rgba(17,17,17,0.15)" }}
+            >
+              <p>REAL PEOPLE.</p>
+              <p className="my-0.5">REAL MUSIC.</p>
+              <p style={{ color: "#F05A28" }}>AURALIS.</p>
+            </div>
           </div>
         </div>
-
-        {/* Hero Visual Right: Synthwave Mic & Sun Illustration */}
-        <SynthwaveHeroIllustration className="absolute right-2 top-0 bottom-0 w-1/2 opacity-95 hidden md:flex" />
       </section>
 
-      {/* 2. QUICK ACCESS SECTION (5 Glowing Bracket Cards) */}
+      {/* 2. QUICK ACCESS SECTION (5 Signature Retro Brutalist Category Cards) */}
       <section className="space-y-3">
         <div className="flex items-center gap-3">
-          <span className="text-[#ff2a85] font-pixel text-xs tracking-wider flex items-center gap-1.5 shrink-0">
-            <span>✦</span>
-            <span>QUICK ACCESS</span>
-          </span>
-          <div className="flex-1 h-[1px] bg-gradient-to-r from-[#ff2a85]/50 via-[#5c32c4]/40 to-transparent" />
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 inline-block shrink-0" style={{ backgroundColor: "#F05A28" }} />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-[#111111]">
+              QUICK ACCESS // DIRECTORIES
+            </h2>
+          </div>
+          <div className="flex-1 h-[1.5px]" style={{ backgroundColor: "rgba(17,17,17,0.15)" }} />
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
           {quickAccessCards.map((card, i) => {
             const Icon = card.icon;
             return (
               <Link
                 key={i}
                 href={card.href}
-                className={`relative group p-3.5 rounded-lg border-2 ${card.borderColor} ${card.bgColor} flex items-center justify-between cursor-pointer transition-all duration-200 hover:-translate-y-0.5`}
+                className="relative group p-3.5 flex items-center justify-between cursor-pointer transition-all"
                 style={{
-                  boxShadow: `0 0 12px ${card.glowColor}`,
+                  backgroundColor: "#FAF7EE",
+                  border: "2px solid #111111",
+                  boxShadow: "3px 3px 0px #111111",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translate(-1.5px,-1.5px)";
+                  e.currentTarget.style.boxShadow = "4px 4px 0px #111111";
+                  e.currentTarget.style.backgroundColor = "#F6EEDE";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "";
+                  e.currentTarget.style.boxShadow = "3px 3px 0px #111111";
+                  e.currentTarget.style.backgroundColor = "#FAF7EE";
                 }}
               >
-                {/* Bracket corners */}
-                <span className={`absolute top-1 left-1.5 text-[10px] font-mono leading-none ${card.cornerColor} opacity-75`}>
+                {/* Corner ticks */}
+                <span className="absolute top-1 left-1.5 text-[10px] font-mono leading-none select-none text-[#F05A28]">
                   ┌
                 </span>
-                <span className={`absolute bottom-1 right-1.5 text-[10px] font-mono leading-none ${card.cornerColor} opacity-75`}>
+                <span className="absolute bottom-1 right-1.5 text-[10px] font-mono leading-none select-none text-[#F05A28]">
                   ┘
                 </span>
 
                 <div className="flex items-center gap-3 min-w-0 pr-1">
-                  <div className={`p-2 rounded-md bg-[#000000]/30 ${card.accentColor} shrink-0`}>
+                  <div
+                    className="w-8 h-8 flex items-center justify-center shrink-0"
+                    style={{
+                      backgroundColor: "#F05A28",
+                      border: "1.5px solid #111111",
+                      color: "#FFFFFF",
+                    }}
+                  >
                     <Icon className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <h4 className="text-xs font-pixel text-white font-bold truncate group-hover:text-white transition-colors">
+                    <h4 className="text-xs font-bold uppercase text-[#111111] truncate group-hover:text-[#F05A28] transition-colors">
                       {card.title}
                     </h4>
-                    <p className="text-[10px] font-sans text-[#a79cd0] truncate">
+                    <p className="text-[10px] text-[#7A7166] font-mono truncate">
                       {card.subtitle}
                     </p>
                   </div>
                 </div>
 
-                <span className={`text-xs font-bold ${card.accentColor} group-hover:translate-x-0.5 transition-transform shrink-0`}>
+                <span className="text-xs font-bold shrink-0" style={{ color: "#F05A28" }}>
                   &gt;
                 </span>
               </Link>
@@ -253,14 +426,15 @@ export function HomeClient({
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Flame className="w-4 h-4 text-[#ff2a85]" />
-            <h2 className="text-xs sm:text-sm font-pixel text-white tracking-wider uppercase">
-              TRENDING ON AURALIS
+            <span className="w-2 h-2 inline-block shrink-0" style={{ backgroundColor: "#F05A28" }} />
+            <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#111111]">
+              TRENDING SIGNALS // ARCHIVE
             </h2>
           </div>
           <Link
             href="/discover"
-            className="text-xs font-pixel text-[#00f0ff] hover:text-[#d7ff3f] transition-colors flex items-center gap-1.5"
+            className="text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-colors"
+            style={{ color: "#F05A28" }}
           >
             <span>VIEW ALL</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -279,15 +453,28 @@ export function HomeClient({
             ))}
           </div>
         ) : (
-          <div className="p-8 rounded-lg bg-[#0c0628] border border-[#4d2db7] text-center space-y-3">
-            <p className="text-xs font-pixel text-white">{"// NO BROADCAST SIGNALS YET"}</p>
-            <p className="text-xs font-sans text-[#a79cd0] max-w-md mx-auto">
-              Your audio catalog is waiting. Upload your first FLAC or MP3 studio master from the control room.
+          <div
+            className="p-8 text-center space-y-3"
+            style={{
+              backgroundColor: "#FAF7EE",
+              border: "2px solid #111111",
+              boxShadow: "3px 3px 0px #111111",
+            }}
+          >
+            <p className="text-xs font-bold uppercase text-[#111111]">{"// NO BROADCAST SIGNALS YET"}</p>
+            <p className="text-xs text-[#7A7166] font-mono max-w-md mx-auto">
+              Your audio catalog is waiting. Upload your first studio master from the control room.
             </p>
             {isAdmin && (
               <Link
                 href="/admin/songs/new"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#d7ff3f] text-black font-pixel text-xs font-bold shadow-[0_0_10px_rgba(215,255,63,0.4)]"
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold uppercase tracking-wider"
+                style={{
+                  backgroundColor: "#F05A28",
+                  color: "#111111",
+                  border: "2px solid #111111",
+                  boxShadow: "2px 2px 0px #111111",
+                }}
               >
                 <Upload className="w-3.5 h-3.5" />
                 <span>UPLOAD MASTER TRACK</span>
@@ -301,14 +488,18 @@ export function HomeClient({
       {recentAlbums.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs sm:text-sm font-pixel text-white tracking-wider uppercase">
-              NEW RELEASES & SLEEVES
-            </h2>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 inline-block shrink-0" style={{ backgroundColor: "#F05A28" }} />
+              <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#111111]">
+                NEW RELEASES & SLEEVES
+              </h2>
+            </div>
             <Link
               href="/discover"
-              className="text-xs font-pixel text-[#00f0ff] hover:text-[#d7ff3f] transition-colors flex items-center gap-1"
+              className="text-xs font-bold uppercase tracking-wider flex items-center gap-1 transition-colors"
+              style={{ color: "#F05A28" }}
             >
-              <span>BROWSE</span>
+              <span>BROWSE ALL</span>
               <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
@@ -325,12 +516,16 @@ export function HomeClient({
       {featuredArtists.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs sm:text-sm font-pixel text-white tracking-wider uppercase">
-              FEATURED ARTISTS
-            </h2>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 inline-block shrink-0" style={{ backgroundColor: "#F05A28" }} />
+              <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#111111]">
+                VERIFIED ARTISTS // SIGNALS
+              </h2>
+            </div>
             <Link
               href="/discover"
-              className="text-xs font-pixel text-[#00f0ff] hover:text-[#d7ff3f] transition-colors flex items-center gap-1"
+              className="text-xs font-bold uppercase tracking-wider flex items-center gap-1 transition-colors"
+              style={{ color: "#F05A28" }}
             >
               <span>ALL ARTISTS</span>
               <ArrowRight className="w-3 h-3" />
@@ -349,12 +544,16 @@ export function HomeClient({
       {curatedPlaylists.length > 0 && (
         <section className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-xs sm:text-sm font-pixel text-white tracking-wider uppercase">
-              CURATED PLAYLISTS
-            </h2>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 inline-block shrink-0" style={{ backgroundColor: "#F05A28" }} />
+              <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-[#111111]">
+                CURATED PLAYLISTS // TAPES
+              </h2>
+            </div>
             <Link
               href="/discover"
-              className="text-xs font-pixel text-[#00f0ff] hover:text-[#d7ff3f] transition-colors flex items-center gap-1"
+              className="text-xs font-bold uppercase tracking-wider flex items-center gap-1 transition-colors"
+              style={{ color: "#F05A28" }}
             >
               <span>ALL PLAYLISTS</span>
               <ArrowRight className="w-3 h-3" />
@@ -368,6 +567,15 @@ export function HomeClient({
           </div>
         </section>
       )}
+
+      {/* 7. TECHNICAL BOTTOM FOOTER */}
+      <div
+        className="mt-8 pt-4 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-[#7A7166]"
+        style={{ borderTop: "2px solid #111111" }}
+      >
+        <span>AURALIS // v1.0 • MUSIC BUILT FOR REAL PEOPLE</span>
+        <span>24-BIT // 96kHz ///</span>
+      </div>
     </div>
   );
 }

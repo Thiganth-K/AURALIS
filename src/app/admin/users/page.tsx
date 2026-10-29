@@ -40,7 +40,6 @@ export default function AdminUsersPage() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
-  const menuRef = useRef<HTMLDivElement | null>(null);
 
   const fetchUsers = async () => {
     try {
@@ -66,9 +65,11 @@ export default function AdminUsersPage() {
   // Close action menu on click outside
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setActiveMenuId(null);
+      const target = e.target as HTMLElement | null;
+      if (target && target.closest("[data-user-actions-menu]")) {
+        return;
       }
+      setActiveMenuId(null);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -98,12 +99,18 @@ export default function AdminUsersPage() {
             prev.map((u) => (u.id === userItem.id ? { ...u, status: newStatus } : u))
           );
           if (newStatus === "active") {
-            setSuccessMessage(`Account request for ${userItem.email} has been approved.`);
+            setSuccessMessage(
+              userItem.status === "pending"
+                ? `Account request for ${userItem.email} has been approved.`
+                : `User ${userItem.email} has been reactivated.`
+            );
           } else if (newStatus === "rejected") {
             setSuccessMessage(`Registration request for ${userItem.email} has been rejected.`);
           } else if (newStatus === "suspended") {
             setSuccessMessage(`User ${userItem.email} has been suspended.`);
           }
+          setTimeout(() => setSuccessMessage(null), 4000);
+          fetchUsers();
         } else {
           const err = await res.json();
           setActionError(err.error || "Failed to update status");
@@ -138,6 +145,8 @@ export default function AdminUsersPage() {
           setSuccessMessage(
             `User ${userItem.email} role updated to ${newRole.toUpperCase()}.`
           );
+          setTimeout(() => setSuccessMessage(null), 4000);
+          fetchUsers();
         } else {
           const err = await res.json();
           setActionError(err.error || "Failed to update role");
@@ -174,6 +183,8 @@ export default function AdminUsersPage() {
         if (res.ok) {
           setUsers((prev) => prev.filter((u) => u.id !== userItem.id));
           setSuccessMessage(`User ${userItem.email} has been permanently deleted.`);
+          setTimeout(() => setSuccessMessage(null), 4000);
+          fetchUsers();
         } else {
           const err = await res.json();
           setActionError(err.error || "Failed to delete user");
@@ -588,27 +599,33 @@ export default function AdminUsersPage() {
 
                       {/* ACTIONS Column: Single Retro Boxed Button with 3 Vertical Dots */}
                       <td className="py-3.5 px-5 text-right relative">
-                        <div className="relative inline-block text-left" ref={menuRef}>
+                        <div
+                          className="relative inline-block text-left"
+                          data-user-actions-menu={u.id}
+                        >
                           <button
                             type="button"
-                            onClick={() =>
-                              setActiveMenuId(isMenuOpen ? null : u.id)
-                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveMenuId(isMenuOpen ? null : u.id);
+                            }}
                             className="p-1.5 transition-all cursor-pointer flex items-center justify-center"
                             style={{
-                              backgroundColor: "#FAF7EE",
+                              backgroundColor: isMenuOpen ? "#F05A28" : "#FAF7EE",
+                              color: isMenuOpen ? "#FAF7EE" : "#111111",
                               border: "1.5px solid #111111",
                               boxShadow: "1.5px 1.5px 0px #111111",
                             }}
                             title="Actions"
                           >
-                            <MoreVertical className="w-3.5 h-3.5 text-[#111111]" />
+                            <MoreVertical className="w-3.5 h-3.5" />
                           </button>
 
                           {/* Popover Action Menu */}
                           {isMenuOpen && (
                             <div
                               className="absolute right-0 mt-1.5 w-44 z-50 p-1 flex flex-col gap-0.5 text-left font-mono text-[11px]"
+                              onMouseDown={(e) => e.stopPropagation()}
                               style={{
                                 backgroundColor: "#FAF7EE",
                                 border: "2px solid #111111",
@@ -620,8 +637,11 @@ export default function AdminUsersPage() {
                                 <button
                                   type="button"
                                   disabled={isPending}
-                                  onClick={() => handleToggleRole(u)}
-                                  className="w-full text-left px-2.5 py-1.5 font-bold uppercase transition-colors hover:bg-[#F6EEDE] flex items-center gap-2 cursor-pointer"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleToggleRole(u);
+                                  }}
+                                  className="w-full text-left px-2.5 py-1.5 font-bold uppercase transition-colors hover:bg-[#F6EEDE] flex items-center gap-2 cursor-pointer disabled:opacity-50"
                                 >
                                   <Shield className="w-3.5 h-3.5 text-[#F05A28]" />
                                   <span>
@@ -638,8 +658,11 @@ export default function AdminUsersPage() {
                                   <button
                                     type="button"
                                     disabled={isPending}
-                                    onClick={() => handleSetStatus(u, "active")}
-                                    className="w-full text-left px-2.5 py-1.5 font-bold uppercase text-[#15803D] hover:bg-[#ECFDF5] flex items-center gap-2 cursor-pointer"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSetStatus(u, "active");
+                                    }}
+                                    className="w-full text-left px-2.5 py-1.5 font-bold uppercase text-[#15803D] hover:bg-[#ECFDF5] flex items-center gap-2 cursor-pointer disabled:opacity-50"
                                   >
                                     <UserCheck className="w-3.5 h-3.5" />
                                     <span>APPROVE USER</span>
@@ -647,8 +670,11 @@ export default function AdminUsersPage() {
                                   <button
                                     type="button"
                                     disabled={isPending}
-                                    onClick={() => handleSetStatus(u, "rejected")}
-                                    className="w-full text-left px-2.5 py-1.5 font-bold uppercase text-[#D62828] hover:bg-[#FFF0ED] flex items-center gap-2 cursor-pointer"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleSetStatus(u, "rejected");
+                                    }}
+                                    className="w-full text-left px-2.5 py-1.5 font-bold uppercase text-[#D62828] hover:bg-[#FFF0ED] flex items-center gap-2 cursor-pointer disabled:opacity-50"
                                   >
                                     <UserX className="w-3.5 h-3.5" />
                                     <span>REJECT USER</span>
@@ -660,8 +686,11 @@ export default function AdminUsersPage() {
                                 <button
                                   type="button"
                                   disabled={isPending}
-                                  onClick={() => handleSetStatus(u, "suspended")}
-                                  className="w-full text-left px-2.5 py-1.5 font-bold uppercase text-[#B45309] hover:bg-[#FEF3C7] flex items-center gap-2 cursor-pointer"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSetStatus(u, "suspended");
+                                  }}
+                                  className="w-full text-left px-2.5 py-1.5 font-bold uppercase text-[#B45309] hover:bg-[#FEF3C7] flex items-center gap-2 cursor-pointer disabled:opacity-50"
                                 >
                                   <UserX className="w-3.5 h-3.5" />
                                   <span>SUSPEND USER</span>
@@ -672,8 +701,11 @@ export default function AdminUsersPage() {
                                 <button
                                   type="button"
                                   disabled={isPending}
-                                  onClick={() => handleSetStatus(u, "active")}
-                                  className="w-full text-left px-2.5 py-1.5 font-bold uppercase text-[#15803D] hover:bg-[#ECFDF5] flex items-center gap-2 cursor-pointer"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSetStatus(u, "active");
+                                  }}
+                                  className="w-full text-left px-2.5 py-1.5 font-bold uppercase text-[#15803D] hover:bg-[#ECFDF5] flex items-center gap-2 cursor-pointer disabled:opacity-50"
                                 >
                                   <UserCheck className="w-3.5 h-3.5" />
                                   <span>UNSUSPEND USER</span>
@@ -686,8 +718,11 @@ export default function AdminUsersPage() {
                                   <button
                                     type="button"
                                     disabled={isPending}
-                                    onClick={() => handleDeleteUser(u)}
-                                    className="w-full text-left px-2.5 py-1.5 font-bold uppercase text-[#D62828] hover:bg-[#FFF0ED] flex items-center gap-2 cursor-pointer"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteUser(u);
+                                    }}
+                                    className="w-full text-left px-2.5 py-1.5 font-bold uppercase text-[#D62828] hover:bg-[#FFF0ED] flex items-center gap-2 cursor-pointer disabled:opacity-50"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
                                     <span>DELETE USER</span>

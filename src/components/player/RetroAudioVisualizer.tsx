@@ -11,12 +11,11 @@ interface RetroAudioVisualizerProps {
 export function RetroAudioVisualizer({
   isPlaying,
   side,
-  barsCount = 24,
+  barsCount = 20,
 }: RetroAudioVisualizerProps) {
-  // Generate initial random heights for the spectrum bars
+  // Generate initial heights for the spectrum bars
   const [heights, setHeights] = useState<number[]>(() =>
     Array.from({ length: barsCount }, (_, i) => {
-      // Bell-ish curve profile
       const distFromCenter = side === "left" ? i / barsCount : 1 - i / barsCount;
       return Math.floor(25 + Math.sin(distFromCenter * Math.PI) * 55 + Math.random() * 15);
     })
@@ -39,21 +38,20 @@ export function RetroAudioVisualizer({
     return () => clearInterval(interval);
   }, [isPlaying, side, barsCount]);
 
-  // Color generator based on height/tier (pixel EQ gradient: green -> lime -> cyan -> purple -> pink)
+  // Color generator based on height/tier (Brutalist Audio VU meter: Ink Black -> Deep Orange -> International Orange -> Peak Red-Orange)
   const getBlockColor = (blockIndex: number, totalBlocks: number) => {
     const ratio = blockIndex / totalBlocks;
-    if (ratio < 0.25) return "#00ff88"; // Neon green
-    if (ratio < 0.45) return "#d7ff3f"; // Neon lime
-    if (ratio < 0.65) return "#00f0ff"; // Neon cyan
-    if (ratio < 0.82) return "#a855f7"; // Neon purple
-    return "#ff2a85"; // Neon pink
+    if (ratio < 0.35) return "#111111"; // Ink black
+    if (ratio < 0.65) return "#C44118"; // Deep warm orange
+    if (ratio < 0.85) return "#F05A28"; // International orange
+    return "#D62828"; // Peak red-orange
   };
 
   const maxBlocks = 16;
 
   return (
     <div
-      className={`flex items-center gap-1.5 h-64 select-none pointer-events-none opacity-90 ${
+      className={`flex items-center gap-1 sm:gap-1.5 h-64 select-none pointer-events-none ${
         side === "left" ? "justify-end" : "justify-start"
       }`}
     >
@@ -77,11 +75,9 @@ export function RetroAudioVisualizer({
                   key={blockIdx}
                   className="w-full h-2 rounded-[1px] transition-all"
                   style={{
-                    backgroundColor: isActive ? color : "transparent",
-                    boxShadow: isActive
-                      ? `0 0 6px ${color}88, inset 0 0 2px #ffffff`
-                      : "none",
-                    opacity: isActive ? 1 : 0.05,
+                    backgroundColor: isActive ? color : "#EAE3D2",
+                    boxShadow: isActive ? "0 0 1px rgba(17,17,17,0.4)" : "none",
+                    opacity: isActive ? 1 : 0.4,
                   }}
                 />
               );

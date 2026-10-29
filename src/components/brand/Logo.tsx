@@ -13,31 +13,35 @@ export function Logo({ collapsed = false, className = "", size = "md" }: LogoPro
   return (
     <Link
       href="/"
-      className={`group flex items-center gap-3 select-none transition-all ${className}`}
+      className={`group flex items-center gap-2.5 select-none transition-all ${className}`}
       aria-label="AURALIS Home"
     >
-      {/* Brand Icon: Retro Pixel Equalizer */}
-      <div className="relative flex items-center justify-center p-2 rounded-md bg-[#0e072b] border border-[#5c32c4] shadow-[0_0_10px_rgba(92,50,196,0.35)] group-hover:border-[#00f0ff] group-hover:shadow-[0_0_12px_rgba(0,240,255,0.4)] transition-all">
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-5 h-5"
-        >
-          {/* Multi-colored pixel equalizer bars (pink, purple, cyan) */}
-          <rect x="2" y="10" width="3" height="10" fill="#ff2a85" />
-          <rect x="7" y="5" width="3" height="15" fill="#a855f7" />
-          <rect x="12" y="3" width="3" height="17" fill="#00f0ff" />
-          <rect x="17" y="8" width="3" height="12" fill="#d7ff3f" />
-        </svg>
+      {/* Brand Icon: Retro Equalizer Graphic */}
+      <div className="flex items-end gap-[3px] h-6 py-0.5 shrink-0">
+        <span className="w-1 bg-[#F05A28] h-3.5 transition-transform group-hover:scale-y-125" />
+        <span className="w-1 bg-[#F05A28] h-5 transition-transform group-hover:scale-y-90" />
+        <span className="w-1 bg-[#F05A28] h-2.5 transition-transform group-hover:scale-y-150" />
+        <span className="w-1 bg-[#F05A28] h-4.5 transition-transform group-hover:scale-y-110" />
       </div>
 
       {!collapsed && (
-        <div className="flex flex-col">
-          <span className="font-pixel font-bold uppercase text-white tracking-widest text-base group-hover:text-[#00f0ff] transition-colors leading-none">
-            AURALIS
-          </span>
-          <span className="text-[9px] font-pixel tracking-wider text-[#ff2a85] uppercase mt-1 leading-none">
+        <div className="flex flex-col font-mono leading-none">
+          <div className="flex items-center gap-1.5 leading-none">
+            <span className="font-black text-sm tracking-widest text-[#111111] uppercase">
+              AURALIS
+            </span>
+            <span
+              className="text-[8px] font-bold px-1 py-0.5 tracking-wider uppercase"
+              style={{
+                backgroundColor: "#FAF7EE",
+                color: "#F05A28",
+                border: "1px solid #F05A28",
+              }}
+            >
+              DECK
+            </span>
+          </div>
+          <span className="text-[8px] font-bold tracking-widest text-[#7A7166] uppercase mt-1 leading-none">
             RETRO MUSIC SYSTEM
           </span>
         </div>
