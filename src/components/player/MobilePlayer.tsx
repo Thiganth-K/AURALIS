@@ -7,6 +7,7 @@ import {
   Play,
   Pause,
   Heart,
+  Film,
 } from "lucide-react";
 
 export function MobilePlayer() {
@@ -63,9 +64,16 @@ export function MobilePlayer() {
               style={{ border: "1.5px solid #111111" }}
             />
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-[#111111] uppercase truncate">
-                {currentSong.title}
-              </p>
+              <div className="flex items-center gap-1.5 truncate">
+                <p className="text-xs font-bold text-[#111111] uppercase truncate">
+                  {currentSong.title}
+                </p>
+                {currentSong.videoUrl && (
+                  <span className="shrink-0 px-1 py-0.2 text-[8px] font-black uppercase text-[#F05A28] border border-[#F05A28] bg-[#FFF0ED]">
+                    🎬 VIDEO
+                  </span>
+                )}
+              </div>
               <p
                 className="text-[10px] font-mono truncate mt-0.5"
                 style={{ color: "#F05A28" }}

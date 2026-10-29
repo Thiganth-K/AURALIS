@@ -823,12 +823,19 @@ export function PlaylistView({ playlist, songs }: PlaylistViewProps) {
                             style={{ border: "1.5px solid #111111" }}
                           />
                           <div className="min-w-0">
-                            <Link
-                              href={`/song/${song.id}`}
-                              className="font-bold text-[#111111] hover:text-[#F05A28] uppercase truncate block transition-colors tracking-wide text-xs"
-                            >
-                              {song.title}
-                            </Link>
+                            <div className="flex items-center gap-1.5">
+                              <Link
+                                href={`/song/${song.id}`}
+                                className="font-bold text-[#111111] hover:text-[#F05A28] uppercase truncate block transition-colors tracking-wide text-xs"
+                              >
+                                {song.title}
+                              </Link>
+                              {song.videoUrl && (
+                                <span className="shrink-0 px-1 py-0.2 text-[8px] font-black uppercase text-[#F05A28] border border-[#F05A28] bg-[#FFF0ED]">
+                                  🎬 MP4
+                                </span>
+                              )}
+                            </div>
                             <span className="text-[11px] text-[#7A7166] uppercase truncate block mt-0.5">
                               {song.artistName}
                             </span>

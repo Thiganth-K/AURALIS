@@ -119,9 +119,16 @@ export function SongRow({
 
         {/* Song & Artist details */}
         <div className="flex flex-col min-w-0 pr-2">
-          <span className="text-xs sm:text-sm font-bold uppercase text-[#111111] tracking-wide truncate group-hover:text-[#F05A28] transition-colors">
-            {song.title}
-          </span>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="text-xs sm:text-sm font-bold uppercase text-[#111111] tracking-wide truncate group-hover:text-[#F05A28] transition-colors">
+              {song.title}
+            </span>
+            {song.videoUrl && (
+              <span className="shrink-0 px-1 py-0.2 text-[9px] font-black uppercase text-[#F05A28] border border-[#F05A28] bg-[#FFF0ED]">
+                🎬 MP4
+              </span>
+            )}
+          </div>
           <span className="text-[11px] text-[#7A7166] font-mono truncate mt-0.5">
             {song.artistName}
           </span>

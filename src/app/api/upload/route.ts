@@ -6,6 +6,7 @@ import crypto from "crypto";
 import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
 
 export const instant = false;
+export const maxDuration = 120;
 
 // Configure Cloudinary if credentials exist
 if (

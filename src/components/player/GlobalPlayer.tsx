@@ -17,6 +17,7 @@ import {
   Volume1,
   ListMusic,
   Maximize2,
+  Film,
 } from "lucide-react";
 
 export function GlobalPlayer() {
@@ -137,9 +138,31 @@ export function GlobalPlayer() {
           >
             {currentSong.title}
           </span>
-          <span className="text-[10px] text-[#7A7166] font-mono truncate">
-            {currentSong.artistName}
-          </span>
+          <div className="flex items-center gap-2 truncate">
+            <span className="text-[10px] text-[#7A7166] font-mono truncate">
+              {currentSong.artistName}
+            </span>
+            {currentSong.videoUrl && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/song/${currentSong.id}`);
+                }}
+                className="shrink-0 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider transition-transform hover:scale-105 inline-flex items-center gap-1 cursor-pointer"
+                style={{
+                  backgroundColor: "#F05A28",
+                  color: "#FAF7EE",
+                  border: "1px solid #111111",
+                  boxShadow: "1px 1px 0px #111111",
+                }}
+                title="Watch MP4 Music Video"
+              >
+                <Film className="w-2.5 h-2.5" />
+                <span>VIDEO</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -346,6 +369,25 @@ export function GlobalPlayer() {
         >
           <ListMusic className="w-4 h-4" />
         </button>
+
+        {/* Watch Video button (if video is available) */}
+        {currentSong.videoUrl && (
+          <button
+            type="button"
+            onClick={() => router.push(`/song/${currentSong.id}`)}
+            className="p-2 transition-all cursor-pointer hidden sm:flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider"
+            style={{
+              backgroundColor: "#FFF0ED",
+              border: "1.5px solid #F05A28",
+              boxShadow: "1.5px 1.5px 0px #111111",
+              color: "#F05A28",
+            }}
+            title="Watch Music Video"
+          >
+            <Film className="w-4 h-4" />
+            <span className="hidden md:inline">[ WATCH VIDEO ]</span>
+          </button>
+        )}
 
         {/* Fullscreen Player toggle */}
         <button
